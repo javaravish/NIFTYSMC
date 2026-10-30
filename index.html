@@ -1,10 +1,452 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>NIFTY SMC Scanner</title>
-</head>
-<body>
-  <h1>NIFTY SMC Scanner</h1>
-  <p>Angel One SmartAPI callback page.</p>
-</body>
-</html>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b1220">
+<title>NIFTY SMC Scanner</title>
+<style>
+:root{
+ --site-primary:#173b68;--site-secondary:#0d766e;--site-background:#0b1220;
+ --site-on-primary:#ffffff;--site-on-secondary:#ffffff;--site-on-background:#edf3fb;
+ --site-font-body:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+ --site-font-heading:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+ --site-heading-scale:1;--site-spacing-scale:1;--site-radius-scale:1;--site-decoration-opacity:1;
+ color-scheme:light dark;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--site-background);color:var(--site-on-background);font-family:var(--site-font-body)}
+#app{min-height:100vh;width:100%;border-radius:0;background:light-dark(#f3f6fb,#0b1220);color:light-dark(#172338,#edf3fb);padding:22px calc(22px * var(--site-spacing-scale)) 36px}
+header{max-width:1400px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;background:var(--site-primary);display:grid;place-items:center;color:white;font-weight:900;letter-spacing:-1px}.brand h1{font:700 calc(19px * var(--site-heading-scale))/1.2 var(--site-font-heading);margin:0}.sub{font-size:12px;color:light-dark(#64748b,#9aabc3);margin-top:4px}.topright{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.pill{font-size:11px;padding:7px 10px;border-radius:99px;background:light-dark(#e8eef6,#18263a);color:light-dark(#43536b,#bdcbe0);border:1px solid light-dark(#d8e1ed,#2b3c54)}.demo{background:#fff4dc;color:#865200;border-color:#f0d49a;font-weight:700}.wrap{max-width:1400px;margin:auto}.hero{background:linear-gradient(115deg,var(--site-primary),#102b4c 62%,var(--site-secondary));color:white;border-radius:calc(20px * var(--site-radius-scale));padding:23px;margin-bottom:17px;display:flex;align-items:center;justify-content:space-between;gap:18px;box-shadow:0 12px 30px #07132333}.hero h2{font-size:clamp(21px,3vw,29px);margin:0 0 7px}.hero p{margin:0;color:#d3e1f3;font-size:13px;line-height:1.5}.hero .market{font-size:12px;color:#d8e8f8;text-align:right;white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:17px}.card{background:light-dark(#fff,#121e30);border:1px solid light-dark(#e0e7f0,#26364d);border-radius:calc(16px * var(--site-radius-scale));padding:16px;min-width:0;box-shadow:0 5px 18px #10233b0a}.klabel{font-size:11px;color:light-dark(#6a7890,#9cacc3);text-transform:uppercase;letter-spacing:.07em}.kvalue{font-size:22px;font-weight:750;margin-top:8px;letter-spacing:-.5px}.kfoot{font-size:11px;color:light-dark(#718098,#93a4bc);margin-top:5px}.up{color:#13966b}.down{color:#dc5c62}.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.85fr);gap:15px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.section-title h3{font-size:15px;margin:0}.muted{font-size:11px;color:light-dark(#77859b,#9aabc0)}.tfrow{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.tf{border:1px solid light-dark(#d8e1ed,#34455d);background:transparent;color:inherit;border-radius:9px;padding:8px 13px;font-weight:650;font-size:12px;cursor:pointer}.tf.active{background:var(--site-primary);border-color:var(--site-primary);color:white}.chart{height:250px;border-radius:12px;background:light-dark(#f7f9fc,#0d1727);border:1px solid light-dark(#e6edf5,#26364d);padding:10px;position:relative;overflow:hidden}.chart svg{width:100%;height:100%}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10px;color:light-dark(#64748b,#a6b5c9);margin-top:10px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.signal{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:11px;background:light-dark(#f1f6fb,#17263a);margin-top:10px;gap:10px}.signal strong{font-size:13px}.tag{font-size:10px;font-weight:800;border-radius:7px;padding:6px 8px;background:#e5f7ef;color:#08734f}.tag.wait{background:#fff2d9;color:#875800}.concepts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.concept{padding:10px;border-radius:10px;background:light-dark(#f4f7fb,#172438);font-size:12px}.concept b{display:block;font-size:12px;margin-bottom:4px}.concept span{font-size:10px;color:light-dark(#748198,#9cacc2)}.bottom{margin-top:15px}.controls{display:flex;gap:9px;flex-wrap:wrap}.select,button{font:inherit;border:1px solid light-dark(#d4deea,#33465f);border-radius:10px;padding:10px 12px;background:light-dark(#fff,#16253a);color:inherit;font-size:12px}.primary{background:var(--site-primary);color:white;border-color:var(--site-primary);font-weight:700;cursor:pointer}.note{font-size:11px;line-height:1.55;color:light-dark(#66758b,#9aabc0);margin-top:14px}.footer{text-align:center;color:light-dark(#8190a5,#8194ae);font-size:10px;margin:20px 0 0}.mobile-nav{display:none}
+@media(max-width:850px){#app{padding:14px 12px 26px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column;padding:18px}.hero .market{text-align:left}.chart{height:220px}}
+@media(max-width:480px){header{align-items:flex-start}.brand h1{font-size:16px}.topright{justify-content:flex-end}.topright .pill:nth-child(2){display:none}.grid{gap:9px}.card{padding:13px}.kvalue{font-size:19px}.concepts{grid-template-columns:1fr 1fr}.chart{height:190px}.hero h2{font-size:21px}}
+
+<style>
+.history-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}
+.history-metric{padding:11px;border-radius:10px;background:light-dark(#f2f6fb,#172438);min-width:0}
+.history-metric span{display:block;font-size:10px;color:light-dark(#718098,#9aabc0)}
+.history-metric strong{display:block;font-size:18px;margin-top:4px;overflow-wrap:anywhere}
+.history-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(250px,.8fr);gap:12px;margin-top:12px}
+.table-wrap{overflow:auto;border:1px solid light-dark(#e0e7f0,#293a52);border-radius:10px}
+table.history-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}
+table.history-table th,table.history-table td{padding:9px 10px;text-align:left;border-bottom:1px solid light-dark(#e8edf4,#293a52)}
+table.history-table th{background:light-dark(#f2f6fb,#172438);position:sticky;top:0}
+.trade-detail{background:light-dark(#f7f9fc,#0d1727);border:1px solid light-dark(#e0e7f0,#293a52);border-radius:11px;padding:13px;min-width:0}
+.trade-detail h4{margin:0 0 8px;font-size:14px}
+.trade-explain{font-size:11px;line-height:1.6;color:light-dark(#64748b,#a6b5c9);overflow-wrap:anywhere}
+.positive{color:#13966b;font-weight:750}.negative{color:#dc5c62;font-weight:750}
+@media(max-width:850px){.history-layout{grid-template-columns:1fr}.history-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</style><style>
+/* Refined live quote and multi-timeframe panel */
+.live-monitor-card{position:relative;overflow:hidden;border-color:light-dark(#cbd9e9,#2d4968);background:linear-gradient(145deg,light-dark(#ffffff,#14243a),light-dark(#f4f8fd,#101d30))}
+.live-monitor-card:before{content:"";display:block;height:4px;position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,#173b68,#0d9488,#42a77b)}
+.live-monitor-card>.section-title{margin-top:3px}
+.live-monitor-card>.section-title h3{font-size:16px;letter-spacing:-.2px}
+.live-quote-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0 20px}
+.live-quote-grid .history-metric{padding:15px;border:1px solid light-dark(#e3eaf3,#2b405b);background:light-dark(#f7faff,#192b42);box-shadow:0 3px 12px #10233b0a}
+.live-quote-grid .history-metric:first-child{border-left:3px solid #0d9488}
+.live-quote-grid .history-metric strong{font-size:21px;font-variant-numeric:tabular-nums}
+.live-timeframe-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 16px}
+.live-timeframe-grid .history-metric{padding:13px;border:1px solid light-dark(#e1e9f2,#2b405b);background:light-dark(#f4f7fb,#18283e);min-height:82px}
+.live-timeframe-grid .history-metric span{font-size:11px;font-weight:700;letter-spacing:.02em}
+.live-timeframe-grid .history-metric strong{font-size:17px;margin-top:7px}
+.live-timeframe-grid .history-metric small{display:block;margin-top:5px;color:light-dark(#718098,#9aabc0);font-size:10px}
+.live-monitor-card .history-layout{align-items:stretch;gap:14px}
+.live-monitor-card .trade-detail{background:light-dark(#fbfcfe,#101d30);border-color:light-dark(#e1e9f2,#2b405b);min-height:112px}
+.live-monitor-card .trade-detail h4{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:light-dark(#51627a,#b6c6d9)}
+.live-monitor-card .note{padding-top:10px;border-top:1px solid light-dark(#e4ebf3,#2b405b)}
+@media(max-width:850px){.live-quote-grid,.live-timeframe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.live-quote-grid .history-metric strong{font-size:18px}.live-timeframe-grid .history-metric{min-height:72px}}
+</style></head>
+<body><main id="app">
+<header><div class="brand"><div class="logo">SMC</div><div><h1>NIFTY SMC Scanner</h1><div class="sub">Angel One · Multi-timeframe market analysis</div></div></div><div class="topright"><span class="pill">LOCAL LIVE API</span><span class="pill">Weekly expiry · Moderate risk</span><span class="pill">Manual execution only</span></div></header>
+<div class="wrap">
+<section class="hero"><div><h2>Smart Money Concepts dashboard</h2><p>15m bias → 5m structure → 2m setup → 1m entry<br>Manual trade approval · Telugu + English explanations</p></div><div class="market">NIFTY 50<br><strong id="hero-live-price" style="font-size:24px">— —</strong><br>Price shown in live monitor below</div></section>
+<section class="grid"><div class="card"><div class="klabel">Market bias · 15m</div><div class="kvalue">Awaiting data</div><div class="kfoot">Higher-timeframe direction</div></div><div class="card"><div class="klabel">Structure · 5m</div><div class="kvalue">Awaiting data</div><div class="kfoot">BOS / MSS confirmation</div></div><div class="card"><div class="klabel">Setup · 2m</div><div class="kvalue">WAIT</div><div class="kfoot">No live setup evaluated</div></div><div class="card"><div class="klabel">Entry · 1m</div><div class="kvalue">WAIT</div><div class="kfoot">No live entry evaluated</div></div></section>
+<div class="layout"><section class="card"><div class="section-title"><h3>Price action & SMC map</h3><span class="muted">Illustrative chart · not live</span></div><div class="tfrow" role="group" aria-label="Chart timeframe"><button class="tf" data-tf="1m">1 min</button><button class="tf active" data-tf="2m">2 min</button><button class="tf" data-tf="5m">5 min</button><button class="tf" data-tf="15m">15 min</button></div><div class="chart"><svg viewBox="0 0 720 230" preserveAspectRatio="none" aria-label="Illustrative candlestick chart"><defs><pattern id="g" width="72" height="46" patternUnits="userSpaceOnUse"><path d="M72 0H0V46" fill="none" stroke="currentColor" opacity=".11"/></pattern></defs><rect width="720" height="230" fill="url(#g)"/><rect x="20" y="54" width="680" height="30" fill="#2da77a" opacity=".10"/><rect x="20" y="154" width="680" height="28" fill="#e0a23a" opacity=".12"/><path d="M20 112H700" stroke="#8ca0b8" stroke-dasharray="5 5" opacity=".65"/><path d="M20 68H700" stroke="#27a77c" stroke-dasharray="4 4" opacity=".8"/><path d="M20 168H700" stroke="#d59a32" stroke-dasharray="4 4" opacity=".8"/>
+<g stroke-width="2"><path d="M55 120V83m0 12h-8v15h16V95h-8" stroke="#16a477" fill="#16a477"/><path d="M100 105V70m0 10h-8v19h16V80h-8" stroke="#d65d65" fill="#d65d65"/><path d="M145 125V88m0 16h-8v13h16v-13h-8" stroke="#16a477" fill="#16a477"/><path d="M190 110V63m0 10h-8v23h16V73h-8" stroke="#16a477" fill="#16a477"/><path d="M235 95V55m0 14h-8v18h16V69h-8" stroke="#d65d65" fill="#d65d65"/><path d="M280 120V78m0 14h-8v20h16V92h-8" stroke="#16a477" fill="#16a477"/><path d="M325 103V65m0 9h-8v20h16V74h-8" stroke="#16a477" fill="#16a477"/><path d="M370 87V44m0 12h-8v23h16V56h-8" stroke="#d65d65" fill="#d65d65"/><path d="M415 112V70m0 14h-8v20h16V84h-8" stroke="#16a477" fill="#16a477"/><path d="M460 90V48m0 10h-8v22h16V58h-8" stroke="#16a477" fill="#16a477"/><path d="M505 75V37m0 8h-8v23h16V45h-8" stroke="#d65d65" fill="#d65d65"/><path d="M550 102V61m0 11h-8v22h16V72h-8" stroke="#16a477" fill="#16a477"/><path d="M595 85V43m0 8h-8v24h16V51h-8" stroke="#16a477" fill="#16a477"/><path d="M640 67V29m0 7h-8v24h16V36h-8" stroke="#16a477" fill="#16a477"/></g><g font-size="10" fill="currentColor" opacity=".8"><text x="25" y="48">BSL zone (illustrative)</text><text x="25" y="148">FVG / discount area (illustrative)</text><text x="610" y="106">EQ</text></g></svg></div><div class="legend"><span><i class="dot" style="background:#16a477"></i>Bullish candle</span><span><i class="dot" style="background:#d65d65"></i>Bearish candle</span><span><i class="dot" style="background:#27a77c"></i>Liquidity zone</span><span><i class="dot" style="background:#d59a32"></i>FVG zone</span></div><p class="note">Chart artwork is illustrative only. It does not represent current NIFTY prices, actual detected SMC zones, or a trade signal.</p></section>
+<aside class="card"><div class="section-title"><h3>Signal monitor</h3><span class="tag wait">WAIT</span></div><div class="signal"><div><strong>CE setup</strong><div class="muted">Bullish confirmation required</div></div><span class="tag wait">Not active</span></div><div class="signal"><div><strong>PE setup</strong><div class="muted">Bearish confirmation required</div></div><span class="tag wait">Not active</span></div><div class="signal"><div><strong>Risk control</strong><div class="muted">Moderate · manual approval</div></div><span class="tag">ON</span></div><p class="note">No option contract, premium, Greeks, stop-loss or target is calculated until verified option-chain data is connected.</p></aside></div>
+<section class="card bottom" id="user-historical-report"><iframe title="Historical trade report" style="width:100%;height:380px;border:0;border-radius:10px;background:transparent;display:block;overflow:auto" loading="eager" srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;style&gt;
+html,body{margin:0;padding:0;min-height:0;height:auto;background:transparent;color:inherit;font-family:Inter,ui-sans-serif,system-ui,-apple-system,&quot;Segoe UI&quot;,sans-serif}
+.wrap{max-width:none;margin:0 auto}header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+header h1{font-size:18px;margin:0 0 5px}header p{font-size:11px;color:light-dark(#9aabc0,#718098);margin:0}
+.panel{background:light-dark(#fff,#121e30);border:1px solid light-dark(#e0e7f0,#293a52);border-radius:12px;padding:14px;margin:0 0 12px}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.controls label{font-size:11px;color:light-dark(#64748b,#a6b5c9)}
+.controls input,.controls select,.controls button{font:inherit;font-size:12px;border:1px solid light-dark(#d4deea,#33465f);border-radius:8px;padding:9px;background:light-dark(#fff,#16253a);color:inherit}
+.controls button.primary{background:#173b68;color:white;border-color:#173b68;cursor:pointer}
+.metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:12px 0}
+.metric{background:light-dark(#f2f6fb,#19283d);border-radius:9px;padding:10px;min-width:0}.metric span{display:block;font-size:10px;color:light-dark(#718098,#9aabc0)}.metric strong{display:block;font-size:18px;margin-top:4px}
+.panel p{font-size:10px;line-height:1.35;color:light-dark(#718098,#9aabc0);margin:6px 0 0}.status{font-size:10px;border-radius:20px;padding:6px 9px;background:light-dark(#e8eef6,#18263a);color:light-dark(#43536b,#bdcbe0)}
+.tablebox{overflow:auto;max-height:430px;border:1px solid light-dark(#e0e7f0,#293a52);border-radius:9px;margin-top:12px}
+table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:11px}th,td{padding:9px 10px;text-align:left;border-bottom:1px solid light-dark(#e8edf4,#293a52)}
+th{position:sticky;top:0;background:light-dark(#f2f6fb,#1b2a40);z-index:1}tbody tr{cursor:pointer}tbody tr:hover,tbody tr.selected{background:light-dark(#edf4fb,#1b2b41)}
+.badge{display:inline-block;padding:4px 7px;border-radius:6px;font-weight:800;font-size:10px}.badge.ce{background:#e5f7ef;color:#08734f}.badge.pe{background:#fdebed;color:#b42332}
+.target{color:#0b946b;font-weight:750}.stop{color:#d34d58;font-weight:750}.open{color:#a06b13}
+.level{display:flex;align-items:center;gap:8px;margin:9px 0;font-size:11px}.level .line{height:2px;flex:1;background:#8da0b8}.level .line.tp{background:#16a477}.level .line.sl{background:#d65d65}
+#detail{font-size:11px;line-height:1.6;color:light-dark(#64748b,#a6b5c9)}.empty{padding:20px;text-align:center;color:light-dark(#718098,#9aabc0)}.muted{font-size:11px;color:light-dark(#718098,#9aabc0)}
+@media(max-width:900px){.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:10px}}
+.metric strong{overflow-wrap:anywhere}.pnl-positive{color:#0b946b;font-weight:800}.pnl-negative{color:#d34d58;font-weight:800}
+.tablebox{max-height:180px;overflow:auto}
+&lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;&lt;main class=&quot;wrap&quot;&gt;
+&lt;header&gt;&lt;div&gt;&lt;h1&gt;NIFTY SMC — Historical Trade Report&lt;/h1&gt;&lt;p&gt;Last 15 trading sessions · 15m → 5m → 2m → 1m confirmation · NIFTY spot backtest&lt;/p&gt;&lt;/div&gt;&lt;span class=&quot;status&quot; id=&quot;status&quot;&gt;Not loaded&lt;/span&gt;&lt;/header&gt;
+&lt;section class=&quot;panel&quot;&gt;
+ &lt;div class=&quot;controls&quot;&gt;
+  &lt;label&gt;Python API &lt;input id=&quot;api&quot; value=&quot;http://127.0.0.1:8000&quot; style=&quot;width:min(310px,75vw)&quot;&gt;&lt;/label&gt;
+  &lt;button class=&quot;primary&quot; id=&quot;load&quot;&gt;Load historical trades&lt;/button&gt;
+  &lt;select id=&quot;direction&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All signals&lt;/option&gt;&lt;option value=&quot;BUY CE&quot;&gt;BUY CE only&lt;/option&gt;&lt;option value=&quot;BUY PE&quot;&gt;BUY PE only&lt;/option&gt;&lt;/select&gt;
+  &lt;select id=&quot;result&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All outcomes&lt;/option&gt;&lt;option value=&quot;TARGET&quot;&gt;Target&lt;/option&gt;&lt;option value=&quot;STOP&quot;&gt;Stop-loss&lt;/option&gt;&lt;option value=&quot;OPEN&quot;&gt;Unresolved&lt;/option&gt;&lt;/select&gt;
+  &lt;input id=&quot;search&quot; placeholder=&quot;Search date / signal…&quot; aria-label=&quot;Search trades&quot;&gt;
+ &lt;/div&gt;
+ &lt;div class=&quot;metrics&quot;&gt;
+  &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;Filtered trades&lt;/span&gt;&lt;strong id=&quot;m-total&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
+  &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;BUY CE&lt;/span&gt;&lt;strong id=&quot;m-ce&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
+  &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;BUY PE&lt;/span&gt;&lt;strong id=&quot;m-pe&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
+  &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;Targets / Stops&lt;/span&gt;&lt;strong id=&quot;m-outcomes&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
+  &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;Win rate*&lt;/span&gt;&lt;strong id=&quot;m-win&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
+  &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;Overall net P/L (spot points)&lt;/span&gt;&lt;strong id=&quot;m-net-points&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
+ &lt;/div&gt;
+ &lt;p&gt;*Win rate = targets ÷ (targets + stop-losses). Unresolved trades are excluded. Values are based on NIFTY spot levels, not option premium P&amp;amp;L.&lt;/p&gt;
+&lt;/section&gt;
+&lt;section class=&quot;panel&quot;&gt;
+ &lt;div style=&quot;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap&quot;&gt;&lt;h2 style=&quot;font-size:16px;margin:0&quot;&gt;Trade history&lt;/h2&gt;&lt;span class=&quot;status&quot; id=&quot;count&quot;&gt;0 trades&lt;/span&gt;&lt;/div&gt;
+ &lt;div class=&quot;tablebox&quot;&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Date &amp;amp; time&lt;/th&gt;&lt;th&gt;Signal&lt;/th&gt;&lt;th&gt;Entry&lt;/th&gt;&lt;th&gt;Stop-loss&lt;/th&gt;&lt;th&gt;Target&lt;/th&gt;&lt;th&gt;Outcome&lt;/th&gt;&lt;th&gt;Exit time&lt;/th&gt;&lt;th&gt;Points P/L&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;rows&quot;&gt;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;Click “Load historical trades” to fetch your trade history.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+ 
+&lt;/section&gt;
+&lt;p class=&quot;muted&quot;&gt;Method note: historical signals are generated by the local scanner using completed candles. This report is educational analysis, not a recommendation. Fees, slippage, option Greeks and actual option fills are not included. No orders are placed.&lt;/p&gt;
+&lt;/main&gt;
+&lt;script&gt;
+let allTrades=[];
+const $=id=&gt;document.getElementById(id);
+const base=()=&gt; $(&#x27;api&#x27;).value.trim().replace(/\/+$/,&#x27;&#x27;);
+const num=v=&gt;v==null||v===&#x27;&#x27;?&#x27;—&#x27;:Number(v).toLocaleString(&#x27;en-IN&#x27;,{minimumFractionDigits:2,maximumFractionDigits:2});
+function outcomeClass(x){return x===&#x27;TARGET&#x27;?&#x27;target&#x27;:String(x||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)?&#x27;stop&#x27;:&#x27;open&#x27;}
+function pointPnL(t){
+ const entry=Number(t.entry); if(!Number.isFinite(entry)) return null;
+ let exit=Number(t.exit_price);
+ if(!Number.isFinite(exit)){const o=String(t.outcome||&#x27;&#x27;).toUpperCase();if(o.includes(&#x27;TARGET&#x27;))exit=Number(t.target);else if(o.includes(&#x27;STOP&#x27;))exit=Number(t.stop_loss);else return null;}
+ if(!Number.isFinite(exit))return null;
+ return (t.signal===&#x27;BUY PE&#x27;?-1:1)*(exit-entry);
+}
+function filtered(){const d=$(&#x27;direction&#x27;).value,r=$(&#x27;result&#x27;).value,q=$(&#x27;search&#x27;).value.toLowerCase();return allTrades.filter(t=&gt;(d===&#x27;ALL&#x27;||t.signal===d)&amp;&amp;(r===&#x27;ALL&#x27;||(r===&#x27;OPEN&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;OPEN&#x27;)||!t.outcome:r===&#x27;STOP&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;):t.outcome===r))&amp;&amp;(!q||(String(t.time)+&#x27; &#x27;+t.signal).toLowerCase().includes(q)))}
+function render(){
+ const list=filtered(),wins=list.filter(t=&gt;t.outcome===&#x27;TARGET&#x27;).length,stops=list.filter(t=&gt;String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)).length;
+ $(&#x27;m-total&#x27;).textContent=list.length;$(&#x27;m-ce&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY CE&#x27;).length;$(&#x27;m-pe&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY PE&#x27;).length;$(&#x27;m-outcomes&#x27;).textContent=wins+&#x27; / &#x27;+stops;$(&#x27;m-win&#x27;).textContent=wins+stops?(100*wins/(wins+stops)).toFixed(1)+&#x27;%&#x27;:&#x27;N/A&#x27;;
+ const points=list.map(pointPnL).filter(v=&gt;v!==null),net=points.reduce((a,b)=&gt;a+b,0);
+ $(&#x27;m-net-points&#x27;).textContent=points.length?(net&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+net.toFixed(2)+&#x27; pts&#x27;:&#x27;—&#x27;;
+ $(&#x27;m-net-points&#x27;).className=net&gt;0?&#x27;pnl-positive&#x27;:net&lt;0?&#x27;pnl-negative&#x27;:&#x27;&#x27;;
+ $(&#x27;count&#x27;).textContent=list.length+&#x27; trades shown&#x27;;
+ $(&#x27;rows&#x27;).innerHTML=list.length?list.map((t,i)=&gt;`&lt;tr data-i=&quot;${i}&quot;&gt;&lt;td&gt;${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge ${t.signal===&#x27;BUY CE&#x27;?&#x27;ce&#x27;:&#x27;pe&#x27;}&quot;&gt;${t.signal}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;${num(t.entry)}&lt;/td&gt;&lt;td&gt;${num(t.stop_loss)}&lt;/td&gt;&lt;td&gt;${num(t.target)}&lt;/td&gt;&lt;td class=&quot;${outcomeClass(t.outcome)}&quot;&gt;${t.outcome||&#x27;OPEN / unresolved&#x27;}&lt;/td&gt;&lt;td&gt;${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;—&#x27;}&lt;/td&gt;&lt;td class=&quot;${pointPnL(t)==null?&#x27;open&#x27;:pointPnL(t)&gt;=0?&#x27;pnl-positive&#x27;:&#x27;pnl-negative&#x27;}&quot;&gt;${pointPnL(t)==null?&#x27;Open&#x27;:(pointPnL(t)&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+pointPnL(t).toFixed(2)}&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;):&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;No trades match these filters.&lt;/td&gt;&lt;/tr&gt;&#x27;;
+ [...$(&#x27;rows&#x27;).querySelectorAll(&#x27;tr[data-i]&#x27;)].forEach(row=&gt;row.addEventListener(&#x27;click&#x27;,()=&gt;showTrade(list[Number(row.dataset.i)],row)));
+}
+function showTrade(t,row){
+ [...$(&#x27;rows&#x27;).querySelectorAll(&#x27;tr&#x27;)].forEach(x=&gt;x.classList.remove(&#x27;selected&#x27;));row.classList.add(&#x27;selected&#x27;);
+ $(&#x27;detail&#x27;).innerHTML=`&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;${t.signal} · ${t.outcome||&#x27;Unresolved&#x27;}&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Entry time:&lt;/b&gt; ${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;br&gt;&lt;b&gt;Signal candle:&lt;/b&gt; ${t.signal_bar_time?new Date(t.signal_bar_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not provided&#x27;}&lt;br&gt;&lt;b&gt;Exit time:&lt;/b&gt; ${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not recorded&#x27;}&lt;br&gt;&lt;b&gt;Exit price:&lt;/b&gt; ${num(t.exit_price)}&lt;br&gt;&lt;b&gt;Risk/reward:&lt;/b&gt; ${t.risk_reward||&#x27;—&#x27;}&lt;/div&gt;&lt;hr style=&quot;border:0;border-top:1px solid #e1e8f0;margin:12px 0&quot;&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Recorded explanation&lt;/b&gt;&lt;br&gt;${t.reason||&#x27;No detailed explanation was returned by the backend.&#x27;}&lt;br&gt;&lt;br&gt;&lt;b&gt;Outcome&lt;/b&gt;&lt;br&gt;${t.outcome||&#x27;Unresolved&#x27;}${t.exit_price?&#x27; at &#x27;+num(t.exit_price):&#x27;&#x27;}&lt;/div&gt;`;
+ $(&#x27;diagram&#x27;).innerHTML=[[&#x27;Target&#x27;,t.target,&#x27;tp&#x27;],[&#x27;Entry&#x27;,t.entry,&#x27;&#x27;],[&#x27;Stop-loss&#x27;,t.stop_loss,&#x27;sl&#x27;]].map(([label,value,cls])=&gt;`&lt;div class=&quot;level&quot;&gt;&lt;b&gt;${label}&lt;/b&gt;&lt;div class=&quot;line ${cls}&quot;&gt;&lt;/div&gt;&lt;strong&gt;${num(value)}&lt;/strong&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
+}
+$(&#x27;load&#x27;).addEventListener(&#x27;click&#x27;,async()=&gt;{const b=$(&#x27;load&#x27;);b.disabled=true;b.textContent=&#x27;Loading…&#x27;;$(&#x27;status&#x27;).textContent=&#x27;Requesting historical candles…&#x27;;try{const r=await fetch(base()+&#x27;/api/history?days=15&amp;strict=true&#x27;);const d=await r.json();if(!r.ok)throw new Error(d.detail||&#x27;HTTP &#x27;+r.status);const raw=[...(d.signals||[])].sort((a,b)=&gt;new Date(a.time)-new Date(b.time));allTrades=[];let active=null;for(const t of raw){if(![&#x27;BUY CE&#x27;,&#x27;BUY PE&#x27;].includes(t.signal))continue;const ts=new Date(t.time).getTime();if(active&amp;&amp;active.signal===t.signal&amp;&amp;(!active.exit_time||ts&lt;=new Date(active.exit_time).getTime()))continue;allTrades.push(t);active={signal:t.signal,exit_time:t.exit_time||null};}render();$(&#x27;status&#x27;).textContent=&#x27;Loaded &#x27;+(d.session_dates||[]).length+&#x27; sessions · &#x27;+raw.length+&#x27; raw signals&#x27;;$(&#x27;detail&#x27;).innerHTML=&#x27;&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;Trade details&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;Select a row in the table to inspect its levels and recorded explanation.&lt;/div&gt;&#x27;;$(&#x27;diagram&#x27;).innerHTML=&#x27;&lt;div class=&quot;empty&quot;&gt;Select a trade to show its levels.&lt;/div&gt;&#x27;;}catch(e){$(&#x27;status&#x27;).textContent=&#x27;Could not load: &#x27;+e.message;$(&#x27;rows&#x27;).innerHTML=&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;Check that the Python API is running, Angel One is connected, and /api/history is available. &#x27;+e.message+&#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;;}finally{b.disabled=false;b.textContent=&#x27;Load historical trades&#x27;;}});
+[&#x27;direction&#x27;,&#x27;result&#x27;,&#x27;search&#x27;].forEach(id=&gt;$(id).addEventListener(id===&#x27;search&#x27;?&#x27;input&#x27;:&#x27;change&#x27;,render));
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe></section>
+<section class="card bottom"><div class="section-title"><h3>SMC concept coverage</h3><span class="muted">Planned detection modules</span></div><div class="concepts"><div class="concept"><b>Market structure</b><span>HH / HL · LH / LL · BOS · CHoCH · MSS</span></div><div class="concept"><b>Liquidity</b><span>BSL · SSL · EQH / EQL · sweeps · inducement</span></div><div class="concept"><b>Imbalances</b><span>FVG · IFVG · volume imbalance · displacement</span></div><div class="concept"><b>Institutional zones</b><span>Order blocks · breaker · mitigation · rejection</span></div><div class="concept"><b>Dealing range</b><span>Premium · discount · equilibrium · OTE</span></div><div class="concept"><b>Time & session</b><span>Previous day levels · session highs/lows · kill zones</span></div></div><p class="note">Detection rules will be specified and tested individually. SMC labels are analytical interpretations, not proof of institutional orders.</p></section>
+
+<section class="card bottom" id="live-monitor">
+  <div class="section-title"><h3>Live NIFTY 50 · WebSocket 2.0</h3><span class="pill" id="feed-health">Waiting for API</span></div>
+  <div class="history-summary">
+    <div class="history-metric"><span>Latest NIFTY 50 price</span><strong id="live-price">—</strong></div>
+    <div class="history-metric"><span>Last exchange tick</span><strong id="live-tick-time" style="font-size:13px">—</strong></div>
+    <div class="history-metric"><span>Tick age</span><strong id="live-tick-age">—</strong></div>
+    <div class="history-metric"><span>Overall signal</span><strong id="live-overall-signal">WAIT</strong></div>
+  </div>
+  <br/>
+  <div class="section-title"><h3>Multi-timeframe SMC analysis</h3><span class="muted">15m bias → 5m structure → 2m setup → 1m entry</span></div>
+  <div class="history-summary" id="live-timeframes">
+    <div class="history-metric"><span>15m · Bias</span><strong>Awaiting data</strong></div>
+    <div class="history-metric"><span>5m · Structure</span><strong>Awaiting data</strong></div>
+    <div class="history-metric"><span>2m · Setup</span><strong>WAIT</strong></div>
+    <div class="history-metric"><span>1m · Entry</span><strong>WAIT</strong></div>
+  </div>
+  <div class="history-layout">
+    <div class="trade-detail"><h4>Detected SMC findings</h4><div id="live-findings" class="trade-explain">Waiting for live candle analysis.</div></div>
+    <div class="trade-detail"><h4>Feed health & connection</h4><div id="live-feed-detail" class="trade-explain">Connection status will appear here. A stale tick is normal outside market hours.</div></div>
+  </div>
+  <p class="note">Dashboard polls the local API every 2 seconds. Tick delivery itself depends on exchange activity and network connectivity. Signals are heuristic; manual execution only.</p>
+</section>
+<section class="card bottom"><div class="section-title"><h3>Connection setup</h3><span class="pill">Credentials not requested here</span></div><div class="controls"><select class="select" aria-label="Data source"><option>Angel One SmartAPI · connected through local API</option><option>CSV candle upload (prototype)</option></select><select class="select" aria-label="Expiry"><option>Weekly expiry</option></select><select class="select" aria-label="Risk"><option>Moderate risk</option></select><button class="primary" id="setup">View integration checklist</button></div><p class="note" id="setup-note">Next: resolve Angel One app registration / static-IP form requirement, verify the NIFTY instrument token, then test historical candles. Live WebSocket 2.0 feed and historical preload are integrated in the local Python API.</p></section>
+<section class="card bottom"><div class="section-title"><h3>Connect to your local Python scanner</h3><span class="pill">Local API</span></div><p class="note">Keep Uvicorn running on this Windows laptop. This page does not store SmartAPI credentials.</p><div class="controls"><input class="select" id="api-url" value="http://127.0.0.1:8000" aria-label="Python API address"><button class="primary" id="connect-python">Test Python connection</button><button class="primary" id="run-scan">Run SMC scan</button><span id="python-status" class="pill">Not tested</span></div><p class="note" id="python-detail">First test /api/status. Then use Run SMC scan to request historical multi-timeframe analysis. No orders are placed.</p><pre id="scan-results" class="note" style="white-space:pre-wrap;overflow-wrap:anywhere">No scan loaded yet.</pre></section>
+<div class="footer">NIFTY SMC Scanner · Local dashboard · Demo data only · No orders placed</div>
+</div></main>
+<script>
+// Timeframe buttons are wired to the real local candle API by the live chart module below.
+document.querySelectorAll('.tf').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tf').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}));
+document.getElementById('setup').addEventListener('click',()=>{document.getElementById('setup-note').textContent='Checklist: 1) Obtain Angel One confirmation on data-only app registration. 2) Create the SmartAPI app using the approved details. 3) Verify instrument master token. 4) Test historical candles. 5) Implement live WebSocket and candle aggregation. 6) Validate SMC rules with paper trading.'});
+
+const apiBase=()=>{let base=document.getElementById('api-url').value.trim();while(base.endsWith('/'))base=base.slice(0,-1);return base};
+const fmt=v=>v==null||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let lastHistoryTrades=[];
+document.getElementById('connect-python').addEventListener('click',async()=>{
+ const status=document.getElementById('python-status'),detail=document.getElementById('python-detail');status.textContent='Checking…';
+ try{const r=await fetch(apiBase()+'/api/status');const d=await r.json();if(!r.ok)throw new Error(d.detail||'HTTP '+r.status);
+ status.textContent=d.angel_one_connected?'Angel One connected':'Python API connected';detail.textContent='API reachable · Angel One '+(d.angel_one_connected?'authenticated':'not authenticated')+' · WebSocket '+(d.websocket_connected?'connected':'not connected');
+ await refreshLivePanel();
+ }catch(e){status.textContent='Not connected';detail.textContent='Cannot reach local API: '+e.message+' · Keep Uvicorn running.'}
+});
+document.getElementById('run-scan').addEventListener('click',async()=>{
+ const b=document.getElementById('run-scan'),out=document.getElementById('scan-results');b.disabled=true;b.textContent='Scanning…';out.textContent='Requesting /api/scan…';
+ try{const r=await fetch(apiBase()+'/api/scan');const d=await r.json();if(!r.ok)throw new Error(d.detail||'HTTP '+r.status);const a=d.analysis||{};const lines=['Overall signal: '+(a.signal||'WAIT')+' · '+(a.signal_te||''),'Candle counts: '+JSON.stringify(d.candle_counts||{})];
+ for(const tf of ['15m','5m','2m','1m']){const x=(a.timeframes||{})[tf];if(!x){lines.push('',tf+': no analysis returned');continue}lines.push('',tf+' · '+(x.structure||'—')+' · '+(x.signal||'WAIT'),x.signal_te||'', 'Swing: '+(x.swing_high_label||'—')+' / '+(x.swing_low_label||'—')+' · '+(x.premium_discount||'—'));(x.findings||[]).forEach((f,i)=>lines.push('• '+f+((x.findings_te||[])[i]?' / '+x.findings_te[i]:'')))}
+ lines.push('',d.note||a.warning||'Heuristic analysis only.');out.textContent=lines.join('\n');await refreshLivePanel();
+ }catch(e){out.textContent='Scan failed: '+e.message}finally{b.disabled=false;b.textContent='Run SMC scan'}
+});
+function calcPoints(t){
+ const entry=Number(t.entry),exit=Number(t.exit_price??t.exit??(t.outcome==='TARGET'?t.target:(String(t.outcome||'').startsWith('STOP')?t.stop_loss:null)));
+ if(!Number.isFinite(entry)||!Number.isFinite(exit))return null;
+ const sign=String(t.signal||'').includes('PE')?-1:1;
+ return (exit-entry)*sign;
+}
+function renderTradeDetail(t){
+ const pnl=calcPoints(t),exit=t.exit_price??t.exit??(t.outcome==='TARGET'?t.target:(String(t.outcome||'').startsWith('STOP')?t.stop_loss:null));
+ document.getElementById('history-trade-detail').innerHTML='<h4>'+esc(t.signal)+' · '+esc(t.outcome||'Unresolved')+'</h4><div class="trade-explain">Entry time: '+esc(t.time||'—')+'<br>Exit time: '+esc(t.exit_time||'Not recorded')+'<br>Entry: '+fmt(t.entry)+'<br>Stop-loss: '+fmt(t.stop_loss)+'<br>Target: '+fmt(t.target)+'<br>Exit price: '+fmt(exit)+'<br><b>Spot points: </b><span class="'+(pnl===null?'':pnl>=0?'positive':'negative')+'">'+(pnl===null?'Not available':(pnl>=0?'+':'')+pnl.toFixed(2)+' points')+'</span><br><br><b>Reason:</b> '+esc(t.reason||'No explanation returned by API')+'<br><b>SMC evidence:</b> '+esc((t.findings||[]).join(' · ')||'Not included in current history response')+'</div>';
+}
+document.getElementById('load-history').addEventListener('click',async()=>{
+ const b=document.getElementById('load-history'),status=document.getElementById('history-status'),out=document.getElementById('history-results');b.disabled=true;b.textContent='Loading…';status.textContent='Requesting history';out.textContent='Downloading and replaying 15 trading days…';
+ try{
+  const r=await fetch(apiBase()+'/api/history?days=15&strict=true');const d=await r.json();if(!r.ok)throw new Error(d.detail||'HTTP '+r.status);
+  const raw=[...(d.signals||[])].sort((a,b)=>new Date(a.time)-new Date(b.time));const trades=[];let active=null;
+  for(const t of raw){if(!['BUY CE','BUY PE'].includes(t.signal))continue;const tm=new Date(t.time).getTime();if(active&&active.signal===t.signal&&(!active.exit_time||tm<=new Date(active.exit_time).getTime()))continue;trades.push(t);active={signal:t.signal,exit_time:t.exit_time||null};}
+  lastHistoryTrades=trades;const wins=trades.filter(t=>t.outcome==='TARGET').length,losses=trades.filter(t=>String(t.outcome||'').startsWith('STOP')).length,open=trades.length-wins-losses;
+  const points=trades.map(calcPoints).filter(x=>x!==null),net=points.reduce((a,b)=>a+b,0),winrate=(wins+losses)?(wins*100/(wins+losses)).toFixed(1)+'%':'N/A';
+  const ce=trades.filter(t=>t.signal==='BUY CE').length,pe=trades.length-ce;
+  document.getElementById('history-summary').innerHTML=[['Filtered trades',trades.length],['CE / PE',ce+' / '+pe],['Targets / Stops / Open',wins+' / '+losses+' / '+open],['Win rate',winrate],['Net spot points',points.length?(net>=0?'+':'')+net.toFixed(2):'N/A'],['Winning points',points.filter(x=>x>0).reduce((a,b)=>a+b,0).toFixed(2)],['Losing points',points.filter(x=>x<0).reduce((a,b)=>a+b,0).toFixed(2)],['Sessions', (d.session_dates||[]).length]].map(x=>'<div class="history-metric"><span>'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join('');
+  const tbody=document.getElementById('history-rows');tbody.innerHTML=trades.map((t,i)=>{const p=calcPoints(t),exit=t.exit_price??t.exit??(t.outcome==='TARGET'?t.target:(String(t.outcome||'').startsWith('STOP')?t.stop_loss:null));return '<tr><td>'+esc(t.time?new Date(t.time).toLocaleString('en-IN'):'—')+'</td><td><button class="trade-pick" data-trade="'+i+'">'+esc(t.signal)+'</button></td><td>'+fmt(t.entry)+'</td><td>'+fmt(t.stop_loss)+'</td><td>'+fmt(t.target)+'</td><td>'+fmt(exit)+'</td><td>'+esc(t.outcome||'OPEN')+'</td><td class="'+(p===null?'':p>=0?'positive':'negative')+'">'+(p===null?'—':(p>=0?'+':'')+p.toFixed(2))+'</td></tr>'}).join('');
+  tbody.querySelectorAll('[data-trade]').forEach(el=>el.addEventListener('click',()=>renderTradeDetail(lastHistoryTrades[Number(el.dataset.trade)])));
+  document.getElementById('history-view').hidden=false;status.textContent='Loaded · '+trades.length+' trades';out.textContent='Historical replay loaded. '+(points.length?'Points are calculated from entry and recorded exit/target/stop.':'The API has not returned exit prices/outcomes sufficient to calculate points yet.')+' Spot points are not actual CE/PE option P&L.'; 
+ }catch(e){status.textContent='Load failed';out.textContent='Historical report failed: '+e.message+'. Ensure /api/history?days=15&strict=true is available.'}
+ finally{b.disabled=false;b.textContent='Load last 15 trading days'}
+});
+async function refreshLivePanel(){
+ const health=document.getElementById('feed-health');
+ try{
+  const [liveR,statusR]=await Promise.all([fetch(apiBase()+'/api/live'),fetch(apiBase()+'/api/status')]);const d=await liveR.json(),st=await statusR.json();if(!liveR.ok)throw new Error(d.detail||'HTTP '+liveR.status);
+  document.getElementById('live-price').textContent=fmt(d.price);document.getElementById('hero-live-price').textContent=fmt(d.price);document.getElementById('live-tick-time').textContent=d.quote_time?new Date(d.quote_time).toLocaleString('en-IN'):'—';document.getElementById('live-tick-age').textContent=d.tick_age_seconds==null?'—':Number(d.tick_age_seconds).toFixed(1)+' sec';document.getElementById('live-overall-signal').textContent=d.signal||'WAIT';
+  const stale=!!d.stale;health.textContent=stale?'STALE TICK':(st.websocket_connected?'WebSocket connected':'Feed waiting');health.style.borderColor=stale?'#d59a32':st.websocket_connected?'#16a477':'';
+  const tf=d.timeframes||{};document.getElementById('live-timeframes').innerHTML=['15m','5m','2m','1m'].map(k=>{const x=tf[k]||{};const names={'15m':'Bias','5m':'Structure','2m':'Setup','1m':'Entry'};return '<div class="history-metric"><span>'+k+' · '+names[k]+'</span><strong>'+esc(x.signal||x.structure||'WAIT')+'</strong><small>'+esc(x.structure||x.premium_discount||'Awaiting candle data')+'</small></div>'}).join('');
+  const findings=[];for(const k of ['15m','5m','2m','1m']){const x=tf[k];if(x){(x.findings||[]).forEach(f=>findings.push('<b>'+k+'</b> · '+esc(f)));(x.findings_te||[]).forEach(f=>findings.push('<span>'+k+' · '+esc(f)+'</span>'));}}
+  document.getElementById('live-findings').innerHTML=findings.length?findings.join('<br>'):'No SMC findings returned yet. Completed candles may be required.';
+  document.getElementById('live-feed-detail').textContent='Angel One login: '+(st.angel_one_connected?'connected':'not connected')+' · WebSocket: '+(st.websocket_connected?'connected':'disconnected')+' · Tick stale: '+(stale?'YES':'NO')+' · '+(d.websocket_error||st.websocket_error||d.note||'Feed status received.');
+  document.getElementById('python-status').textContent=st.angel_one_connected?'Angel One connected':'API reachable';
+  document.getElementById('python-detail').textContent='API reachable · Angel One '+(st.angel_one_connected?'connected':'not connected')+' · WebSocket '+(st.websocket_connected?'connected':'disconnected');
+ }catch(e){health.textContent='API unavailable';document.getElementById('live-feed-detail').textContent='Could not read live feed: '+e.message+' · Ensure Uvicorn is running and /api/live is available.'}
+}
+setInterval(refreshLivePanel,2000);
+</script>
+<script>
+// Unified dashboard binding: live API -> hero, timeframe cards and CE/PE monitor.
+(function(){
+  const base = () => {
+    const field = document.getElementById('api-url');
+    return (field ? field.value.trim() : 'http://127.0.0.1:8000').replace(/\/+$/, '');
+  };
+  const safe = value => String(value ?? '—').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+  async function refreshUnifiedDashboard(){
+    try{
+      const response = await fetch(base() + '/api/live');
+      const data = await response.json();
+      if(!response.ok) throw new Error(data.detail || ('HTTP ' + response.status));
+
+      const heroPrice = document.querySelector('.hero .market strong');
+      if(heroPrice) heroPrice.textContent = data.price == null ? '— —' :
+        Number(data.price).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+      const topGrid = document.querySelector('.hero + .grid');
+      const tf = data.timeframes || {};
+      if(topGrid){
+        const cards = topGrid.querySelectorAll('.card');
+        const keys = ['15m','5m','2m','1m'];
+        const labels = ['Higher-timeframe direction','BOS / structure confirmation','Setup confirmation','Entry confirmation'];
+        cards.forEach((card,index)=>{
+          const item = tf[keys[index]] || {};
+          const value = card.querySelector('.kvalue');
+          const foot = card.querySelector('.kfoot');
+          if(value) value.textContent = index < 2 ?
+            (item.structure || item.signal || 'Awaiting data') :
+            (item.signal || 'WAIT');
+          if(foot) foot.textContent = item.premium_discount ?
+            labels[index] + ' · ' + item.premium_discount : labels[index];
+        });
+      }
+
+      const monitor = document.querySelector('.layout aside.card');
+      if(monitor){
+        const overall = String(data.signal || 'WAIT').toUpperCase();
+        const ceActive = overall === 'BUY CE';
+        const peActive = overall === 'BUY PE';
+        const headingTag = monitor.querySelector('.section-title .tag');
+        if(headingTag){
+          headingTag.textContent = overall;
+          headingTag.className = 'tag' + (overall === 'WAIT' ? ' wait' : '');
+        }
+        const rows = monitor.querySelectorAll('.signal');
+        [[ceActive,'CE setup'],[peActive,'PE setup']].forEach(([active,label],i)=>{
+          const row = rows[i];
+          if(!row) return;
+          const tag = row.querySelector('.tag');
+          const description = row.querySelector('.muted');
+          if(tag){tag.textContent = active ? 'ACTIVE' : 'Not active';tag.className = 'tag' + (active ? '' : ' wait');}
+          if(description) description.textContent = active ?
+            'Backend confirmed overall ' + overall + ' signal' :
+            (label === 'CE setup' ? 'Bullish confirmation required' : 'Bearish confirmation required');
+        });
+      }
+
+      const liveStatus = document.getElementById('live-status');
+      if(liveStatus){
+        liveStatus.textContent = data.stale ? 'Connected · stale tick' :
+          (data.connected ? 'WebSocket live' : 'Waiting for tick');
+      }
+    }catch(error){
+      const liveStatus = document.getElementById('live-status');
+      if(liveStatus) liveStatus.textContent = 'API unavailable';
+    }
+  }
+
+  // Hook the existing live refresh loop without changing its 2-second cadence.
+  setInterval(()=>{
+    const status = document.getElementById('python-status');
+    if(status && status.textContent.toLowerCase().includes('connected')){
+      refreshUnifiedDashboard();
+    }
+  },2000);
+  document.addEventListener('DOMContentLoaded', refreshUnifiedDashboard);
+})();
+</script>
+
+
+<script>
+// Live OHLC chart. The 2-minute view is rebuilt from 1-minute candles,
+// anchored to the NSE session open (09:15) to avoid midnight/even-minute drift.
+(function(){
+  const chart = document.querySelector('.chart');
+  if(!chart) return;
+  let timeframe = document.querySelector('.tf.active')?.dataset.tf || '2m';
+  let busy = false;
+  const base = () => (document.getElementById('api-url')?.value || 'http://127.0.0.1:8000').trim().replace(/\/+$/,'');
+  const label = document.querySelector('.layout .card .section-title .muted');
+  const note = chart.parentElement.querySelector('.note');
+  const safe = v => String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function parseCandles(payload){
+    const list = Array.isArray(payload) ? payload : (payload.candles || payload.data || payload.results || []);
+    return list.map(v => Array.isArray(v)
+      ? {time:v[0],open:Number(v[1]),high:Number(v[2]),low:Number(v[3]),close:Number(v[4])}
+      : {time:v.datetime || v.timestamp || v.time || v.date,open:Number(v.open ?? v.o),high:Number(v.high ?? v.h),low:Number(v.low ?? v.l),close:Number(v.close ?? v.c)})
+      .filter(c=>c.time && [c.open,c.high,c.low,c.close].every(Number.isFinite))
+      .sort((a,b)=>new Date(a.time)-new Date(b.time));
+  }
+  function aggregateFromOneMinute(rows, minutes){
+    const groups = new Map();
+    for(const c of rows){
+      const d = new Date(c.time);
+      if(!Number.isFinite(d.getTime())) continue;
+      const day = d.toLocaleDateString('en-CA');
+      const minute = d.getHours()*60+d.getMinutes();
+      const sessionOpen = 9*60+15;
+      if(minute < sessionOpen || minute >= 15*60+30) continue;
+      const offset = minute-sessionOpen;
+      const bucket = Math.floor(offset/minutes);
+      const key = day+'-'+bucket;
+      if(!groups.has(key)) groups.set(key,{time:c.time,open:c.open,high:c.high,low:c.low,close:c.close,count:0,bucketStart:sessionOpen+bucket*minutes});
+      const g=groups.get(key);g.high=Math.max(g.high,c.high);g.low=Math.min(g.low,c.low);g.close=c.close;g.count++;
+    }
+    return [...groups.values()].filter(g=>g.count===minutes).map(g=>({...g,time:(()=>{const [y,m,d]=new Date(g.time).toLocaleDateString('en-CA').split('-').map(Number);const hh=Math.floor(g.bucketStart/60),mm=g.bucketStart%60;return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00`;})()}));
+  }
+  function draw(rows, stale){
+    if(!rows.length){chart.innerHTML='<div style="height:100%;display:grid;place-items:center;text-align:center;padding:16px;color:light-dark(#64748b,#9aabc0);font-size:12px">No completed '+timeframe+' candles returned. Check the local API and market session.</div>';return;}
+    const W=900,H=260,L=66,R=14,T=12,B=28,pw=W-L-R,ph=H-T-B;
+    const lo=Math.min(...rows.map(c=>c.low)),hi=Math.max(...rows.map(c=>c.high)),pad=(hi-lo)*.08||1,min=lo-pad,max=hi+pad;
+    const y=v=>T+(max-v)/(max-min)*ph,x=i=>L+(i+.5)*pw/rows.length,cw=Math.max(2,Math.min(13,pw/rows.length*.62));
+    let svg=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="NIFTY ${timeframe} live candlestick chart">`;
+    for(let i=0;i<5;i++){const yy=T+i*ph/4,val=max-i*(max-min)/4;svg+=`<path d="M${L} ${yy}H${W-R}" stroke="currentColor" opacity=".14"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="10" fill="currentColor">${val.toFixed(0)}</text>`;}
+    rows.forEach((c,i)=>{const color=c.close>=c.open?'#16a477':'#d65d65',xx=x(i),top=y(Math.max(c.open,c.close)),bottom=y(Math.min(c.open,c.close));svg+=`<path d="M${xx} ${y(c.high)}V${y(c.low)}" stroke="${color}" stroke-width="1.5"/><rect x="${xx-cw/2}" y="${top}" width="${cw}" height="${Math.max(1,bottom-top)}" fill="${color}" rx="1"/>`;});
+    [0,Math.floor((rows.length-1)/2),rows.length-1].forEach(i=>{svg+=`<text x="${x(i)}" y="${H-7}" text-anchor="middle" font-size="10" fill="currentColor">${safe(new Date(rows[i].time).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}))}</text>`;});
+    svg+='</svg>';chart.innerHTML=svg;
+    if(label) label.textContent=`${timeframe} · ${rows.length} candles · Angel One ${stale?'(last tick stale)':'historical/live API'}`;
+    if(note) note.textContent='Candles are loaded from your local Angel One API. The 2-minute chart is aggregated from 1-minute candles starting at 09:15; only complete 2-minute buckets are shown. Chart candles are spot OHLC, not option premium.';
+  }
+  async function refreshChart(){
+    if(busy || document.visibilityState==='hidden') return;
+    busy=true;
+    try{
+      const interval=timeframe==='2m'?'1m':timeframe;
+      const response=await fetch(base()+'/api/candles?interval='+interval+'&days=1');
+      const payload=await response.json();
+      if(!response.ok) throw new Error(payload.detail || 'HTTP '+response.status);
+      let candles=parseCandles(payload);
+      if(timeframe==='2m') candles=aggregateFromOneMinute(candles,2);
+      draw(candles, false);
+    }catch(err){
+      chart.innerHTML='<div style="height:100%;display:grid;place-items:center;text-align:center;padding:16px;color:#b45309;font-size:12px">Could not load real candles: '+safe(err.message)+'. Confirm Uvicorn is running and /api/candles is available.</div>';
+      if(label) label.textContent='Live candle data unavailable';
+    }finally{busy=false;}
+  }
+  document.querySelectorAll('.tf').forEach(button=>button.addEventListener('click',()=>{timeframe=button.dataset.tf;refreshChart();}));
+  const connect=document.getElementById('connect-python');
+  if(connect) connect.addEventListener('click',()=>setTimeout(refreshChart,800));
+  refreshChart();
+  setInterval(refreshChart,2000);
+})();
+</script>
+
+
+<script>
+// Candle zoom controls. Zoom stays anchored to the newest candle during refresh.
+(()=>{
+  const chart=document.querySelector('.chart');
+  if(!chart || document.getElementById('candle-zoom-controls')) return;
+  let zoom=1;
+  const controls=document.createElement('div');
+  controls.id='candle-zoom-controls';
+  controls.className='tfrow';
+  controls.style.cssText='align-items:center;margin:0 0 10px';
+  controls.innerHTML=
+    '<button type="button" class="tf" id="candle-zoom-in">＋ Zoom in</button>'+
+    '<button type="button" class="tf" id="candle-zoom-out">－ Zoom out</button>'+
+    '<button type="button" class="tf" id="candle-zoom-reset">Reset</button>'+
+    '<span class="muted" id="candle-zoom-level">100%</span>';
+  chart.parentNode.insertBefore(controls,chart);
+
+  function applyZoom(){
+    const svg=chart.querySelector('svg');
+    const level=document.getElementById('candle-zoom-level');
+    if(level) level.textContent=Math.round(zoom*100)+'%';
+    if(!svg) return;
+    // The chart renderer redraws a 900-unit-wide base viewBox every refresh.
+    const parts=(svg.dataset.baseViewBox || svg.getAttribute('viewBox') || '0 0 900 260').split(/\s+/).map(Number);
+    if(!svg.dataset.baseViewBox) svg.dataset.baseViewBox=parts.join(' ');
+    const [x,y,w,h]=parts;
+    const visibleWidth=w/zoom;
+    svg.setAttribute('viewBox',(x+w-visibleWidth)+' '+y+' '+visibleWidth+' '+h);
+  }
+
+  document.getElementById('candle-zoom-in').addEventListener('click',()=>{
+    zoom=Math.min(zoom*1.25,8);applyZoom();
+  });
+  document.getElementById('candle-zoom-out').addEventListener('click',()=>{
+    zoom=Math.max(zoom/1.25,1);applyZoom();
+  });
+  document.getElementById('candle-zoom-reset').addEventListener('click',()=>{
+    zoom=1;applyZoom();
+  });
+  new MutationObserver(()=>applyZoom()).observe(chart,{childList:true});
+  applyZoom();
+})();
+</script>
+
+<script>
+document.querySelectorAll('#user-historical-report iframe').forEach(frame=>{
+ const fit=()=>{try{const doc=frame.contentDocument;if(doc&&doc.documentElement)frame.style.height=Math.max(360,doc.documentElement.scrollHeight+8)+'px'}catch(e){}};
+ frame.addEventListener('load',()=>{fit();setTimeout(fit,200);setTimeout(fit,700)});
+});
+</script>
+</body></html>
