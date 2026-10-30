@@ -55,7 +55,34 @@ table.history-table th{background:light-dark(#f2f6fb,#172438);position:sticky;to
 .live-monitor-card .note{padding-top:10px;border-top:1px solid light-dark(#e4ebf3,#2b405b)}
 @media(max-width:850px){.live-quote-grid,.live-timeframe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.live-quote-grid .history-metric strong{font-size:18px}.live-timeframe-grid .history-metric{min-height:72px}}
-</style></head>
+</style>
+<style>
+/* Keep Live NIFTY values in one horizontal row */
+#live-monitor > .history-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin: 12px 0 16px;
+}
+
+/* Keep all four SMC timeframes in one horizontal row */
+#live-monitor #live-timeframes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin: 12px 0 16px;
+}
+
+/* On narrow screens, scroll horizontally rather than wrapping */
+@media (max-width: 850px) {
+  #live-monitor > .history-summary,
+  #live-monitor #live-timeframes {
+    grid-template-columns: repeat(4, minmax(145px, 1fr));
+    overflow-x: auto;
+  }
+}
+</style>
+</head>
 <body><main id="app">
 <header><div class="brand"><div class="logo">SMC</div><div><h1>NIFTY SMC Scanner</h1><div class="sub">Angel One · Multi-timeframe market analysis</div></div></div><div class="topright"><span class="pill">LOCAL LIVE API</span><span class="pill">Weekly expiry · Moderate risk</span><span class="pill">Manual execution only</span></div></header>
 <div class="wrap">
