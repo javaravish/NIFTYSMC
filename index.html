@@ -1,101 +1,337 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b1220">
-<title>NIFTY SMC Scanner</title>
-<style>
-:root{
- --site-primary:#173b68;--site-secondary:#0d766e;--site-background:#0b1220;
- --site-on-primary:#ffffff;--site-on-secondary:#ffffff;--site-on-background:#edf3fb;
- --site-font-body:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
- --site-font-heading:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
- --site-heading-scale:1;--site-spacing-scale:1;--site-radius-scale:1;--site-decoration-opacity:1;
- color-scheme:light dark;
-}
-*{box-sizing:border-box} body{margin:0;background:var(--site-background);color:var(--site-on-background);font-family:var(--site-font-body)}
-#app{min-height:100vh;width:100%;border-radius:0;background:light-dark(#f3f6fb,#0b1220);color:light-dark(#172338,#edf3fb);padding:22px calc(22px * var(--site-spacing-scale)) 36px}
-header{max-width:1400px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;background:var(--site-primary);display:grid;place-items:center;color:white;font-weight:900;letter-spacing:-1px}.brand h1{font:700 calc(19px * var(--site-heading-scale))/1.2 var(--site-font-heading);margin:0}.sub{font-size:12px;color:light-dark(#64748b,#9aabc3);margin-top:4px}.topright{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.pill{font-size:11px;padding:7px 10px;border-radius:99px;background:light-dark(#e8eef6,#18263a);color:light-dark(#43536b,#bdcbe0);border:1px solid light-dark(#d8e1ed,#2b3c54)}.demo{background:#fff4dc;color:#865200;border-color:#f0d49a;font-weight:700}.wrap{max-width:1400px;margin:auto}.hero{background:linear-gradient(115deg,var(--site-primary),#102b4c 62%,var(--site-secondary));color:white;border-radius:calc(20px * var(--site-radius-scale));padding:23px;margin-bottom:17px;display:flex;align-items:center;justify-content:space-between;gap:18px;box-shadow:0 12px 30px #07132333}.hero h2{font-size:clamp(21px,3vw,29px);margin:0 0 7px}.hero p{margin:0;color:#d3e1f3;font-size:13px;line-height:1.5}.hero .market{font-size:12px;color:#d8e8f8;text-align:right;white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:17px}.card{background:light-dark(#fff,#121e30);border:1px solid light-dark(#e0e7f0,#26364d);border-radius:calc(16px * var(--site-radius-scale));padding:16px;min-width:0;box-shadow:0 5px 18px #10233b0a}.klabel{font-size:11px;color:light-dark(#6a7890,#9cacc3);text-transform:uppercase;letter-spacing:.07em}.kvalue{font-size:22px;font-weight:750;margin-top:8px;letter-spacing:-.5px}.kfoot{font-size:11px;color:light-dark(#718098,#93a4bc);margin-top:5px}.up{color:#13966b}.down{color:#dc5c62}.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.85fr);gap:15px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.section-title h3{font-size:15px;margin:0}.muted{font-size:11px;color:light-dark(#77859b,#9aabc0)}.tfrow{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.tf{border:1px solid light-dark(#d8e1ed,#34455d);background:transparent;color:inherit;border-radius:9px;padding:8px 13px;font-weight:650;font-size:12px;cursor:pointer}.tf.active{background:var(--site-primary);border-color:var(--site-primary);color:white}.chart{height:250px;border-radius:12px;background:light-dark(#f7f9fc,#0d1727);border:1px solid light-dark(#e6edf5,#26364d);padding:10px;position:relative;overflow:hidden}.chart svg{width:100%;height:100%}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10px;color:light-dark(#64748b,#a6b5c9);margin-top:10px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.signal{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:11px;background:light-dark(#f1f6fb,#17263a);margin-top:10px;gap:10px}.signal strong{font-size:13px}.tag{font-size:10px;font-weight:800;border-radius:7px;padding:6px 8px;background:#e5f7ef;color:#08734f}.tag.wait{background:#fff2d9;color:#875800}.concepts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.concept{padding:10px;border-radius:10px;background:light-dark(#f4f7fb,#172438);font-size:12px}.concept b{display:block;font-size:12px;margin-bottom:4px}.concept span{font-size:10px;color:light-dark(#748198,#9cacc2)}.bottom{margin-top:15px}.controls{display:flex;gap:9px;flex-wrap:wrap}.select,button{font:inherit;border:1px solid light-dark(#d4deea,#33465f);border-radius:10px;padding:10px 12px;background:light-dark(#fff,#16253a);color:inherit;font-size:12px}.primary{background:var(--site-primary);color:white;border-color:var(--site-primary);font-weight:700;cursor:pointer}.note{font-size:11px;line-height:1.55;color:light-dark(#66758b,#9aabc0);margin-top:14px}.footer{text-align:center;color:light-dark(#8190a5,#8194ae);font-size:10px;margin:20px 0 0}.mobile-nav{display:none}
-@media(max-width:850px){#app{padding:14px 12px 26px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column;padding:18px}.hero .market{text-align:left}.chart{height:220px}}
-@media(max-width:480px){header{align-items:flex-start}.brand h1{font-size:16px}.topright{justify-content:flex-end}.topright .pill:nth-child(2){display:none}.grid{gap:9px}.card{padding:13px}.kvalue{font-size:19px}.concepts{grid-template-columns:1fr 1fr}.chart{height:190px}.hero h2{font-size:21px}}
+  <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="#0b1220" name="theme-color"/>
+  <title>NIFTY SMC Scanner</title>
+  <style>
+    :root{
+     --site-primary:#173b68;--site-secondary:#0d766e;--site-background:#0b1220;
+     --site-on-primary:#ffffff;--site-on-secondary:#ffffff;--site-on-background:#edf3fb;
+     --site-font-body:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+     --site-font-heading:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+     --site-heading-scale:1;--site-spacing-scale:1;--site-radius-scale:1;--site-decoration-opacity:1;
+     color-scheme:light dark;
+    }
+    *{box-sizing:border-box} body{margin:0;background:var(--site-background);color:var(--site-on-background);font-family:var(--site-font-body)}
+    #app{min-height:100vh;width:100%;border-radius:0;background:light-dark(#f3f6fb,#0b1220);color:light-dark(#172338,#edf3fb);padding:22px calc(22px * var(--site-spacing-scale)) 36px}
+    header{max-width:1400px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;background:var(--site-primary);display:grid;place-items:center;color:white;font-weight:900;letter-spacing:-1px}.brand h1{font:700 calc(19px * var(--site-heading-scale))/1.2 var(--site-font-heading);margin:0}.sub{font-size:12px;color:light-dark(#64748b,#9aabc3);margin-top:4px}.topright{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.pill{font-size:11px;padding:7px 10px;border-radius:99px;background:light-dark(#e8eef6,#18263a);color:light-dark(#43536b,#bdcbe0);border:1px solid light-dark(#d8e1ed,#2b3c54)}.demo{background:#fff4dc;color:#865200;border-color:#f0d49a;font-weight:700}.wrap{max-width:1400px;margin:auto}.hero{background:linear-gradient(115deg,var(--site-primary),#102b4c 62%,var(--site-secondary));color:white;border-radius:calc(20px * var(--site-radius-scale));padding:23px;margin-bottom:17px;display:flex;align-items:center;justify-content:space-between;gap:18px;box-shadow:0 12px 30px #07132333}.hero h2{font-size:clamp(21px,3vw,29px);margin:0 0 7px}.hero p{margin:0;color:#d3e1f3;font-size:13px;line-height:1.5}.hero .market{font-size:12px;color:#d8e8f8;text-align:right;white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:17px}.card{background:light-dark(#fff,#121e30);border:1px solid light-dark(#e0e7f0,#26364d);border-radius:calc(16px * var(--site-radius-scale));padding:16px;min-width:0;box-shadow:0 5px 18px #10233b0a}.klabel{font-size:11px;color:light-dark(#6a7890,#9cacc3);text-transform:uppercase;letter-spacing:.07em}.kvalue{font-size:22px;font-weight:750;margin-top:8px;letter-spacing:-.5px}.kfoot{font-size:11px;color:light-dark(#718098,#93a4bc);margin-top:5px}.up{color:#13966b}.down{color:#dc5c62}.layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.85fr);gap:15px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.section-title h3{font-size:15px;margin:0}.muted{font-size:11px;color:light-dark(#77859b,#9aabc0)}.tfrow{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.tf{border:1px solid light-dark(#d8e1ed,#34455d);background:transparent;color:inherit;border-radius:9px;padding:8px 13px;font-weight:650;font-size:12px;cursor:pointer}.tf.active{background:var(--site-primary);border-color:var(--site-primary);color:white}.chart{height:250px;border-radius:12px;background:light-dark(#f7f9fc,#0d1727);border:1px solid light-dark(#e6edf5,#26364d);padding:10px;position:relative;overflow:hidden}.chart svg{width:100%;height:100%}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10px;color:light-dark(#64748b,#a6b5c9);margin-top:10px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.signal{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:11px;background:light-dark(#f1f6fb,#17263a);margin-top:10px;gap:10px}.signal strong{font-size:13px}.tag{font-size:10px;font-weight:800;border-radius:7px;padding:6px 8px;background:#e5f7ef;color:#08734f}.tag.wait{background:#fff2d9;color:#875800}.concepts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.concept{padding:10px;border-radius:10px;background:light-dark(#f4f7fb,#172438);font-size:12px}.concept b{display:block;font-size:12px;margin-bottom:4px}.concept span{font-size:10px;color:light-dark(#748198,#9cacc2)}.bottom{margin-top:15px}.controls{display:flex;gap:9px;flex-wrap:wrap}.select,button{font:inherit;border:1px solid light-dark(#d4deea,#33465f);border-radius:10px;padding:10px 12px;background:light-dark(#fff,#16253a);color:inherit;font-size:12px}.primary{background:var(--site-primary);color:white;border-color:var(--site-primary);font-weight:700;cursor:pointer}.note{font-size:11px;line-height:1.55;color:light-dark(#66758b,#9aabc0);margin-top:14px}.footer{text-align:center;color:light-dark(#8190a5,#8194ae);font-size:10px;margin:20px 0 0}.mobile-nav{display:none}
+    @media(max-width:850px){#app{padding:14px 12px 26px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column;padding:18px}.hero .market{text-align:left}.chart{height:220px}}
+    @media(max-width:480px){header{align-items:flex-start}.brand h1{font-size:16px}.topright{justify-content:flex-end}.topright .pill:nth-child(2){display:none}.grid{gap:9px}.card{padding:13px}.kvalue{font-size:19px}.concepts{grid-template-columns:1fr 1fr}.chart{height:190px}.hero h2{font-size:21px}}
 
-<style>
-.history-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}
-.history-metric{padding:11px;border-radius:10px;background:light-dark(#f2f6fb,#172438);min-width:0}
-.history-metric span{display:block;font-size:10px;color:light-dark(#718098,#9aabc0)}
-.history-metric strong{display:block;font-size:18px;margin-top:4px;overflow-wrap:anywhere}
-.history-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(250px,.8fr);gap:12px;margin-top:12px}
-.table-wrap{overflow:auto;border:1px solid light-dark(#e0e7f0,#293a52);border-radius:10px}
-table.history-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}
-table.history-table th,table.history-table td{padding:9px 10px;text-align:left;border-bottom:1px solid light-dark(#e8edf4,#293a52)}
-table.history-table th{background:light-dark(#f2f6fb,#172438);position:sticky;top:0}
-.trade-detail{background:light-dark(#f7f9fc,#0d1727);border:1px solid light-dark(#e0e7f0,#293a52);border-radius:11px;padding:13px;min-width:0}
-.trade-detail h4{margin:0 0 8px;font-size:14px}
-.trade-explain{font-size:11px;line-height:1.6;color:light-dark(#64748b,#a6b5c9);overflow-wrap:anywhere}
-.positive{color:#13966b;font-weight:750}.negative{color:#dc5c62;font-weight:750}
-@media(max-width:850px){.history-layout{grid-template-columns:1fr}.history-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
-</style>
-</style><style>
-/* Refined live quote and multi-timeframe panel */
-.live-monitor-card{position:relative;overflow:hidden;border-color:light-dark(#cbd9e9,#2d4968);background:linear-gradient(145deg,light-dark(#ffffff,#14243a),light-dark(#f4f8fd,#101d30))}
-.live-monitor-card:before{content:"";display:block;height:4px;position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,#173b68,#0d9488,#42a77b)}
-.live-monitor-card>.section-title{margin-top:3px}
-.live-monitor-card>.section-title h3{font-size:16px;letter-spacing:-.2px}
-.live-quote-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0 20px}
-.live-quote-grid .history-metric{padding:15px;border:1px solid light-dark(#e3eaf3,#2b405b);background:light-dark(#f7faff,#192b42);box-shadow:0 3px 12px #10233b0a}
-.live-quote-grid .history-metric:first-child{border-left:3px solid #0d9488}
-.live-quote-grid .history-metric strong{font-size:21px;font-variant-numeric:tabular-nums}
-.live-timeframe-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 16px}
-.live-timeframe-grid .history-metric{padding:13px;border:1px solid light-dark(#e1e9f2,#2b405b);background:light-dark(#f4f7fb,#18283e);min-height:82px}
-.live-timeframe-grid .history-metric span{font-size:11px;font-weight:700;letter-spacing:.02em}
-.live-timeframe-grid .history-metric strong{font-size:17px;margin-top:7px}
-.live-timeframe-grid .history-metric small{display:block;margin-top:5px;color:light-dark(#718098,#9aabc0);font-size:10px}
-.live-monitor-card .history-layout{align-items:stretch;gap:14px}
-.live-monitor-card .trade-detail{background:light-dark(#fbfcfe,#101d30);border-color:light-dark(#e1e9f2,#2b405b);min-height:112px}
-.live-monitor-card .trade-detail h4{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:light-dark(#51627a,#b6c6d9)}
-.live-monitor-card .note{padding-top:10px;border-top:1px solid light-dark(#e4ebf3,#2b405b)}
-@media(max-width:850px){.live-quote-grid,.live-timeframe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:480px){.live-quote-grid .history-metric strong{font-size:18px}.live-timeframe-grid .history-metric{min-height:72px}}
-</style>
-<style>
-/* Keep Live NIFTY values in one horizontal row */
-#live-monitor > .history-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 9px;
-  margin: 12px 0 16px;
-}
+    <style>
+    .history-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}
+    .history-metric{padding:11px;border-radius:10px;background:light-dark(#f2f6fb,#172438);min-width:0}
+    .history-metric span{display:block;font-size:10px;color:light-dark(#718098,#9aabc0)}
+    .history-metric strong{display:block;font-size:18px;margin-top:4px;overflow-wrap:anywhere}
+    .history-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(250px,.8fr);gap:12px;margin-top:12px}
+    .table-wrap{overflow:auto;border:1px solid light-dark(#e0e7f0,#293a52);border-radius:10px}
+    table.history-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}
+    table.history-table th,table.history-table td{padding:9px 10px;text-align:left;border-bottom:1px solid light-dark(#e8edf4,#293a52)}
+    table.history-table th{background:light-dark(#f2f6fb,#172438);position:sticky;top:0}
+    .trade-detail{background:light-dark(#f7f9fc,#0d1727);border:1px solid light-dark(#e0e7f0,#293a52);border-radius:11px;padding:13px;min-width:0}
+    .trade-detail h4{margin:0 0 8px;font-size:14px}
+    .trade-explain{font-size:11px;line-height:1.6;color:light-dark(#64748b,#a6b5c9);overflow-wrap:anywhere}
+    .positive{color:#13966b;font-weight:750}.negative{color:#dc5c62;font-weight:750}
+    @media(max-width:850px){.history-layout{grid-template-columns:1fr}.history-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
-/* Keep all four SMC timeframes in one horizontal row */
-#live-monitor #live-timeframes {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 9px;
-  margin: 12px 0 16px;
-}
+    /* v3.6: consistent section-heading typography */
+    .section-title h3, #user-historical-report h2, #multi-timeframe-panel h3 {font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif!important;font-size:16px!important;font-weight:700!important;line-height:1.3!important;margin:0!important}
 
-/* On narrow screens, scroll horizontally rather than wrapping */
-@media (max-width: 850px) {
-  #live-monitor > .history-summary,
-  #live-monitor #live-timeframes {
-    grid-template-columns: repeat(4, minmax(145px, 1fr));
-    overflow-x: auto;
-  }
-}
-</style>
+    .section-title h3, #user-historical-report h2, #multi-timeframe-panel h3 {font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif!important;font-size:16px!important;font-weight:700!important;line-height:1.3!important;margin:0!important}
+
+    /* v3.7 dashboard layout and collapsible sections */
+    .collapsible-heading{display:flex!important;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;user-select:none;padding:2px 0 10px!important}
+    .collapsible-heading h3{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif!important;font-size:16px!important;font-weight:700!important;line-height:1.3!important;margin:0!important}
+    .collapsible-heading .collapse-chevron{font-size:20px;font-weight:700;min-width:24px;text-align:center;color:var(--muted,#64748b)}
+    .collapsible-heading:focus-visible{outline:2px solid #3b82f6;outline-offset:3px;border-radius:6px}
+    .mtf-single-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;overflow-x:auto;white-space:nowrap}
+    .mtf-single-row .history-metric{min-width:0}
+    @media(max-width:760px){.mtf-single-row{grid-template-columns:repeat(4,minmax(160px,1fr))!important}}
+    #user-historical-report iframe{min-height:760px}
+
+    /* v3.8 requested dashboard refinements */
+    #auto-trading-panel .history-metric{min-width:150px}
+    #auto-trading-panel button,#connect-local-api{font:inherit;font-size:13px;font-weight:700;padding:9px 13px;border:1px solid #cbd5e1;border-radius:8px;cursor:pointer}
+    #auto-trading-toggle:disabled{opacity:1;color:#8b4b12;background:#fff4df;border-color:#f2d29b;cursor:not-allowed}
+    #auto-trading-quantity{font:inherit;font-size:14px;padding:9px;border:1px solid #cbd5e1;border-radius:8px}
+    #connect-api-status{align-self:center}
+    .layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:14px;align-items:stretch}
+    @media(max-width:850px){.layout{grid-template-columns:1fr}}
+
+    /* v3.9 layout refinements */
+    .layout>.section-title{grid-column:1/-1;margin-bottom:0}
+    .layout{grid-template-columns:minmax(0,1.65fr) minmax(320px,.85fr)!important;align-items:stretch!important}
+    @media(max-width:850px){.layout{grid-template-columns:1fr!important}.layout>.section-title{grid-column:1}}
+    .auto-controls-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(150px,.8fr) minmax(160px,.8fr);gap:10px;align-items:end}
+    .auto-control{background:var(--soft,#f1f5f9);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+    .auto-control label{font-size:11px;color:var(--muted,#64748b)}
+    .auto-control button,.auto-control input{height:38px;box-sizing:border-box}
+    .auto-control input{width:100%;max-width:140px;border:1px solid #cbd5e1;border-radius:8px;padding:7px 10px;font:inherit;background:white}
+    .auto-toggle{border:1px solid #cbd5e1;border-radius:9px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer;align-self:flex-start;min-width:92px}
+    .auto-toggle.off{background:#fff4df;color:#9a5b00;border-color:#f2d29b}
+    .auto-toggle.on{background:#dcfce7;color:#166534;border-color:#86efac}
+    #refresh-positions,#connect-local-api{border:1px solid #cbd5e1;border-radius:8px;background:white;color:#173b68;padding:8px 13px;font:inherit;font-weight:700;cursor:pointer}
+    #connect-local-api{background:#173b68;color:white;border-color:#173b68}
+    @media(max-width:650px){.auto-controls-row{grid-template-columns:1fr 1fr}.auto-control:first-child{grid-column:1/-1}}
+
+    /* v3.10 unified price-action and signal-monitor section */
+    .wrap>.layout{box-sizing:border-box;background:light-dark(#fff,#121e30);border:1px solid light-dark(#dce5ef,#293a52);border-radius:14px;padding:14px;gap:14px;align-items:stretch;margin-top: 15px}
+    .wrap>.layout>.section-title{grid-column:1/-1;width:100%;box-sizing:border-box;margin:0 0 2px;padding:0 2px 8px!important}
+    .wrap>.layout>section.card{height:100%;box-sizing:border-box;margin:0;min-width:0}
+    #user-historical-report{min-height:0!important;height:auto!important}
+    #user-historical-report iframe{height:1120px;min-height:800px}
+
+    .chart{height:390px;min-height:320px;position:relative;overflow:hidden;border-radius:10px;touch-action:pan-y;cursor:crosshair}
+    .chart svg{width:100%;height:100%;display:block}
+    .chart-message{height:100%;min-height:260px;display:grid;place-items:center;text-align:center;padding:18px;color:light-dark(#64748b,#9aabc0);font-size:13px}
+    .chart-error{color:#b45309}
+    .chart svg text{font-family:Inter,system-ui,sans-serif;user-select:none}
+    .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:11px}
+
+    /* v3.16: readable timeframe cards and daily signal journal */
+    #multi-timeframe-panel .section-title{align-items:center}
+    .mtf-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    #mtf-last-refresh{font-size:10px;color:light-dark(#718098,#9aabc0);font-weight:500}
+    #refresh-mtf{padding:8px 12px;font-size:11px}
+    #refresh-mtf:disabled{opacity:.65;cursor:wait}
+    #live-timeframes.mtf-single-row{white-space:normal;overflow:visible}
+    #live-timeframes .history-metric{min-width:0;white-space:normal;overflow-wrap:anywhere}
+    #live-timeframes .history-metric strong{line-height:1.25;overflow-wrap:anywhere}
+    #live-timeframes .history-metric small{display:block;font-size:11px;line-height:1.45;margin-top:4px;white-space:normal;overflow-wrap:anywhere}
+    #signal-monitor .signal{min-width:0}
+    #signal-monitor .signal .muted{line-height:1.45;overflow-wrap:anywhere}
+    #today-signal-history .history-summary{margin-bottom:10px}
+    #today-signal-history .table-wrap{max-height:360px;overflow:auto}
+    #today-signal-history table{width:100%;border-collapse:collapse;font-size:12px}
+    #today-signal-history th,#today-signal-history td{padding:9px 10px;border-bottom:1px solid var(--border,#dbe4ef);text-align:left;white-space:nowrap}
+    #today-signal-history th{position:sticky;top:0;background:light-dark(#eef3f9,#1b2a40);z-index:1}
+    #today-signal-history .empty-history{padding:14px;border-radius:10px;background:light-dark(#f3f6fb,#172338);line-height:1.5}
+    #today-signal-history .journal-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    #today-signal-history .journal-actions small{color:light-dark(#718098,#9aabc0)}
+    @media(max-width:760px){#live-timeframes.mtf-single-row{grid-template-columns:1fr!important}.mtf-actions{gap:6px}#today-signal-history .history-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+  <style>
+    /* Refined live quote and multi-timeframe panel */
+    .live-monitor-card{position:relative;overflow:hidden;border-color:light-dark(#cbd9e9,#2d4968);background:linear-gradient(145deg,light-dark(#ffffff,#14243a),light-dark(#f4f8fd,#101d30))}
+    .live-monitor-card:before{content:"";display:block;height:4px;position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,#173b68,#0d9488,#42a77b)}
+    .live-monitor-card>.section-title{margin-top:3px}
+    .live-monitor-card>.section-title h3{font-size:16px;letter-spacing:-.2px}
+    .live-quote-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0 20px}
+    .live-quote-grid .history-metric{padding:15px;border:1px solid light-dark(#e3eaf3,#2b405b);background:light-dark(#f7faff,#192b42);box-shadow:0 3px 12px #10233b0a}
+    .live-quote-grid .history-metric:first-child{border-left:3px solid #0d9488}
+    .live-quote-grid .history-metric strong{font-size:21px;font-variant-numeric:tabular-nums}
+    .live-timeframe-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 16px}
+    .live-timeframe-grid .history-metric{padding:13px;border:1px solid light-dark(#e1e9f2,#2b405b);background:light-dark(#f4f7fb,#18283e);min-height:82px}
+    .live-timeframe-grid .history-metric span{font-size:11px;font-weight:700;letter-spacing:.02em}
+    .live-timeframe-grid .history-metric strong{font-size:17px;margin-top:7px}
+    .live-timeframe-grid .history-metric small{display:block;margin-top:5px;color:light-dark(#718098,#9aabc0);font-size:10px}
+    .live-monitor-card .history-layout{align-items:stretch;gap:14px}
+    .live-monitor-card .trade-detail{background:light-dark(#fbfcfe,#101d30);border-color:light-dark(#e1e9f2,#2b405b);min-height:112px}
+    .live-monitor-card .trade-detail h4{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:light-dark(#51627a,#b6c6d9)}
+    .live-monitor-card .note{padding-top:10px;border-top:1px solid light-dark(#e4ebf3,#2b405b)}
+    @media(max-width:850px){.live-quote-grid,.live-timeframe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:480px){.live-quote-grid .history-metric strong{font-size:18px}.live-timeframe-grid .history-metric{min-height:72px}}
+  </style>
+  <style>
+    /* Keep Live NIFTY values in one horizontal row */
+    #live-monitor > .history-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+      margin: 12px 0 16px;
+    }
+
+    /* Keep all four SMC timeframes in one horizontal row */
+    #live-monitor #live-timeframes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+      margin: 12px 0 16px;
+    }
+
+    /* On narrow screens, scroll horizontally rather than wrapping */
+    @media (max-width: 850px) {
+      #live-monitor > .history-summary,
+      #live-monitor #live-timeframes {
+        grid-template-columns: repeat(4, minmax(145px, 1fr));
+        overflow-x: auto;
+      }
+    }
+  </style>
+
+
+  <style>
+    /* Screenshot-matched styling: Paper Trading and Today's Signals only. */
+    #auto-trading-panel, #today-signal-history{
+      background:#fff!important;color:#172338!important;border:1px solid #dce5ef!important;
+      border-radius:12px!important;padding:13px!important;box-shadow:0 5px 18px #10233b0a!important;
+    }
+    #auto-trading-panel .collapsible-heading,
+    #today-signal-history .collapsible-heading{
+      padding:2px 0 10px!important;margin:0 0 10px!important;
+      border-bottom:1px solid #e5ebf3;align-items:center!important;
+    }
+    #auto-trading-panel .collapsible-heading h3,
+    #today-signal-history .collapsible-heading h3{
+      color:#102f55!important;font-size:13px!important;font-weight:800!important;
+    }
+    #auto-trading-panel .note,#today-signal-history .note{
+      color:#718098!important;font-size:10px!important;line-height:1.5!important;
+    }
+    #auto-trading-panel .auto-controls-row{
+      display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+      gap:9px!important;align-items:stretch!important;margin:10px 0!important;
+    }
+    #auto-trading-panel .auto-control{
+      background:#f3f6fb!important;border:1px solid #dce5ef!important;
+      border-radius:9px!important;padding:9px!important;gap:5px!important;
+    }
+    #auto-trading-panel .auto-control label{
+      color:#718098!important;font-size:9px!important;text-transform:uppercase;letter-spacing:.04em;
+    }
+    #auto-trading-panel .auto-control button,
+    #auto-trading-panel .auto-control input{
+      min-height:32px!important;height:32px!important;font-size:10px!important;
+    }
+    #auto-trading-panel #auto-trading-toggle{min-width:74px!important;padding:5px 12px!important}
+    #auto-trading-panel #refresh-positions{width:100%!important}
+    #auto-trading-panel #auto-trading-state{margin:8px 0 10px!important}
+    #auto-trading-panel .panel{
+      margin-top:8px!important;padding:9px!important;background:#fff!important;
+      border:1px solid #dce5ef!important;border-radius:10px!important;
+    }
+    #auto-trading-panel .panel .section-title{margin:0 0 8px!important}
+    #auto-trading-panel .panel .section-title h3{font-size:11px!important;color:#102f55!important}
+    #auto-trading-panel #positions-status{
+      font-size:8px!important;padding:5px 8px!important;background:#f3f6fb!important;
+      border:1px solid #dce5ef!important;color:#53657d!important;
+    }
+    #auto-trading-panel .paper-table-wrap{
+      border:1px solid #dce5ef!important;border-radius:8px!important;overflow:auto!important;
+    }
+    #auto-trading-panel .paper-positions-table{
+      width:100%!important;min-width:760px!important;border-collapse:collapse!important;
+      font-size:9px!important;white-space:nowrap!important;
+    }
+    #auto-trading-panel .paper-positions-table th{
+      padding:8px 7px!important;background:#f0f4f9!important;color:#42546d!important;
+      font-size:8px!important;text-transform:uppercase;text-align:center!important;
+      border-bottom:1px solid #e2e9f2!important;
+    }
+    #auto-trading-panel .paper-positions-table td{
+      padding:9px 7px!important;text-align:center!important;color:#33445c!important;
+      border-bottom:1px solid #e8edf4!important;
+    }
+    #auto-trading-panel .paper-positions-table td:first-child{text-align:left!important}
+    #auto-trading-panel .paper-positions-table small{font-size:8px!important;font-weight:700}
+    #auto-trading-panel .paper-positions-table .positive{color:#13966b!important;font-weight:800}
+    #auto-trading-panel .paper-positions-table .negative{color:#dc5c62!important;font-weight:800}
+    #today-signal-history .journal-actions{gap:8px!important;flex-wrap:nowrap!important}
+    #today-signal-history .journal-actions small{font-size:9px!important;color:#718098!important}
+    #today-signal-history #refresh-today-journal{
+      font-size:9px!important;padding:7px 10px!important;white-space:nowrap!important;
+    }
+    #today-signal-history #today-journal-summary{
+      display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+      gap:8px!important;margin:10px 0!important;overflow-x:auto!important;
+    }
+    #today-signal-history #today-journal-summary .history-metric{
+      min-width:0!important;padding:9px!important;background:#f3f6fb!important;
+      border:1px solid #e1e8f1!important;border-radius:9px!important;
+    }
+    #today-signal-history #today-journal-summary .history-metric span{
+      color:#718098!important;font-size:8px!important;line-height:1.35!important;
+    }
+    #today-signal-history #today-journal-summary .history-metric strong{
+      color:#102f55!important;font-size:16px!important;margin-top:5px!important;
+    }
+    #today-signal-history #today-journal-message{
+      padding:10px!important;background:#f7f9fc!important;border:1px dashed #cbd8e8!important;
+      border-radius:9px!important;color:#64748b!important;font-size:10px!important;
+    }
+    #today-signal-history .table-wrap{border:1px solid #dce5ef!important;border-radius:8px!important}
+    #today-signal-history table{font-size:9px!important}
+    #today-signal-history th{background:#f0f4f9!important;color:#42546d!important}
+    @media(max-width:650px){
+      #auto-trading-panel .auto-controls-row{grid-template-columns:repeat(3,minmax(150px,1fr))!important;overflow-x:auto!important}
+      #today-signal-history #today-journal-summary{grid-template-columns:repeat(4,minmax(150px,1fr))!important}
+      #today-signal-history .journal-actions{gap:5px!important}
+      #today-signal-history .journal-actions small{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    }
+  </style>
+
+
+  <style>
+    /* Typography correction: match Paper Trading and Today's Signals to other dashboard cards. */
+    #auto-trading-panel, #today-signal-history {font-size:12px!important}
+    #auto-trading-panel .collapsible-heading h3,
+    #today-signal-history .collapsible-heading h3 {font-size:16px!important;line-height:1.3!important}
+    #auto-trading-panel .note,
+    #today-signal-history .note {font-size:11px!important;line-height:1.55!important}
+    #auto-trading-panel .auto-control label {font-size:11px!important}
+    #auto-trading-panel .auto-control button,
+    #auto-trading-panel .auto-control input {font-size:12px!important}
+    #auto-trading-panel .panel .section-title h3 {font-size:14px!important}
+    #auto-trading-panel #positions-status {font-size:10px!important}
+    #auto-trading-panel .paper-positions-table {font-size:11px!important}
+    #auto-trading-panel .paper-positions-table th {font-size:10px!important}
+    #auto-trading-panel .paper-positions-table td {font-size:11px!important}
+    #auto-trading-panel .paper-positions-table small {font-size:10px!important}
+    #today-signal-history .journal-actions small {font-size:10px!important}
+    #today-signal-history #refresh-today-journal {font-size:11px!important}
+    #today-signal-history #today-journal-summary .history-metric span {font-size:10px!important}
+    #today-signal-history #today-journal-summary .history-metric strong {font-size:18px!important}
+    #today-signal-history #today-journal-message {font-size:11px!important;line-height:1.55!important}
+    #today-signal-history table {font-size:11px!important}
+    #today-signal-history th,#today-signal-history td {font-size:11px!important}
+  </style>
+
 </head>
 <body><main id="app">
-<header><div class="brand"><div class="logo">SMC</div><div><h1>NIFTY SMC Scanner</h1><div class="sub">Angel One · Multi-timeframe market analysis</div></div></div><div class="topright"><span class="pill">LOCAL LIVE API</span><span class="pill">Weekly expiry · Moderate risk</span><span class="pill">Manual execution only</span></div></header>
-<div class="wrap">
-<section class="hero"><div><h2>Smart Money Concepts dashboard</h2><p>15m bias → 5m structure → 2m setup → 1m entry<br>Manual trade approval · Telugu + English explanations</p></div><div class="market">NIFTY 50<br><strong id="hero-live-price" style="font-size:24px">— —</strong><br>Price shown in live monitor below</div></section>
-<section class="grid"><div class="card"><div class="klabel">Market bias · 15m</div><div class="kvalue">Awaiting data</div><div class="kfoot">Higher-timeframe direction</div></div><div class="card"><div class="klabel">Structure · 5m</div><div class="kvalue">Awaiting data</div><div class="kfoot">BOS / MSS confirmation</div></div><div class="card"><div class="klabel">Setup · 2m</div><div class="kvalue">WAIT</div><div class="kfoot">No live setup evaluated</div></div><div class="card"><div class="klabel">Entry · 1m</div><div class="kvalue">WAIT</div><div class="kfoot">No live entry evaluated</div></div></section>
-<div class="layout"><section class="card"><div class="section-title"><h3>Price action & SMC map</h3><span class="muted">Illustrative chart · not live</span></div><div class="tfrow" role="group" aria-label="Chart timeframe"><button class="tf" data-tf="1m">1 min</button><button class="tf active" data-tf="2m">2 min</button><button class="tf" data-tf="5m">5 min</button><button class="tf" data-tf="15m">15 min</button></div><div class="chart"><svg viewBox="0 0 720 230" preserveAspectRatio="none" aria-label="Illustrative candlestick chart"><defs><pattern id="g" width="72" height="46" patternUnits="userSpaceOnUse"><path d="M72 0H0V46" fill="none" stroke="currentColor" opacity=".11"/></pattern></defs><rect width="720" height="230" fill="url(#g)"/><rect x="20" y="54" width="680" height="30" fill="#2da77a" opacity=".10"/><rect x="20" y="154" width="680" height="28" fill="#e0a23a" opacity=".12"/><path d="M20 112H700" stroke="#8ca0b8" stroke-dasharray="5 5" opacity=".65"/><path d="M20 68H700" stroke="#27a77c" stroke-dasharray="4 4" opacity=".8"/><path d="M20 168H700" stroke="#d59a32" stroke-dasharray="4 4" opacity=".8"/>
-<g stroke-width="2"><path d="M55 120V83m0 12h-8v15h16V95h-8" stroke="#16a477" fill="#16a477"/><path d="M100 105V70m0 10h-8v19h16V80h-8" stroke="#d65d65" fill="#d65d65"/><path d="M145 125V88m0 16h-8v13h16v-13h-8" stroke="#16a477" fill="#16a477"/><path d="M190 110V63m0 10h-8v23h16V73h-8" stroke="#16a477" fill="#16a477"/><path d="M235 95V55m0 14h-8v18h16V69h-8" stroke="#d65d65" fill="#d65d65"/><path d="M280 120V78m0 14h-8v20h16V92h-8" stroke="#16a477" fill="#16a477"/><path d="M325 103V65m0 9h-8v20h16V74h-8" stroke="#16a477" fill="#16a477"/><path d="M370 87V44m0 12h-8v23h16V56h-8" stroke="#d65d65" fill="#d65d65"/><path d="M415 112V70m0 14h-8v20h16V84h-8" stroke="#16a477" fill="#16a477"/><path d="M460 90V48m0 10h-8v22h16V58h-8" stroke="#16a477" fill="#16a477"/><path d="M505 75V37m0 8h-8v23h16V45h-8" stroke="#d65d65" fill="#d65d65"/><path d="M550 102V61m0 11h-8v22h16V72h-8" stroke="#16a477" fill="#16a477"/><path d="M595 85V43m0 8h-8v24h16V51h-8" stroke="#16a477" fill="#16a477"/><path d="M640 67V29m0 7h-8v24h16V36h-8" stroke="#16a477" fill="#16a477"/></g><g font-size="10" fill="currentColor" opacity=".8"><text x="25" y="48">BSL zone (illustrative)</text><text x="25" y="148">FVG / discount area (illustrative)</text><text x="610" y="106">EQ</text></g></svg></div><div class="legend"><span><i class="dot" style="background:#16a477"></i>Bullish candle</span><span><i class="dot" style="background:#d65d65"></i>Bearish candle</span><span><i class="dot" style="background:#27a77c"></i>Liquidity zone</span><span><i class="dot" style="background:#d59a32"></i>FVG zone</span></div><p class="note">Chart artwork is illustrative only. It does not represent current NIFTY prices, actual detected SMC zones, or a trade signal.</p></section>
-<aside class="card"><div class="section-title"><h3>Signal monitor</h3><span class="tag wait">WAIT</span></div><div class="signal"><div><strong>CE setup</strong><div class="muted">Bullish confirmation required</div></div><span class="tag wait">Not active</span></div><div class="signal"><div><strong>PE setup</strong><div class="muted">Bearish confirmation required</div></div><span class="tag wait">Not active</span></div><div class="signal"><div><strong>Risk control</strong><div class="muted">Moderate · manual approval</div></div><span class="tag">ON</span></div><p class="note">No option contract, premium, Greeks, stop-loss or target is calculated until verified option-chain data is connected.</p></aside></div>
-<section class="card bottom" id="user-historical-report"><iframe title="Historical trade report" style="width:100%;height:380px;border:0;border-radius:10px;background:transparent;display:block;overflow:auto" loading="eager" srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+  <header><div class="brand"><div class="logo">SMC</div><div><h1>NIFTY SMC Research Lab v3.16</h1><div class="sub">Angel One · Multi-timeframe market analysis</div></div></div><div class="topright"><span class="pill">LOCAL LIVE API</span><span class="pill">Weekly expiry · Moderate risk</span><span class="pill">Manual execution only</span></div></header>
+  <div class="wrap">
+    <section class="hero"><div><h2>Smart Money Concepts dashboard</h2><p>5m structure → 2m FVG / OB / IDM → 1m entry<br/>Manual trade approval · Telugu + English explanations</p></div><div class="market">NIFTY 50<br/><strong id="hero-live-price" style="font-size:24px">— —</strong><br/>Price shown in live monitor below</div></section><section class="card bottom" id="live-monitor">
+    <div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>1. Live NIFTY 50 · WebSocket 2.0</h3><span class="collapse-chevron">−</span></div>
+    <div class="history-summary" data-collapse-content="true">
+      <div class="history-metric"><span>Latest NIFTY 50 price</span><strong id="live-price">—</strong></div>
+      <div class="history-metric"><span>Last exchange tick</span><strong id="live-tick-time" style="font-size:13px">—</strong></div>
+      <div class="history-metric"><span>Tick age</span><strong id="live-tick-age">—</strong></div>
+      <div class="history-metric"><span>Overall signal</span><strong id="live-overall-signal">WAIT</strong></div>
+    </div><div class="history-summary" data-collapse-content="true" id="live-trade-plan" style="margin-top:12px;grid-template-columns:repeat(4,minmax(0,1fr))"><div class="history-metric"><span>Entry reference</span><strong id="live-plan-entry">Waiting for signal</strong></div><div class="history-metric"><span>Stop-loss</span><strong id="live-plan-stop">—</strong></div><div class="history-metric"><span>Target 1 · 1R</span><strong id="live-plan-t1">—</strong></div><div class="history-metric"><span>Target 2 · 2R</span><strong id="live-plan-t2">—</strong></div></div><p class="note" data-collapse-content="true" id="live-plan-note" style="margin-top:6px">Entry is the completed 1-minute signal candle close; stop and targets are NIFTY spot reference levels (1R and 2R), not option premium prices. Manual verification required; no orders are placed.</p>
+  </section><section class="card bottom" id="multi-timeframe-panel"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>2. Multi-timeframe SMC analysis</h3><span class="mtf-actions"><small id="mtf-last-refresh">Waiting for analysis</small><button class="primary" id="refresh-mtf" type="button">Refresh analysis</button><span class="collapse-chevron">−</span></span></div><div class="history-summary mtf-single-row" data-collapse-content="true" id="live-timeframes">
+    <div class="history-metric"><span>5m · BOS / MSS</span><strong>Awaiting data</strong></div>
+    <div class="history-metric"><span>5m · Structure</span><strong>Awaiting data</strong></div>
+    <div class="history-metric"><span>2m · Setup</span><strong>WAIT</strong></div>
+    <div class="history-metric"><span>1m · Entry</span><strong>WAIT</strong></div>
+  </div><div class="history-layout" data-collapse-content="true">
+    <div class="trade-detail"><h4>Detected SMC findings</h4><div class="trade-explain" id="live-findings">Waiting for live candle analysis.</div></div>
+    <div class="trade-detail"><h4>Feed health &amp; connection</h4><div class="trade-explain" id="live-feed-detail">Connection status will appear here. A stale tick is normal outside market hours.</div></div>
+  </div></section>
+    <section class="card bottom" id="auto-trading-panel"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>3&nbsp; Paper Trading</h3><span class="collapse-chevron">−</span></div><div data-collapse-content="true"><p class="note">Paper auto mode only: follows confirmed SMC signals using NIFTY spot reference prices. It does not place Angel One orders or calculate option-premium P/L. Keep OFF until validated.</p><div class="auto-controls-row" id="auto-controls-row"><div class="auto-control"><label>Auto trading</label><button aria-pressed="false" class="auto-toggle off" id="auto-trading-toggle" type="button">OFF</button></div><div class="auto-control"><label for="auto-trading-quantity">Quantity (lots)</label><input id="auto-trading-quantity" max="100" min="1" step="1" type="number" value="1"/></div><div class="auto-control"><label>Refresh</label><button id="refresh-positions" type="button">Refresh status</button></div></div><p class="note" id="auto-trading-state">Paper auto mode is OFF.</p><div class="panel" style="margin-top:10px"><div class="section-title"><h3>Paper open positions</h3><span class="pill" id="positions-status">OFF</span></div><div class="tablebox paper-table-wrap" style="overflow:auto"><table class="paper-positions-table"><thead><tr><th>Position</th><th>Lots</th><th>Entry price</th><th>Stop-loss</th><th>Target 1</th><th>Target 2</th><th>Last price</th><th>Unrealised points</th></tr></thead><tbody id="open-positions-rows"><tr><td class="empty" colspan="8">No open paper positions.</td></tr></tbody></table></div></div></div></section><section class="card bottom" id="today-signal-history">
+    <div class="section-title collapsible-heading" role="button" tabindex="0" aria-expanded="true">
+      <h3>4&nbsp; Today's Signals &amp; Missed Entries</h3>
+      <span class="journal-actions"><small id="today-journal-updated">Loading today's scan history…</small><button class="primary" id="refresh-today-journal" type="button">Refresh history</button><span class="collapse-chevron">−</span></span>
+    </div>
+    <div data-collapse-content="true">
+      <div class="history-summary" id="today-journal-summary">
+        <div class="history-metric"><span>Completed 1m scans today</span><strong id="today-scan-count">—</strong></div>
+        <div class="history-metric"><span>Confirmed CE / PE signals</span><strong id="today-confirmed-count">—</strong></div>
+        <div class="history-metric"><span>WAIT scans</span><strong id="today-wait-count">—</strong></div>
+        <div class="history-metric"><span>Trading date · IST</span><strong id="today-journal-date">—</strong></div>
+      </div>
+      <div id="today-journal-message" class="empty-history">Today's completed-candle signal history will appear here. The journal is reconstructed from local cached candles where available.</div>
+      <div class="table-wrap" id="today-journal-table-wrap" style="display:none">
+        <table><thead><tr><th>Signal time</th><th>Side</th><th>Entry reference</th><th>Stop-loss</th><th>Target 1</th><th>Target 2</th><th>Status</th></tr></thead><tbody id="today-journal-rows"></tbody></table>
+      </div>
+      <p class="note">This journal records completed 1-minute scans, including confirmed signals from before you opened the dashboard. It uses locally cached candles and saved scan records; it does not request historical data from Angel One. A CONFIRMED scanner signal is not proof of an executable options fill.</p>
+    </div>
+  </section><div class="layout"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>5. Price action &amp; SMC map + Signal monitor</h3><span class="collapse-chevron">−</span></div><section class="card" data-collapse-content="true"><div class="section-title"><h3>Price action &amp; SMC map</h3><span class="muted">Live Angel One candles · SMC overlays</span></div><div aria-label="Chart timeframe" class="tfrow" role="group"><button class="tf" data-tf="1m">1 min</button><button class="tf active" data-tf="2m">2 min</button><button class="tf" data-tf="5m">5 min</button></div><div class="chart" style="height:390px;min-height:320px;position:relative;overflow:hidden;touch-action:pan-y"></div><p class="note">Mouse wheel over chart to zoom in/out. Scroll up to zoom in; scroll down to zoom out.</p><div class="legend"><span><i class="dot" style="background:#16a477"></i> Bullish candle</span><span><i class="dot" style="background:#d65d65"></i> Bearish candle</span><span><i class="dot" style="background:#e0a23a"></i> FVG</span><span><i class="dot" style="background:#2563eb"></i> Order block</span><span><i class="dot" style="background:#7c3aed"></i> BOS</span><span><i class="dot" style="background:#db2777"></i> MSS</span><span><i class="dot" style="background:#0891b2"></i> IDM</span></div><p class="note">Live Angel One OHLC candles. FVG, OB, BOS, MSS and IDM labels are algorithmic chart annotations based on completed candles; OB and IDM are heuristic proxies, not official TradingView LuxAlgo signals. Use them for analysis, not automatic execution.</p></section>
+    <aside class="card" data-collapse-content="true" id="signal-monitor"><div class="section-title"><h3>Signal monitor</h3><span class="tag wait" id="signal-overall">WAIT</span></div><div class="signal"><div><strong>CE setup</strong><div class="muted" id="signal-ce-detail">Waiting for live SMC confirmation</div></div><span class="tag wait" id="signal-ce-state">WAITING</span></div><div class="signal"><div><strong>PE setup</strong><div class="muted" id="signal-pe-detail">Waiting for live SMC confirmation</div></div><span class="tag wait" id="signal-pe-state">WAITING</span></div><div class="signal"><div><strong>Risk control</strong><div class="muted" id="signal-risk-detail">Manual approval · paper only</div></div><span class="tag" id="signal-risk-state">ON</span></div><p class="note" id="signal-monitor-note">Waiting for live analysis. No option premium or option Greeks are calculated; levels are NIFTY spot references only.</p></aside></div><section class="card bottom" id="user-historical-report"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>6. NIFTY SMC — Historical Trade Report</h3><span class="collapse-chevron">−</span></div><iframe data-collapse-content="true" loading="eager" srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
 &lt;style&gt;
 html,body{margin:0;padding:0;min-height:0;height:auto;background:transparent;color:inherit;font-family:Inter,ui-sans-serif,system-ui,-apple-system,&quot;Segoe UI&quot;,sans-serif}
 .wrap{max-width:none;margin:0 auto}header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
-header h1{font-size:18px;margin:0 0 5px}header p{font-size:11px;color:light-dark(#9aabc0,#718098);margin:0}
+header h1{display:none;font-size:18px;margin:0 0 5px}header p{font-size:11px;color:light-dark(#9aabc0,#718098);margin:0}
 .panel{background:light-dark(#fff,#121e30);border:1px solid light-dark(#e0e7f0,#293a52);border-radius:12px;padding:14px;margin:0 0 12px}
 .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.controls label{font-size:11px;color:light-dark(#64748b,#a6b5c9)}
 .controls input,.controls select,.controls button{font:inherit;font-size:12px;border:1px solid light-dark(#d4deea,#33465f);border-radius:8px;padding:9px;background:light-dark(#fff,#16253a);color:inherit}
@@ -103,7 +339,7 @@ header h1{font-size:18px;margin:0 0 5px}header p{font-size:11px;color:light-dark
 .metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:12px 0}
 .metric{background:light-dark(#f2f6fb,#19283d);border-radius:9px;padding:10px;min-width:0}.metric span{display:block;font-size:10px;color:light-dark(#718098,#9aabc0)}.metric strong{display:block;font-size:18px;margin-top:4px}
 .panel p{font-size:10px;line-height:1.35;color:light-dark(#718098,#9aabc0);margin:6px 0 0}.status{font-size:10px;border-radius:20px;padding:6px 9px;background:light-dark(#e8eef6,#18263a);color:light-dark(#43536b,#bdcbe0)}
-.tablebox{overflow:auto;max-height:430px;border:1px solid light-dark(#e0e7f0,#293a52);border-radius:9px;margin-top:12px}
+.tablebox{overflow:visible;height:auto;max-height:none;min-height:0;border:1px solid light-dark(#e0e7f0,#293a52);border-radius:9px;margin-top:10px}
 table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:11px}th,td{padding:9px 10px;text-align:left;border-bottom:1px solid light-dark(#e8edf4,#293a52)}
 th{position:sticky;top:0;background:light-dark(#f2f6fb,#1b2a40);z-index:1}tbody tr{cursor:pointer}tbody tr:hover,tbody tr.selected{background:light-dark(#edf4fb,#1b2b41)}
 .badge{display:inline-block;padding:4px 7px;border-radius:6px;font-weight:800;font-size:10px}.badge.ce{background:#e5f7ef;color:#08734f}.badge.pe{background:#fdebed;color:#b42332}
@@ -113,18 +349,23 @@ th{position:sticky;top:0;background:light-dark(#f2f6fb,#1b2a40);z-index:1}tbody 
 @media(max-width:900px){.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:10px}}
 .metric strong{overflow-wrap:anywhere}.pnl-positive{color:#0b946b;font-weight:800}.pnl-negative{color:#d34d58;font-weight:800}
-.tablebox{max-height:180px;overflow:auto}
+.tablebox{max-height:none;overflow:visible}
+#export-csv{background:#0b7a59;color:#fff;border-color:#0b7a59;font-weight:700}
+.tablebox.is-scroll{height:370px;max-height:370px;overflow-y:auto;overflow-x:auto}
+.tablebox.is-empty{display:none}
 &lt;/style&gt;
 &lt;/head&gt;&lt;body&gt;&lt;main class=&quot;wrap&quot;&gt;
-&lt;header&gt;&lt;div&gt;&lt;h1&gt;NIFTY SMC — Historical Trade Report&lt;/h1&gt;&lt;p&gt;Last 15 trading sessions · 15m → 5m → 2m → 1m confirmation · NIFTY spot backtest&lt;/p&gt;&lt;/div&gt;&lt;span class=&quot;status&quot; id=&quot;status&quot;&gt;Not loaded&lt;/span&gt;&lt;/header&gt;
+&lt;header&gt;&lt;div&gt;&lt;p&gt;Selectable 15–250 sessions · 5m → 2m → 1m SMC confirmation · NIFTY spot · 09:30–11:40 IST&lt;/p&gt;&lt;/div&gt;&lt;span class=&quot;status&quot; id=&quot;status&quot;&gt;Not loaded&lt;/span&gt;&lt;/header&gt;
 &lt;section class=&quot;panel&quot;&gt;
  &lt;div class=&quot;controls&quot;&gt;
   &lt;label&gt;Python API &lt;input id=&quot;api&quot; value=&quot;http://127.0.0.1:8000&quot; style=&quot;width:min(310px,75vw)&quot;&gt;&lt;/label&gt;
-  &lt;button class=&quot;primary&quot; id=&quot;load&quot;&gt;Load historical trades&lt;/button&gt;
+  &lt;label&gt;Strategy view &lt;select id=&quot;strategy-view&quot;&gt;&lt;option value=&quot;smc_pac&quot;&gt;SMC FVG / OB / IDM / BOS / MSS&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;
+  &lt;label&gt;Trading sessions &lt;select id=&quot;sessions&quot;&gt;&lt;option value=&quot;250&quot; selected&gt;250 (default)&lt;/option&gt;&lt;option value=&quot;180&quot;&gt;180&lt;/option&gt;&lt;option value=&quot;90&quot;&gt;90&lt;/option&gt;&lt;option value=&quot;60&quot;&gt;60&lt;/option&gt;&lt;option value=&quot;30&quot;&gt;30&lt;/option&gt;&lt;option value=&quot;15&quot;&gt;15&lt;/option&gt;&lt;/select&gt;&lt;/label&gt; &lt;label&gt;Round-trip cost (spot pts) &lt;input id=&quot;cost-points&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;100&quot; step=&quot;0.25&quot; value=&quot;2&quot; style=&quot;width:76px&quot;&gt;&lt;/label&gt; &lt;button class=&quot;primary&quot; id=&quot;load&quot;&gt;Run corrected backtest&lt;/button&gt;
   &lt;select id=&quot;direction&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All signals&lt;/option&gt;&lt;option value=&quot;BUY CE&quot;&gt;BUY CE only&lt;/option&gt;&lt;option value=&quot;BUY PE&quot;&gt;BUY PE only&lt;/option&gt;&lt;/select&gt;
-  &lt;select id=&quot;result&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All outcomes&lt;/option&gt;&lt;option value=&quot;TARGET&quot;&gt;Target&lt;/option&gt;&lt;option value=&quot;STOP&quot;&gt;Stop-loss&lt;/option&gt;&lt;option value=&quot;OPEN&quot;&gt;Unresolved&lt;/option&gt;&lt;/select&gt;
-  &lt;input id=&quot;search&quot; placeholder=&quot;Search date / signal…&quot; aria-label=&quot;Search trades&quot;&gt;
+  &lt;select id=&quot;result&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All outcomes&lt;/option&gt;&lt;option value=&quot;TARGET&quot;&gt;Target&lt;/option&gt;&lt;option value=&quot;STOP&quot;&gt;Stop-loss&lt;/option&gt;&lt;option value=&quot;EOD_EXIT&quot;&gt;EOD exit&lt;/option&gt;&lt;option value=&quot;OPEN&quot;&gt;Unresolved&lt;/option&gt;&lt;/select&gt;
+  &lt;input id=&quot;search&quot; placeholder=&quot;Search date / signal…&quot; aria-label=&quot;Search trades&quot;&gt; &lt;button class=&quot;primary&quot; id=&quot;export-csv&quot; type=&quot;button&quot;&gt;Download CSV&lt;/button&gt;
  &lt;/div&gt;
+ &lt;div style=&quot;margin-top:10px&quot;&gt;&lt;div id=&quot;progress-message&quot; class=&quot;muted&quot;&gt;Select a history range and run the backtest. Downloaded candles are cached locally.&lt;/div&gt;&lt;progress id=&quot;history-progress&quot; value=&quot;0&quot; max=&quot;100&quot; style=&quot;width:100%;height:12px&quot;&gt;&lt;/progress&gt;&lt;/div&gt;
  &lt;div class=&quot;metrics&quot;&gt;
   &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;Filtered trades&lt;/span&gt;&lt;strong id=&quot;m-total&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
   &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;BUY CE&lt;/span&gt;&lt;strong id=&quot;m-ce&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
@@ -133,347 +374,393 @@ th{position:sticky;top:0;background:light-dark(#f2f6fb,#1b2a40);z-index:1}tbody 
   &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;Win rate*&lt;/span&gt;&lt;strong id=&quot;m-win&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
   &lt;div class=&quot;metric&quot;&gt;&lt;span&gt;Overall net P/L (spot points)&lt;/span&gt;&lt;strong id=&quot;m-net-points&quot;&gt;—&lt;/strong&gt;&lt;/div&gt;
  &lt;/div&gt;
- &lt;p&gt;*Win rate = targets ÷ (targets + stop-losses). Unresolved trades are excluded. Values are based on NIFTY spot levels, not option premium P&amp;amp;L.&lt;/p&gt;
+ &lt;p&gt;Win rate = resolved trades profitable after estimated round-trip cost. Includes target, stop and end-of-day exits; unresolved data-end trades are separate. NIFTY spot points, not option premium P&amp;amp;L.&lt;/p&gt;
 &lt;/section&gt;
 &lt;section class=&quot;panel&quot;&gt;
  &lt;div style=&quot;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap&quot;&gt;&lt;h2 style=&quot;font-size:16px;margin:0&quot;&gt;Trade history&lt;/h2&gt;&lt;span class=&quot;status&quot; id=&quot;count&quot;&gt;0 trades&lt;/span&gt;&lt;/div&gt;
- &lt;div class=&quot;tablebox&quot;&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Date &amp;amp; time&lt;/th&gt;&lt;th&gt;Signal&lt;/th&gt;&lt;th&gt;Entry&lt;/th&gt;&lt;th&gt;Stop-loss&lt;/th&gt;&lt;th&gt;Target&lt;/th&gt;&lt;th&gt;Outcome&lt;/th&gt;&lt;th&gt;Exit time&lt;/th&gt;&lt;th&gt;Points P/L&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;rows&quot;&gt;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;Click “Load historical trades” to fetch your trade history.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
- 
+ &lt;div class=&quot;tablebox is-empty&quot;&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Date &amp;amp; time&lt;/th&gt;&lt;th&gt;Signal&lt;/th&gt;&lt;th&gt;Entry&lt;/th&gt;&lt;th&gt;Stop-loss&lt;/th&gt;&lt;th&gt;Target&lt;/th&gt;&lt;th&gt;Outcome&lt;/th&gt;&lt;th&gt;Exit time&lt;/th&gt;&lt;th&gt;Net points P/L&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;rows&quot;&gt;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;Run corrected backtest to load historical trades.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+ &lt;div id=&quot;trade-detail-panel&quot; style=&quot;display:none;margin-top:12px;border:1px solid light-dark(#e0e7f0,#293a52);border-radius:9px;padding:12px&quot;&gt;
+  &lt;div id=&quot;trade-detail-toggle&quot; role=&quot;button&quot; tabindex=&quot;0&quot; aria-expanded=&quot;true&quot; style=&quot;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:700;font-size:14px;margin-bottom:8px&quot;&gt;&lt;span&gt;Trade details · click to hide&lt;/span&gt;&lt;span id=&quot;trade-detail-chevron&quot;&gt;−&lt;/span&gt;&lt;/div&gt;
+  &lt;div id=&quot;detail&quot; class=&quot;muted&quot;&gt;Select a trade row to inspect its details.&lt;/div&gt;
+  &lt;div id=&quot;diagram&quot; style=&quot;margin-top:8px&quot;&gt;&lt;/div&gt;
+ &lt;/div&gt;
 &lt;/section&gt;
-&lt;p class=&quot;muted&quot;&gt;Method note: historical signals are generated by the local scanner using completed candles. This report is educational analysis, not a recommendation. Fees, slippage, option Greeks and actual option fills are not included. No orders are placed.&lt;/p&gt;
+&lt;p class=&quot;muted&quot;&gt;Method note: historical signals are generated by the local scanner using completed candles. This report is educational analysis, not a recommendation. Estimated spot-point costs are deducted as configured; actual brokerage, taxes, slippage, option Greeks and option fills are not modeled. No orders are placed.&lt;/p&gt;
 &lt;/main&gt;
 &lt;script&gt;
-let allTrades=[];
+let allTrades=[], strategyTrades={smc_pac:[]};
 const $=id=&gt;document.getElementById(id);
-const base=()=&gt; $(&#x27;api&#x27;).value.trim().replace(/\/+$/,&#x27;&#x27;);
-const num=v=&gt;v==null||v===&#x27;&#x27;?&#x27;—&#x27;:Number(v).toLocaleString(&#x27;en-IN&#x27;,{minimumFractionDigits:2,maximumFractionDigits:2});
-function outcomeClass(x){return x===&#x27;TARGET&#x27;?&#x27;target&#x27;:String(x||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)?&#x27;stop&#x27;:&#x27;open&#x27;}
+const base=()=&gt; $('api').value.trim().replace(/\/+$/,'');
+const num=v=&gt;v==null||v===''?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+function outcomeClass(x){return x==='TARGET'?'target':String(x||'').startsWith('STOP')?'stop':'open'}
 function pointPnL(t){
+ if(t.net_points!=null &amp;&amp; Number.isFinite(Number(t.net_points))) return Number(t.net_points);
  const entry=Number(t.entry); if(!Number.isFinite(entry)) return null;
  let exit=Number(t.exit_price);
- if(!Number.isFinite(exit)){const o=String(t.outcome||&#x27;&#x27;).toUpperCase();if(o.includes(&#x27;TARGET&#x27;))exit=Number(t.target);else if(o.includes(&#x27;STOP&#x27;))exit=Number(t.stop_loss);else return null;}
+ if(!Number.isFinite(exit)){const o=String(t.outcome||'').toUpperCase();if(o.includes('TARGET'))exit=Number(t.target);else if(o.includes('STOP'))exit=Number(t.stop_loss);else return null;}
  if(!Number.isFinite(exit))return null;
- return (t.signal===&#x27;BUY PE&#x27;?-1:1)*(exit-entry);
+ return (t.signal==='BUY PE'?-1:1)*(exit-entry);
 }
-function filtered(){const d=$(&#x27;direction&#x27;).value,r=$(&#x27;result&#x27;).value,q=$(&#x27;search&#x27;).value.toLowerCase();return allTrades.filter(t=&gt;(d===&#x27;ALL&#x27;||t.signal===d)&amp;&amp;(r===&#x27;ALL&#x27;||(r===&#x27;OPEN&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;OPEN&#x27;)||!t.outcome:r===&#x27;STOP&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;):t.outcome===r))&amp;&amp;(!q||(String(t.time)+&#x27; &#x27;+t.signal).toLowerCase().includes(q)))}
+function filtered(){const d=$('direction').value,r=$('result').value,q=$('search').value.toLowerCase();allTrades=strategyTrades[$('strategy-view').value]||[];return allTrades.filter(t=&gt;(d==='ALL'||t.signal===d)&amp;&amp;(r==='ALL'||(r==='OPEN'?String(t.outcome||'').startsWith('OPEN')||!t.outcome:r==='STOP'?String(t.outcome||'').startsWith('STOP'):t.outcome===r))&amp;&amp;(!q||(String(t.time)+' '+t.signal).toLowerCase().includes(q)))}
+
+function csvCell(v){if(v===null||v===undefined)return '';let s=typeof v==='object'?JSON.stringify(v):String(v);return '&quot;'+s.replace(/&quot;/g,'&quot;&quot;')+'&quot;';}
+$('export-csv').addEventListener('click',()=&gt;{
+ const list=filtered();
+ if(!list.length){alert('No trades to export. Run the backtest first or clear the filters.');return;}
+ const cols=['time','signal','entry','stop_loss','target','outcome','exit_time','exit_price','gross_points','cost_points','net_points','reason','confluence_score','checks','signal_bar_time','strategy'];
+ const lines=[cols.join(','),...list.map(t=&gt;cols.map(k=&gt;csvCell(t[k])).join(','))];
+ const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='NIFTY_SMC_trade_history_'+new Date().toISOString().slice(0,10)+'.csv';
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+});
 function render(){
- const list=filtered(),wins=list.filter(t=&gt;t.outcome===&#x27;TARGET&#x27;).length,stops=list.filter(t=&gt;String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)).length;
- $(&#x27;m-total&#x27;).textContent=list.length;$(&#x27;m-ce&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY CE&#x27;).length;$(&#x27;m-pe&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY PE&#x27;).length;$(&#x27;m-outcomes&#x27;).textContent=wins+&#x27; / &#x27;+stops;$(&#x27;m-win&#x27;).textContent=wins+stops?(100*wins/(wins+stops)).toFixed(1)+&#x27;%&#x27;:&#x27;N/A&#x27;;
+ const list=filtered(),wins=list.filter(t=&gt;pointPnL(t)!=null &amp;&amp; pointPnL(t)&gt;0).length,stops=list.filter(t=&gt;pointPnL(t)!=null &amp;&amp; pointPnL(t)&lt;=0).length;
+ $('m-total').textContent=list.length;$('m-ce').textContent=list.filter(t=&gt;t.signal==='BUY CE').length;$('m-pe').textContent=list.filter(t=&gt;t.signal==='BUY PE').length;$('m-outcomes').textContent=list.filter(t=&gt;t.outcome==='TARGET').length+' / '+list.filter(t=&gt;String(t.outcome||'').startsWith('STOP')).length+' / '+list.filter(t=&gt;t.outcome==='EOD_EXIT').length+' EOD';$('m-win').textContent=wins+stops?(100*wins/(wins+stops)).toFixed(1)+'%':'N/A';
  const points=list.map(pointPnL).filter(v=&gt;v!==null),net=points.reduce((a,b)=&gt;a+b,0);
- $(&#x27;m-net-points&#x27;).textContent=points.length?(net&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+net.toFixed(2)+&#x27; pts&#x27;:&#x27;—&#x27;;
- $(&#x27;m-net-points&#x27;).className=net&gt;0?&#x27;pnl-positive&#x27;:net&lt;0?&#x27;pnl-negative&#x27;:&#x27;&#x27;;
- $(&#x27;count&#x27;).textContent=list.length+&#x27; trades shown&#x27;;
- $(&#x27;rows&#x27;).innerHTML=list.length?list.map((t,i)=&gt;`&lt;tr data-i=&quot;${i}&quot;&gt;&lt;td&gt;${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge ${t.signal===&#x27;BUY CE&#x27;?&#x27;ce&#x27;:&#x27;pe&#x27;}&quot;&gt;${t.signal}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;${num(t.entry)}&lt;/td&gt;&lt;td&gt;${num(t.stop_loss)}&lt;/td&gt;&lt;td&gt;${num(t.target)}&lt;/td&gt;&lt;td class=&quot;${outcomeClass(t.outcome)}&quot;&gt;${t.outcome||&#x27;OPEN / unresolved&#x27;}&lt;/td&gt;&lt;td&gt;${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;—&#x27;}&lt;/td&gt;&lt;td class=&quot;${pointPnL(t)==null?&#x27;open&#x27;:pointPnL(t)&gt;=0?&#x27;pnl-positive&#x27;:&#x27;pnl-negative&#x27;}&quot;&gt;${pointPnL(t)==null?&#x27;Open&#x27;:(pointPnL(t)&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+pointPnL(t).toFixed(2)}&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;):&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;No trades match these filters.&lt;/td&gt;&lt;/tr&gt;&#x27;;
- [...$(&#x27;rows&#x27;).querySelectorAll(&#x27;tr[data-i]&#x27;)].forEach(row=&gt;row.addEventListener(&#x27;click&#x27;,()=&gt;showTrade(list[Number(row.dataset.i)],row)));
+ $('m-net-points').textContent=points.length?(net&gt;0?'+':'')+net.toFixed(2)+' pts':'—';
+ $('m-net-points').className=net&gt;0?'pnl-positive':net&lt;0?'pnl-negative':'';
+ $('count').textContent=list.length+' trades shown';
+ const tableBox=document.querySelector('.tablebox');
+ tableBox.classList.toggle('is-empty',list.length===0);
+ tableBox.classList.toggle('is-scroll',list.length&gt;10);
+ tableBox.style.height=list.length&gt;10?'370px':'auto';
+ tableBox.style.maxHeight=list.length&gt;10?'370px':'none';
+ tableBox.style.overflowY=list.length&gt;10?'auto':'visible';
+ if(list.length&lt;=10){$('trade-detail-panel').style.display='none';}
+ $('rows').innerHTML=list.length?list.map((t,i)=&gt;`&lt;tr data-i=&quot;${i}&quot;&gt;&lt;td&gt;${new Date(t.time).toLocaleString('en-IN')}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge ${t.signal==='BUY CE'?'ce':'pe'}&quot;&gt;${t.signal}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;${num(t.entry)}&lt;/td&gt;&lt;td&gt;${num(t.stop_loss)}&lt;/td&gt;&lt;td&gt;${num(t.target)}&lt;/td&gt;&lt;td class=&quot;${outcomeClass(t.outcome)}&quot;&gt;${t.outcome||'OPEN / unresolved'}&lt;/td&gt;&lt;td&gt;${t.exit_time?new Date(t.exit_time).toLocaleString('en-IN'):'—'}&lt;/td&gt;&lt;td class=&quot;${pointPnL(t)==null?'open':pointPnL(t)&gt;=0?'pnl-positive':'pnl-negative'}&quot;&gt;${pointPnL(t)==null?'Open':(pointPnL(t)&gt;0?'+':'')+pointPnL(t).toFixed(2)}&lt;/td&gt;&lt;/tr&gt;`).join(''):'&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;No trades match these filters.&lt;/td&gt;&lt;/tr&gt;';
+ [...$('rows').querySelectorAll('tr[data-i]')].forEach(row=&gt;row.addEventListener('click',()=&gt;showTrade(list[Number(row.dataset.i)],row)));
 }
 function showTrade(t,row){
- [...$(&#x27;rows&#x27;).querySelectorAll(&#x27;tr&#x27;)].forEach(x=&gt;x.classList.remove(&#x27;selected&#x27;));row.classList.add(&#x27;selected&#x27;);
- $(&#x27;detail&#x27;).innerHTML=`&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;${t.signal} · ${t.outcome||&#x27;Unresolved&#x27;}&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Entry time:&lt;/b&gt; ${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;br&gt;&lt;b&gt;Signal candle:&lt;/b&gt; ${t.signal_bar_time?new Date(t.signal_bar_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not provided&#x27;}&lt;br&gt;&lt;b&gt;Exit time:&lt;/b&gt; ${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not recorded&#x27;}&lt;br&gt;&lt;b&gt;Exit price:&lt;/b&gt; ${num(t.exit_price)}&lt;br&gt;&lt;b&gt;Risk/reward:&lt;/b&gt; ${t.risk_reward||&#x27;—&#x27;}&lt;/div&gt;&lt;hr style=&quot;border:0;border-top:1px solid #e1e8f0;margin:12px 0&quot;&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Recorded explanation&lt;/b&gt;&lt;br&gt;${t.reason||&#x27;No detailed explanation was returned by the backend.&#x27;}&lt;br&gt;&lt;br&gt;&lt;b&gt;Outcome&lt;/b&gt;&lt;br&gt;${t.outcome||&#x27;Unresolved&#x27;}${t.exit_price?&#x27; at &#x27;+num(t.exit_price):&#x27;&#x27;}&lt;/div&gt;`;
- $(&#x27;diagram&#x27;).innerHTML=[[&#x27;Target&#x27;,t.target,&#x27;tp&#x27;],[&#x27;Entry&#x27;,t.entry,&#x27;&#x27;],[&#x27;Stop-loss&#x27;,t.stop_loss,&#x27;sl&#x27;]].map(([label,value,cls])=&gt;`&lt;div class=&quot;level&quot;&gt;&lt;b&gt;${label}&lt;/b&gt;&lt;div class=&quot;line ${cls}&quot;&gt;&lt;/div&gt;&lt;strong&gt;${num(value)}&lt;/strong&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
+ const panel=$('trade-detail-panel');
+ if(row.classList.contains('selected') &amp;&amp; panel.style.display!=='none'){
+  row.classList.remove('selected');panel.style.display='none';return;
+ }
+ [...$('rows').querySelectorAll('tr')].forEach(x=&gt;x.classList.remove('selected'));row.classList.add('selected');
+ panel.style.display='block';
+ $('detail').innerHTML=`&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;${t.signal} · ${t.outcome||'Unresolved'}&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Entry time:&lt;/b&gt; ${new Date(t.time).toLocaleString('en-IN')}&lt;br&gt;&lt;b&gt;Signal candle:&lt;/b&gt; ${t.signal_bar_time?new Date(t.signal_bar_time).toLocaleString('en-IN'):'Not provided'}&lt;br&gt;&lt;b&gt;Exit time:&lt;/b&gt; ${t.exit_time?new Date(t.exit_time).toLocaleString('en-IN'):'Not recorded'}&lt;br&gt;&lt;b&gt;Exit price:&lt;/b&gt; ${num(t.exit_price)}&lt;br&gt;&lt;b&gt;Risk/reward:&lt;/b&gt; ${t.risk_reward||'—'}&lt;/div&gt;&lt;hr style=&quot;border:0;border-top:1px solid #e1e8f0;margin:12px 0&quot;&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Recorded explanation&lt;/b&gt;&lt;br&gt;${t.reason||'No detailed explanation was returned by the backend.'}&lt;br&gt;&lt;br&gt;&lt;b&gt;Outcome&lt;/b&gt;&lt;br&gt;${t.outcome||'Unresolved'}${t.exit_price?' at '+num(t.exit_price):''}&lt;/div&gt;`;
+ $('diagram').innerHTML=[['Target',t.target,'tp'],['Entry',t.entry,''],['Stop-loss',t.stop_loss,'sl']].map(([label,value,cls])=&gt;`&lt;div class=&quot;level&quot;&gt;&lt;b&gt;${label}&lt;/b&gt;&lt;div class=&quot;line ${cls}&quot;&gt;&lt;/div&gt;&lt;strong&gt;${num(value)}&lt;/strong&gt;&lt;/div&gt;`).join('');
 }
-$(&#x27;load&#x27;).addEventListener(&#x27;click&#x27;,async()=&gt;{const b=$(&#x27;load&#x27;);b.disabled=true;b.textContent=&#x27;Loading…&#x27;;$(&#x27;status&#x27;).textContent=&#x27;Requesting historical candles…&#x27;;try{const r=await fetch(base()+&#x27;/api/history?days=15&amp;strict=true&#x27;);const d=await r.json();if(!r.ok)throw new Error(d.detail||&#x27;HTTP &#x27;+r.status);const raw=[...(d.signals||[])].sort((a,b)=&gt;new Date(a.time)-new Date(b.time));allTrades=[];let active=null;for(const t of raw){if(![&#x27;BUY CE&#x27;,&#x27;BUY PE&#x27;].includes(t.signal))continue;const ts=new Date(t.time).getTime();if(active&amp;&amp;active.signal===t.signal&amp;&amp;(!active.exit_time||ts&lt;=new Date(active.exit_time).getTime()))continue;allTrades.push(t);active={signal:t.signal,exit_time:t.exit_time||null};}render();$(&#x27;status&#x27;).textContent=&#x27;Loaded &#x27;+(d.session_dates||[]).length+&#x27; sessions · &#x27;+raw.length+&#x27; raw signals&#x27;;$(&#x27;detail&#x27;).innerHTML=&#x27;&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;Trade details&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;Select a row in the table to inspect its levels and recorded explanation.&lt;/div&gt;&#x27;;$(&#x27;diagram&#x27;).innerHTML=&#x27;&lt;div class=&quot;empty&quot;&gt;Select a trade to show its levels.&lt;/div&gt;&#x27;;}catch(e){$(&#x27;status&#x27;).textContent=&#x27;Could not load: &#x27;+e.message;$(&#x27;rows&#x27;).innerHTML=&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;Check that the Python API is running, Angel One is connected, and /api/history is available. &#x27;+e.message+&#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;;}finally{b.disabled=false;b.textContent=&#x27;Load historical trades&#x27;;}});
-[&#x27;direction&#x27;,&#x27;result&#x27;,&#x27;search&#x27;].forEach(id=&gt;$(id).addEventListener(id===&#x27;search&#x27;?&#x27;input&#x27;:&#x27;change&#x27;,render));
-&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe></section>
-<section class="card bottom"><div class="section-title"><h3>SMC concept coverage</h3><span class="muted">Planned detection modules</span></div><div class="concepts"><div class="concept"><b>Market structure</b><span>HH / HL · LH / LL · BOS · CHoCH · MSS</span></div><div class="concept"><b>Liquidity</b><span>BSL · SSL · EQH / EQL · sweeps · inducement</span></div><div class="concept"><b>Imbalances</b><span>FVG · IFVG · volume imbalance · displacement</span></div><div class="concept"><b>Institutional zones</b><span>Order blocks · breaker · mitigation · rejection</span></div><div class="concept"><b>Dealing range</b><span>Premium · discount · equilibrium · OTE</span></div><div class="concept"><b>Time & session</b><span>Previous day levels · session highs/lows · kill zones</span></div></div><p class="note">Detection rules will be specified and tested individually. SMC labels are analytical interpretations, not proof of institutional orders.</p></section>
-
-<section class="card bottom" id="live-monitor">
-  <div class="section-title"><h3>Live NIFTY 50 · WebSocket 2.0</h3><span class="pill" id="feed-health">Waiting for API</span></div>
-  <div class="history-summary">
-    <div class="history-metric"><span>Latest NIFTY 50 price</span><strong id="live-price">—</strong></div>
-    <div class="history-metric"><span>Last exchange tick</span><strong id="live-tick-time" style="font-size:13px">—</strong></div>
-    <div class="history-metric"><span>Tick age</span><strong id="live-tick-age">—</strong></div>
-    <div class="history-metric"><span>Overall signal</span><strong id="live-overall-signal">WAIT</strong></div>
-  </div>
-  <br/>
-  <div class="section-title"><h3>Multi-timeframe SMC analysis</h3><span class="muted">15m bias → 5m structure → 2m setup → 1m entry</span></div>
-  <div class="history-summary" id="live-timeframes">
-    <div class="history-metric"><span>15m · Bias</span><strong>Awaiting data</strong></div>
-    <div class="history-metric"><span>5m · Structure</span><strong>Awaiting data</strong></div>
-    <div class="history-metric"><span>2m · Setup</span><strong>WAIT</strong></div>
-    <div class="history-metric"><span>1m · Entry</span><strong>WAIT</strong></div>
-  </div>
-  <div class="history-layout">
-    <div class="trade-detail"><h4>Detected SMC findings</h4><div id="live-findings" class="trade-explain">Waiting for live candle analysis.</div></div>
-    <div class="trade-detail"><h4>Feed health & connection</h4><div id="live-feed-detail" class="trade-explain">Connection status will appear here. A stale tick is normal outside market hours.</div></div>
-  </div>
-  <p class="note">Dashboard polls the local API every 2 seconds. Tick delivery itself depends on exchange activity and network connectivity. Signals are heuristic; manual execution only.</p>
-</section>
-<section class="card bottom"><div class="section-title"><h3>Connection setup</h3><span class="pill">Credentials not requested here</span></div><div class="controls"><select class="select" aria-label="Data source"><option>Angel One SmartAPI · connected through local API</option><option>CSV candle upload (prototype)</option></select><select class="select" aria-label="Expiry"><option>Weekly expiry</option></select><select class="select" aria-label="Risk"><option>Moderate risk</option></select><button class="primary" id="setup">View integration checklist</button></div><p class="note" id="setup-note">Next: resolve Angel One app registration / static-IP form requirement, verify the NIFTY instrument token, then test historical candles. Live WebSocket 2.0 feed and historical preload are integrated in the local Python API.</p></section>
-<section class="card bottom"><div class="section-title"><h3>Connect to your local Python scanner</h3><span class="pill">Local API</span></div><p class="note">Keep Uvicorn running on this Windows laptop. This page does not store SmartAPI credentials.</p><div class="controls"><input class="select" id="api-url" value="http://127.0.0.1:8000" aria-label="Python API address"><button class="primary" id="connect-python">Test Python connection</button><button class="primary" id="run-scan">Run SMC scan</button><span id="python-status" class="pill">Not tested</span></div><p class="note" id="python-detail">First test /api/status. Then use Run SMC scan to request historical multi-timeframe analysis. No orders are placed.</p><pre id="scan-results" class="note" style="white-space:pre-wrap;overflow-wrap:anywhere">No scan loaded yet.</pre></section>
-<div class="footer">NIFTY SMC Scanner · Local dashboard · Demo data only · No orders placed</div>
-</div></main>
+$('trade-detail-toggle').addEventListener('click',()=&gt;{
+ const d=$('detail'),g=$('diagram'),hidden=d.style.display==='none';
+ d.style.display=hidden?'block':'none';g.style.display=hidden?'block':'none';
+ $('trade-detail-toggle').setAttribute('aria-expanded',hidden?'true':'false');
+ $('trade-detail-toggle').firstElementChild.textContent=hidden?'Trade details · click to hide':'Trade details · click to show';
+ $('trade-detail-chevron').textContent=hidden?'−':'+';
+});
+$('trade-detail-toggle').addEventListener('keydown',e=&gt;{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('trade-detail-toggle').click();}});
+$('load').addEventListener('click',async()=&gt;{const b=$('load'),prog=$('history-progress'),msg=$('progress-message');b.disabled=true;b.textContent='Starting…';prog.value=0;$('status').textContent='Starting backtest…';try{const sessions=$('sessions').value,cost=$('cost-points').value||'2';const start=await fetch(base()+'/api/history/start?sessions='+encodeURIComponent(sessions)+'&amp;cost_points='+encodeURIComponent(cost),{method:'POST'});const job=await start.json();if(!start.ok)throw new Error(job.detail||'HTTP '+start.status);let state;while(true){await new Promise(r=&gt;setTimeout(r,1200));const sr=await fetch(base()+'/api/history/status/'+job.job_id);state=await sr.json();if(!sr.ok)throw new Error(state.detail||'Could not read progress');prog.value=state.progress_pct||0;msg.textContent=(state.message||state.status)+' · '+(state.completed_chunks||0)+'/'+(state.total_chunks||0)+' chunks · '+(state.candles_received||0).toLocaleString()+' candles';$('status').textContent=state.status+' · '+(state.progress_pct||0)+'%';if(state.status==='failed')throw new Error(state.error||state.message);if(state.status==='completed')break;}const rr=await fetch(base()+'/api/history/result/'+job.job_id);const d=await rr.json();if(!rr.ok)throw new Error(d.detail||'HTTP '+rr.status);strategyTrades.smc_pac=[...(d.signals||[])];$('trade-detail-panel').style.display='none';allTrades=strategyTrades[$('strategy-view').value]||[];render();$('status').textContent='Loaded '+(d.session_dates||[]).length+' sessions · '+allTrades.length+' trades';msg.innerHTML='Completed · '+(d.summary?.one_minute_candles||0).toLocaleString()+' candles · cache chunks '+(d.summary?.cache_chunks_used||0)+'&lt;br&gt;&lt;b&gt;SMC FVG / OB / IDM / BOS / MSS:&lt;/b&gt; '+(d.summary?.trades??0)+' trades · win '+(d.summary?.win_rate_pct??'—')+'% · PF '+(d.summary?.profit_factor??'—')+' · net '+(d.summary?.net_points??'—')+' pts&lt;br&gt;&lt;b&gt;Diagnostics:&lt;/b&gt; BOS '+(d.summary?.diagnostics?.bos??0)+' · MSS '+(d.summary?.diagnostics?.mss??0)+' · FVG '+(d.summary?.diagnostics?.fvg_detected??0)+' · OB '+(d.summary?.diagnostics?.ob_detected??0)+' · IDM '+(d.summary?.diagnostics?.idm??0)+' · 1m triggers '+(d.summary?.diagnostics?.trigger??0)+'&lt;br&gt;&lt;span class=&quot;muted&quot;&gt;SMC-only morning window 09:30–11:40 IST. NIFTY spot points, not options-premium returns.&lt;/span&gt;'; $('detail').innerHTML='&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;Trade details&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;Select a row in the table to inspect its levels and recorded explanation.&lt;/div&gt;';$('diagram').innerHTML='&lt;div class=&quot;empty&quot;&gt;Select a trade to show its levels.&lt;/div&gt;';}catch(e){$('status').textContent='Could not load: '+e.message;msg.textContent='Backtest failed: '+e.message;$('rows').innerHTML='&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;'+e.message+'&lt;/td&gt;&lt;/tr&gt;';}finally{b.disabled=false;b.textContent='Run corrected backtest';}});
+['direction','result','strategy-view','search'].forEach(id=&gt;$(id).addEventListener(id==='search'?'input':'change',render));
+window.addEventListener('load',()=&gt;{const sendHeight=()=&gt;window.parent.postMessage({type:'smc-report-height',height:Math.ceil(document.documentElement.scrollHeight)},'*');sendHeight();if(window.ResizeObserver){new ResizeObserver(sendHeight).observe(document.body);}setTimeout(sendHeight,250);setTimeout(sendHeight,900);});
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="width:100%;height:420px;min-height:0;border:0;border-radius:10px;background:transparent;display:block;overflow:hidden" title="Historical trade report"></iframe></section><section class="card bottom" style="margin-bottom:16px"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>7. SMC · ICT · Price Action Research Engine v3.0</h3><span class="collapse-chevron">−</span></div><p class="note" data-collapse-content="true" style="margin-top:0">New rule sequence: 5m BOS / MSS → 2m FVG / OB / IDM retest → 1m entry confirmation · signals 09:30–11:40 IST close-confirmed trigger. Maximum one trade per session; no setup means no trade.</p><div class="concepts" data-collapse-content="true"><div class="concept"><b>SMC reference</b><span>BOS / CHoCH, swing structure, liquidity pools, order-block and FVG context.</span></div><div class="concept"><b>ICT reference</b><span>MSS, displacement, buy/sell-side liquidity sweeps and session timing.</span></div><div class="concept"><b>Price Action reference</b><span>Price structure, liquidity grabs, imbalance retests and multi-timeframe context.</span></div><div class="concept"><b>Validation gate</b><span>Win rate, profit factor, average net points, CE/PE split and out-of-sample checks.</span></div></div><p class="note" data-collapse-content="true">Independent implementation inspired by public descriptions; not LuxAlgo code or an endorsement. A 70% win rate is an unproven target, not a promise. Current replay is NIFTY spot points, not options-premium returns.</p><p class="note" data-collapse-content="true"><a href="https://www.luxalgo.com/library/indicator/smart-money-concepts-smc/" rel="noopener" target="_blank">LuxAlgo SMC</a> · <a href="https://www.luxalgo.com/library/indicator/ict-concepts/" rel="noopener" target="_blank">ICT Concepts</a> · <a href="https://www.luxalgo.com/library/indicator/luxalgo-price-action-concepts/" rel="noopener" target="_blank">Price Action Concepts</a> · <a href="https://github.com/harshatangirala/smc-ict-research" rel="noopener" target="_blank">Independent SMC/ICT study</a></p></section><section class="card bottom"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>8. SMC concept coverage</h3><span class="collapse-chevron">−</span></div><div class="concepts" data-collapse-content="true"><div class="concept"><b>Market structure</b><span>HH / HL · LH / LL · BOS · CHoCH · MSS</span></div><div class="concept"><b>Liquidity</b><span>BSL · SSL · EQH / EQL · sweeps · inducement</span></div><div class="concept"><b>Imbalances</b><span>FVG · IFVG · volume imbalance · displacement</span></div><div class="concept"><b>Institutional zones</b><span>Order blocks · breaker · mitigation · rejection</span></div><div class="concept"><b>Dealing range</b><span>Premium · discount · equilibrium · OTE</span></div><div class="concept"><b>Time &amp; session</b><span>Previous day levels · session highs/lows · kill zones</span></div></div><p class="note" data-collapse-content="true">Detection rules will be specified and tested individually. SMC labels are analytical interpretations, not proof of institutional orders.</p></section><section class="card bottom"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>9. Connection setup</h3><span class="collapse-chevron">−</span></div><div class="controls" data-collapse-content="true"><select aria-label="Data source" class="select"><option>Angel One SmartAPI · connected through local API</option><option>CSV candle upload (prototype)</option></select><select aria-label="Expiry" class="select"><option>Weekly expiry</option></select><select aria-label="Risk" class="select"><option>Moderate risk</option></select><button class="primary" id="setup">View integration checklist</button></div><p class="note" data-collapse-content="true" id="setup-note">Next: resolve Angel One app registration / static-IP form requirement, verify the NIFTY instrument token, then test historical candles. Live WebSocket 2.0 feed builds 1m candles locally; 2m and 5m are aggregated locally. Historical preload is guarded and cached to avoid repeated broker requests.</p></section><section class="card bottom"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>10. Connect to your local Python scanner</h3><span class="collapse-chevron">−</span></div><p class="note" data-collapse-content="true">Keep Uvicorn running on this Windows laptop. This page does not store SmartAPI credentials.</p><div class="controls" data-collapse-content="true"><input aria-label="Python API address" class="select" id="api-url" value="http://127.0.0.1:8000"/><button class="primary" id="connect-python">Test Python connection</button><button class="primary" id="connect-local-api" type="button">Retry API connection</button><button class="primary" id="run-scan">Run SMC scan</button><span class="pill" id="python-status">Not tested</span></div><p class="note" id="connect-api-status">Retry API connection sends POST /api/connect to the Python API URL above.</p><p class="note" data-collapse-content="true" id="python-detail">Test /api/status. Live chart and SMC scan use the local completed-candle engine; historical API is used only for one guarded warm-up. No orders are placed.</p><pre class="note" data-collapse-content="true" id="scan-results" style="white-space:pre-wrap;overflow-wrap:anywhere">No scan loaded yet.</pre></section><div class="footer">NIFTY SMC Scanner · Live market data · Paper/research only · No orders placed · Dashboard v3.15</div></div></main>
 <script>
-// Timeframe buttons are wired to the real local candle API by the live chart module below.
-document.querySelectorAll('.tf').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tf').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}));
-document.getElementById('setup').addEventListener('click',()=>{document.getElementById('setup-note').textContent='Checklist: 1) Obtain Angel One confirmation on data-only app registration. 2) Create the SmartAPI app using the approved details. 3) Verify instrument master token. 4) Test historical candles. 5) Implement live WebSocket and candle aggregation. 6) Validate SMC rules with paper trading.'});
+  // Timeframe buttons are wired to the real local candle API by the live chart module below.
+  document.querySelectorAll('.tf').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tf').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}));
+  document.getElementById('setup').addEventListener('click',()=>{document.getElementById('setup-note').textContent='Checklist: 1) Obtain Angel One confirmation on data-only app registration. 2) Create the SmartAPI app using the approved details. 3) Verify instrument master token. 4) Test historical candles. 5) Implement live WebSocket and candle aggregation. 6) Validate SMC rules with paper trading.'});
 
-const apiBase=()=>{let base=document.getElementById('api-url').value.trim();while(base.endsWith('/'))base=base.slice(0,-1);return base};
-const fmt=v=>v==null||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let lastHistoryTrades=[];
-document.getElementById('connect-python').addEventListener('click',async()=>{
- const status=document.getElementById('python-status'),detail=document.getElementById('python-detail');status.textContent='Checking…';
- try{const r=await fetch(apiBase()+'/api/status');const d=await r.json();if(!r.ok)throw new Error(d.detail||'HTTP '+r.status);
- status.textContent=d.angel_one_connected?'Angel One connected':'Python API connected';detail.textContent='API reachable · Angel One '+(d.angel_one_connected?'authenticated':'not authenticated')+' · WebSocket '+(d.websocket_connected?'connected':'not connected');
- await refreshLivePanel();
- }catch(e){status.textContent='Not connected';detail.textContent='Cannot reach local API: '+e.message+' · Keep Uvicorn running.'}
-});
-document.getElementById('run-scan').addEventListener('click',async()=>{
- const b=document.getElementById('run-scan'),out=document.getElementById('scan-results');b.disabled=true;b.textContent='Scanning…';out.textContent='Requesting /api/scan…';
- try{const r=await fetch(apiBase()+'/api/scan');const d=await r.json();if(!r.ok)throw new Error(d.detail||'HTTP '+r.status);const a=d.analysis||{};const lines=['Overall signal: '+(a.signal||'WAIT')+' · '+(a.signal_te||''),'Candle counts: '+JSON.stringify(d.candle_counts||{})];
- for(const tf of ['15m','5m','2m','1m']){const x=(a.timeframes||{})[tf];if(!x){lines.push('',tf+': no analysis returned');continue}lines.push('',tf+' · '+(x.structure||'—')+' · '+(x.signal||'WAIT'),x.signal_te||'', 'Swing: '+(x.swing_high_label||'—')+' / '+(x.swing_low_label||'—')+' · '+(x.premium_discount||'—'));(x.findings||[]).forEach((f,i)=>lines.push('• '+f+((x.findings_te||[])[i]?' / '+x.findings_te[i]:'')))}
- lines.push('',d.note||a.warning||'Heuristic analysis only.');out.textContent=lines.join('\n');await refreshLivePanel();
- }catch(e){out.textContent='Scan failed: '+e.message}finally{b.disabled=false;b.textContent='Run SMC scan'}
-});
-function calcPoints(t){
- const entry=Number(t.entry),exit=Number(t.exit_price??t.exit??(t.outcome==='TARGET'?t.target:(String(t.outcome||'').startsWith('STOP')?t.stop_loss:null)));
- if(!Number.isFinite(entry)||!Number.isFinite(exit))return null;
- const sign=String(t.signal||'').includes('PE')?-1:1;
- return (exit-entry)*sign;
-}
-function renderTradeDetail(t){
- const pnl=calcPoints(t),exit=t.exit_price??t.exit??(t.outcome==='TARGET'?t.target:(String(t.outcome||'').startsWith('STOP')?t.stop_loss:null));
- document.getElementById('history-trade-detail').innerHTML='<h4>'+esc(t.signal)+' · '+esc(t.outcome||'Unresolved')+'</h4><div class="trade-explain">Entry time: '+esc(t.time||'—')+'<br>Exit time: '+esc(t.exit_time||'Not recorded')+'<br>Entry: '+fmt(t.entry)+'<br>Stop-loss: '+fmt(t.stop_loss)+'<br>Target: '+fmt(t.target)+'<br>Exit price: '+fmt(exit)+'<br><b>Spot points: </b><span class="'+(pnl===null?'':pnl>=0?'positive':'negative')+'">'+(pnl===null?'Not available':(pnl>=0?'+':'')+pnl.toFixed(2)+' points')+'</span><br><br><b>Reason:</b> '+esc(t.reason||'No explanation returned by API')+'<br><b>SMC evidence:</b> '+esc((t.findings||[]).join(' · ')||'Not included in current history response')+'</div>';
-}
-document.getElementById('load-history').addEventListener('click',async()=>{
- const b=document.getElementById('load-history'),status=document.getElementById('history-status'),out=document.getElementById('history-results');b.disabled=true;b.textContent='Loading…';status.textContent='Requesting history';out.textContent='Downloading and replaying 15 trading days…';
- try{
-  const r=await fetch(apiBase()+'/api/history?days=15&strict=true');const d=await r.json();if(!r.ok)throw new Error(d.detail||'HTTP '+r.status);
-  const raw=[...(d.signals||[])].sort((a,b)=>new Date(a.time)-new Date(b.time));const trades=[];let active=null;
-  for(const t of raw){if(!['BUY CE','BUY PE'].includes(t.signal))continue;const tm=new Date(t.time).getTime();if(active&&active.signal===t.signal&&(!active.exit_time||tm<=new Date(active.exit_time).getTime()))continue;trades.push(t);active={signal:t.signal,exit_time:t.exit_time||null};}
-  lastHistoryTrades=trades;const wins=trades.filter(t=>t.outcome==='TARGET').length,losses=trades.filter(t=>String(t.outcome||'').startsWith('STOP')).length,open=trades.length-wins-losses;
-  const points=trades.map(calcPoints).filter(x=>x!==null),net=points.reduce((a,b)=>a+b,0),winrate=(wins+losses)?(wins*100/(wins+losses)).toFixed(1)+'%':'N/A';
-  const ce=trades.filter(t=>t.signal==='BUY CE').length,pe=trades.length-ce;
-  document.getElementById('history-summary').innerHTML=[['Filtered trades',trades.length],['CE / PE',ce+' / '+pe],['Targets / Stops / Open',wins+' / '+losses+' / '+open],['Win rate',winrate],['Net spot points',points.length?(net>=0?'+':'')+net.toFixed(2):'N/A'],['Winning points',points.filter(x=>x>0).reduce((a,b)=>a+b,0).toFixed(2)],['Losing points',points.filter(x=>x<0).reduce((a,b)=>a+b,0).toFixed(2)],['Sessions', (d.session_dates||[]).length]].map(x=>'<div class="history-metric"><span>'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join('');
-  const tbody=document.getElementById('history-rows');tbody.innerHTML=trades.map((t,i)=>{const p=calcPoints(t),exit=t.exit_price??t.exit??(t.outcome==='TARGET'?t.target:(String(t.outcome||'').startsWith('STOP')?t.stop_loss:null));return '<tr><td>'+esc(t.time?new Date(t.time).toLocaleString('en-IN'):'—')+'</td><td><button class="trade-pick" data-trade="'+i+'">'+esc(t.signal)+'</button></td><td>'+fmt(t.entry)+'</td><td>'+fmt(t.stop_loss)+'</td><td>'+fmt(t.target)+'</td><td>'+fmt(exit)+'</td><td>'+esc(t.outcome||'OPEN')+'</td><td class="'+(p===null?'':p>=0?'positive':'negative')+'">'+(p===null?'—':(p>=0?'+':'')+p.toFixed(2))+'</td></tr>'}).join('');
-  tbody.querySelectorAll('[data-trade]').forEach(el=>el.addEventListener('click',()=>renderTradeDetail(lastHistoryTrades[Number(el.dataset.trade)])));
-  document.getElementById('history-view').hidden=false;status.textContent='Loaded · '+trades.length+' trades';out.textContent='Historical replay loaded. '+(points.length?'Points are calculated from entry and recorded exit/target/stop.':'The API has not returned exit prices/outcomes sufficient to calculate points yet.')+' Spot points are not actual CE/PE option P&L.'; 
- }catch(e){status.textContent='Load failed';out.textContent='Historical report failed: '+e.message+'. Ensure /api/history?days=15&strict=true is available.'}
- finally{b.disabled=false;b.textContent='Load last 15 trading days'}
-});
-async function refreshLivePanel(){
- const health=document.getElementById('feed-health');
- try{
-  const [liveR,statusR]=await Promise.all([fetch(apiBase()+'/api/live'),fetch(apiBase()+'/api/status')]);const d=await liveR.json(),st=await statusR.json();if(!liveR.ok)throw new Error(d.detail||'HTTP '+liveR.status);
-  document.getElementById('live-price').textContent=fmt(d.price);document.getElementById('hero-live-price').textContent=fmt(d.price);document.getElementById('live-tick-time').textContent=d.quote_time?new Date(d.quote_time).toLocaleString('en-IN'):'—';document.getElementById('live-tick-age').textContent=d.tick_age_seconds==null?'—':Number(d.tick_age_seconds).toFixed(1)+' sec';document.getElementById('live-overall-signal').textContent=d.signal||'WAIT';
-  const stale=!!d.stale;health.textContent=stale?'STALE TICK':(st.websocket_connected?'WebSocket connected':'Feed waiting');health.style.borderColor=stale?'#d59a32':st.websocket_connected?'#16a477':'';
-  const tf=d.timeframes||{};document.getElementById('live-timeframes').innerHTML=['15m','5m','2m','1m'].map(k=>{const x=tf[k]||{};const names={'15m':'Bias','5m':'Structure','2m':'Setup','1m':'Entry'};return '<div class="history-metric"><span>'+k+' · '+names[k]+'</span><strong>'+esc(x.signal||x.structure||'WAIT')+'</strong><small>'+esc(x.structure||x.premium_discount||'Awaiting candle data')+'</small></div>'}).join('');
-  const findings=[];for(const k of ['15m','5m','2m','1m']){const x=tf[k];if(x){(x.findings||[]).forEach(f=>findings.push('<b>'+k+'</b> · '+esc(f)));(x.findings_te||[]).forEach(f=>findings.push('<span>'+k+' · '+esc(f)+'</span>'));}}
-  document.getElementById('live-findings').innerHTML=findings.length?findings.join('<br>'):'No SMC findings returned yet. Completed candles may be required.';
-  document.getElementById('live-feed-detail').textContent='Angel One login: '+(st.angel_one_connected?'connected':'not connected')+' · WebSocket: '+(st.websocket_connected?'connected':'disconnected')+' · Tick stale: '+(stale?'YES':'NO')+' · '+(d.websocket_error||st.websocket_error||d.note||'Feed status received.');
-  document.getElementById('python-status').textContent=st.angel_one_connected?'Angel One connected':'API reachable';
-  document.getElementById('python-detail').textContent='API reachable · Angel One '+(st.angel_one_connected?'connected':'not connected')+' · WebSocket '+(st.websocket_connected?'connected':'disconnected');
- }catch(e){health.textContent='API unavailable';document.getElementById('live-feed-detail').textContent='Could not read live feed: '+e.message+' · Ensure Uvicorn is running and /api/live is available.'}
-}
-setInterval(refreshLivePanel,2000);
-</script>
-<script>
-// Unified dashboard binding: live API -> hero, timeframe cards and CE/PE monitor.
-(function(){
-  const base = () => {
-    const field = document.getElementById('api-url');
-    return (field ? field.value.trim() : 'http://127.0.0.1:8000').replace(/\/+$/, '');
-  };
-  const safe = value => String(value ?? '—').replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-  async function refreshUnifiedDashboard(){
-    try{
-      const response = await fetch(base() + '/api/live');
-      const data = await response.json();
-      if(!response.ok) throw new Error(data.detail || ('HTTP ' + response.status));
-
-      const heroPrice = document.querySelector('.hero .market strong');
-      if(heroPrice) heroPrice.textContent = data.price == null ? '— —' :
-        Number(data.price).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-
-      const topGrid = document.querySelector('.hero + .grid');
-      const tf = data.timeframes || {};
-      if(topGrid){
-        const cards = topGrid.querySelectorAll('.card');
-        const keys = ['15m','5m','2m','1m'];
-        const labels = ['Higher-timeframe direction','BOS / structure confirmation','Setup confirmation','Entry confirmation'];
-        cards.forEach((card,index)=>{
-          const item = tf[keys[index]] || {};
-          const value = card.querySelector('.kvalue');
-          const foot = card.querySelector('.kfoot');
-          if(value) value.textContent = index < 2 ?
-            (item.structure || item.signal || 'Awaiting data') :
-            (item.signal || 'WAIT');
-          if(foot) foot.textContent = item.premium_discount ?
-            labels[index] + ' · ' + item.premium_discount : labels[index];
-        });
-      }
-
-      const monitor = document.querySelector('.layout aside.card');
-      if(monitor){
-        const overall = String(data.signal || 'WAIT').toUpperCase();
-        const ceActive = overall === 'BUY CE';
-        const peActive = overall === 'BUY PE';
-        const headingTag = monitor.querySelector('.section-title .tag');
-        if(headingTag){
-          headingTag.textContent = overall;
-          headingTag.className = 'tag' + (overall === 'WAIT' ? ' wait' : '');
-        }
-        const rows = monitor.querySelectorAll('.signal');
-        [[ceActive,'CE setup'],[peActive,'PE setup']].forEach(([active,label],i)=>{
-          const row = rows[i];
-          if(!row) return;
-          const tag = row.querySelector('.tag');
-          const description = row.querySelector('.muted');
-          if(tag){tag.textContent = active ? 'ACTIVE' : 'Not active';tag.className = 'tag' + (active ? '' : ' wait');}
-          if(description) description.textContent = active ?
-            'Backend confirmed overall ' + overall + ' signal' :
-            (label === 'CE setup' ? 'Bullish confirmation required' : 'Bearish confirmation required');
-        });
-      }
-
-      const liveStatus = document.getElementById('live-status');
-      if(liveStatus){
-        liveStatus.textContent = data.stale ? 'Connected · stale tick' :
-          (data.connected ? 'WebSocket live' : 'Waiting for tick');
-      }
-    }catch(error){
-      const liveStatus = document.getElementById('live-status');
-      if(liveStatus) liveStatus.textContent = 'API unavailable';
-    }
+  const apiBase=()=>{let base=document.getElementById('api-url').value.trim();while(base.endsWith('/'))base=base.slice(0,-1);return base};
+  const fmt=v=>v==null||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let lastHistoryTrades=[];
+  document.getElementById('connect-python').addEventListener('click',async()=>{
+   const status=document.getElementById('python-status'),detail=document.getElementById('python-detail');status.textContent='Checking…';
+   try{const r=await fetch(apiBase()+'/api/status');const d=await r.json();if(!r.ok)throw new Error(d.detail||'HTTP '+r.status);
+   status.textContent=d.angel_one_connected?'Angel One connected':'Python API connected';detail.textContent='API reachable · Angel One '+(d.angel_one_connected?'authenticated':'not authenticated')+' · WebSocket '+(d.websocket_connected?'connected':'not connected');
+   await refreshLivePanel();
+   }catch(e){status.textContent='Not connected';detail.textContent='Cannot reach local API: '+e.message+' · Keep Uvicorn running.'}
+  });
+  document.getElementById('run-scan').addEventListener('click',async()=>{
+   const b=document.getElementById('run-scan'),out=document.getElementById('scan-results');b.disabled=true;b.textContent='Scanning…';out.textContent='Requesting /api/scan…';
+   try{const r=await fetch(apiBase()+'/api/scan');const d=await r.json();if(!r.ok)throw new Error(d.detail||'HTTP '+r.status);const a=d.analysis||{};const lines=['Overall signal: '+(a.signal||'WAIT')+' · '+(a.signal_te||''),'Candle counts: '+JSON.stringify(d.candle_counts||{})];
+   lines.push('Data source: '+(d.live_source||'local candle engine'));
+   (a.reasons||[]).forEach(x=>lines.push('• '+x));
+   lines.push('SMC checks: '+JSON.stringify(a.checks||{}));
+   lines.push('',d.note||a.warning||'Heuristic analysis only.');out.textContent=lines.join('\n');await refreshLivePanel();
+   }catch(e){out.textContent='Scan failed: '+e.message}finally{b.disabled=false;b.textContent='Run SMC scan'}
+  });
+  function calcPoints(t){
+   const entry=Number(t.entry),exit=Number(t.exit_price??t.exit??(t.outcome==='TARGET'?t.target:(String(t.outcome||'').startsWith('STOP')?t.stop_loss:null)));
+   if(!Number.isFinite(entry)||!Number.isFinite(exit))return null;
+   const sign=String(t.signal||'').includes('PE')?-1:1;
+   return (exit-entry)*sign;
   }
+  function renderTradeDetail(t){
+   const pnl=calcPoints(t),exit=t.exit_price??t.exit??(t.outcome==='TARGET'?t.target:(String(t.outcome||'').startsWith('STOP')?t.stop_loss:null));
+   document.getElementById('history-trade-detail').innerHTML='<h4>'+esc(t.signal)+' · '+esc(t.outcome||'Unresolved')+'</h4><div class="trade-explain">Entry time: '+esc(t.time||'—')+'<br>Exit time: '+esc(t.exit_time||'Not recorded')+'<br>Entry: '+fmt(t.entry)+'<br>Stop-loss: '+fmt(t.stop_loss)+'<br>Target: '+fmt(t.target)+'<br>Exit price: '+fmt(exit)+'<br><b>Spot points: </b><span class="'+(pnl===null?'':pnl>=0?'positive':'negative')+'">'+(pnl===null?'Not available':(pnl>=0?'+':'')+pnl.toFixed(2)+' points')+'</span><br><br><b>Reason:</b> '+esc(t.reason||'No explanation returned by API')+'<br><b>SMC evidence:</b> '+esc((t.findings||[]).join(' · ')||'Not included in current history response')+'</div>';
+  }
+  async function refreshLivePanel(){
+   const health=document.getElementById('feed-health')||document.getElementById('python-status');
+   try{
+    const [liveR,statusR,paperR]=await Promise.all([fetch(apiBase()+'/api/live'),fetch(apiBase()+'/api/status'),fetch(apiBase()+'/api/paper-trading')]);const d=await liveR.json(),st=await statusR.json(),paper=await paperR.json();if(!liveR.ok)throw new Error(d.detail||'HTTP '+liveR.status);if(!paperR.ok)throw new Error(paper.detail||'Paper status unavailable');
+    document.getElementById('live-price').textContent=fmt(d.price);document.getElementById('hero-live-price').textContent=fmt(d.price);document.getElementById('live-tick-time').textContent=d.quote_time?new Date(d.quote_time).toLocaleString('en-IN'):'—';document.getElementById('live-tick-age').textContent=d.tick_age_seconds==null?'—':Number(d.tick_age_seconds).toFixed(1)+' sec';document.getElementById('live-overall-signal').textContent=d.signal||'WAIT';
+    const plan=d.trade_plan;
+    const openPaper=(paper.open_positions||[])[0]||null;
+    const planFresh=!!plan && !d.stale && !!d.connected;
+    const displayPlan=openPaper?{entry_reference:openPaper.entry_price,side:openPaper.side,stop_loss:openPaper.stop_loss,target_1:openPaper.target_1,target_2:openPaper.target_2}:plan;
+    const displayPlanFresh=!!openPaper||planFresh;
+    document.getElementById('live-plan-entry').textContent=displayPlanFresh?fmt(displayPlan.entry_reference)+' · '+displayPlan.side+(openPaper?' · OPEN PAPER':''):'Waiting for confirmed signal';
+    document.getElementById('live-plan-stop').textContent=displayPlanFresh?fmt(displayPlan.stop_loss):'—';
+    document.getElementById('live-plan-t1').textContent=displayPlanFresh?fmt(displayPlan.target_1):'—';
+    document.getElementById('live-plan-t2').textContent=displayPlanFresh?fmt(displayPlan.target_2):'—';
 
-  // Hook the existing live refresh loop without changing its 2-second cadence.
-  setInterval(()=>{
-    const status = document.getElementById('python-status');
-    if(status && status.textContent.toLowerCase().includes('connected')){
-      refreshUnifiedDashboard();
-    }
-  },2000);
-  document.addEventListener('DOMContentLoaded', refreshUnifiedDashboard);
-})();
+    const stale=!!d.stale;health.textContent=stale?'STALE TICK':(st.websocket_connected?'WebSocket connected':'Feed waiting');health.style.borderColor=stale?'#d59a32':st.websocket_connected?'#16a477':'';
+    const tf=d.timeframes||{};document.getElementById('live-timeframes').innerHTML=['5m','2m','1m'].map(k=>{const x=tf[k]||{};const names={'5m':'BOS / MSS','2m':'FVG / OB / IDM','1m':'Entry'};const stamp=x.timestamp?new Date(x.timestamp).toLocaleTimeString('en-IN'):'No candle';return '<div class="history-metric"><span>'+k+' · '+names[k]+'</span><strong>'+esc(x.signal||'WAIT')+'</strong><small>'+esc(x.structure||'Awaiting completed candles')+'</small><small>Completed: '+esc(stamp)+'</small></div>'}).join('');
+    const findings=[];for(const k of ['5m','2m','1m']){const x=tf[k];if(x){(x.findings||[]).forEach(f=>findings.push('<b>'+k+'</b> · '+esc(f)));}}
+    document.getElementById('live-findings').innerHTML=findings.length?findings.join('<br>'):'No SMC findings returned yet. Completed candles may be required.';
+    document.getElementById('live-feed-detail').textContent='Angel One login: '+(st.angel_one_connected?'connected':'not connected')+' · WebSocket: '+(st.websocket_connected?'connected':'disconnected')+' · Tick stale: '+(stale?'YES':'NO')+' · '+(d.websocket_error||st.websocket_error||d.note||'Feed status received.');
+    const overall=String(d.signal||'WAIT').toUpperCase();
+    const ceOpen=!!openPaper && openPaper.signal==='CE', peOpen=!!openPaper && openPaper.signal==='PE';
+    const ce=ceOpen || (overall==='CE' && planFresh), pe=peOpen || (overall==='PE' && planFresh);
+    const setTag=(id,active,text)=>{const el=document.getElementById(id);if(el){el.textContent=text;el.className='tag'+(active?'':' wait');}};
+    setTag('signal-overall',overall!=='WAIT' && planFresh,planFresh?(plan.side||overall):'WAIT');
+    setTag('signal-ce-state',ce,ceOpen?'OPEN · PAPER':ce?'CONFIRMED':'WAITING');
+    setTag('signal-pe-state',pe,peOpen?'OPEN · PAPER':pe?'CONFIRMED':'WAITING');
+    const ceDetail=document.getElementById('signal-ce-detail'),peDetail=document.getElementById('signal-pe-detail');
+    const waitingReasons=(d.reasons||[]).filter(Boolean).slice(0,3).join(' · ')||'Waiting for completed-candle BOS/MSS, FVG/OB/IDM and 1m confirmation';
+    if(ceDetail)ceDetail.textContent=ceOpen?'Paper BUY CE position remains open · entry '+fmt(openPaper.entry_price)+' · last '+fmt(openPaper.last_price):ce?'Confirmed setup · entry '+fmt(plan.entry_reference):'Waiting · '+waitingReasons;
+    if(peDetail)peDetail.textContent=peOpen?'Paper BUY PE position remains open · entry '+fmt(openPaper.entry_price)+' · last '+fmt(openPaper.last_price):pe?'Confirmed setup · entry '+fmt(plan.entry_reference):'Waiting · '+waitingReasons;
+    const riskState=document.getElementById('signal-risk-state');if(riskState){riskState.textContent=st.angel_one_connected && !stale?'FEED OK':'CHECK FEED';riskState.className='tag'+(st.angel_one_connected && !stale?'':' wait');}
+    const riskDetail=document.getElementById('signal-risk-detail');if(riskDetail)riskDetail.textContent='Manual approval · paper only · '+(stale?'quote stale':'fresh quote');
+    const monitorNote=document.getElementById('signal-monitor-note');if(monitorNote)monitorNote.textContent=openPaper?'OPEN PAPER '+openPaper.side+' · Entry '+fmt(openPaper.entry_price)+' · SL '+fmt(openPaper.stop_loss)+' · T1 '+fmt(openPaper.target_1)+' · T2 '+fmt(openPaper.target_2)+' · P/L '+fmt(openPaper.unrealised_points)+' points. Position status is independent of the latest scanner WAIT result.':planFresh?'Confirmed '+(plan.side||'signal')+' · Entry '+fmt(plan.entry_reference)+' · SL '+fmt(plan.stop_loss)+' · T1 '+fmt(plan.target_1)+' · T2 '+fmt(plan.target_2)+'. NIFTY spot references only.':(d.reasons||[]).slice(-3).join(' · ')||'No confirmed entry. Waiting for completed-candle confirmation. Levels remain blank until a valid signal exists.';
+    const refreshed=document.getElementById('mtf-last-refresh');if(refreshed)refreshed.textContent='Updated '+new Date().toLocaleTimeString('en-IN')+' · auto every 2 sec';
+    document.getElementById('python-status').textContent=st.angel_one_connected?'Angel One connected':'API reachable';
+    document.getElementById('python-detail').textContent='API reachable · Angel One '+(st.angel_one_connected?'connected':'not connected')+' · WebSocket '+(st.websocket_connected?'connected':'disconnected');
+   }catch(e){if(health)health.textContent='API unavailable';const feedDetail=document.getElementById('live-feed-detail');if(feedDetail)feedDetail.textContent='Could not read live feed: '+e.message+' · Ensure Uvicorn is running and /api/live is available.'}
+  }
+  setInterval(refreshLivePanel,2000);
+  const mtfRefreshButton=document.getElementById('refresh-mtf');
+  if(mtfRefreshButton){mtfRefreshButton.addEventListener('click',async()=>{mtfRefreshButton.disabled=true;mtfRefreshButton.textContent='Refreshing…';try{await refreshLivePanel();}finally{mtfRefreshButton.disabled=false;mtfRefreshButton.textContent='Refresh analysis';}});}
+
 </script>
 
-
 <script>
-// Live OHLC chart. The 2-minute view is rebuilt from 1-minute candles,
-// anchored to the NSE session open (09:15) to avoid midnight/even-minute drift.
-(function(){
-  const chart = document.querySelector('.chart');
-  if(!chart) return;
-  let timeframe = document.querySelector('.tf.active')?.dataset.tf || '2m';
-  let busy = false;
-  const base = () => (document.getElementById('api-url')?.value || 'http://127.0.0.1:8000').trim().replace(/\/+$/,'');
-  const label = document.querySelector('.layout .card .section-title .muted');
-  const note = chart.parentElement.querySelector('.note');
-  const safe = v => String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function parseCandles(payload){
-    const list = Array.isArray(payload) ? payload : (payload.candles || payload.data || payload.results || []);
-    return list.map(v => Array.isArray(v)
-      ? {time:v[0],open:Number(v[1]),high:Number(v[2]),low:Number(v[3]),close:Number(v[4])}
-      : {time:v.datetime || v.timestamp || v.time || v.date,open:Number(v.open ?? v.o),high:Number(v.high ?? v.h),low:Number(v.low ?? v.l),close:Number(v.close ?? v.c)})
-      .filter(c=>c.time && [c.open,c.high,c.low,c.close].every(Number.isFinite))
-      .sort((a,b)=>new Date(a.time)-new Date(b.time));
-  }
-  function aggregateFromOneMinute(rows, minutes){
-    const groups = new Map();
-    for(const c of rows){
-      const d = new Date(c.time);
-      if(!Number.isFinite(d.getTime())) continue;
-      const day = d.toLocaleDateString('en-CA');
-      const minute = d.getHours()*60+d.getMinutes();
-      const sessionOpen = 9*60+15;
-      if(minute < sessionOpen || minute >= 15*60+30) continue;
-      const offset = minute-sessionOpen;
-      const bucket = Math.floor(offset/minutes);
-      const key = day+'-'+bucket;
-      if(!groups.has(key)) groups.set(key,{time:c.time,open:c.open,high:c.high,low:c.low,close:c.close,count:0,bucketStart:sessionOpen+bucket*minutes});
-      const g=groups.get(key);g.high=Math.max(g.high,c.high);g.low=Math.min(g.low,c.low);g.close=c.close;g.count++;
+  // Live NIFTY chart with heuristic SMC overlays. Mouse wheel zooms; no zoom buttons.
+  (function(){
+   const chart=document.querySelector('.chart'); if(!chart)return;
+   let timeframe=document.querySelector('.tf.active')?.dataset.tf||'2m',busy=false,allRows=[],visibleCount=60;
+   const base=()=> (document.getElementById('api-url')?.value||'http://127.0.0.1:8000').trim().replace(/\/+$/,'');
+   const label=document.querySelector('.layout .card .section-title .muted');
+   const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+   const num=v=>Number(v).toLocaleString('en-IN',{maximumFractionDigits:2});
+   function parse(payload){
+    const a=Array.isArray(payload)?payload:(payload.candles||payload.data||payload.results||[]);
+    return a.map(v=>Array.isArray(v)?{time:v[0],open:+v[1],high:+v[2],low:+v[3],close:+v[4]}:
+     {time:v.datetime||v.timestamp||v.time||v.date,open:+(v.open??v.o),high:+(v.high??v.h),low:+(v.low??v.l),close:+(v.close??v.c)})
+     .filter(c=>c.time&&[c.open,c.high,c.low,c.close].every(Number.isFinite))
+     .sort((a,b)=>new Date(a.time)-new Date(b.time));
+   }
+   function aggregate(rows,n){
+    const groups=new Map();
+    rows.forEach(c=>{
+     const d=new Date(c.time),day=d.toLocaleDateString('en-CA'),mins=d.getHours()*60+d.getMinutes();
+     if(mins<555||mins>=930)return;
+     const bucket=Math.floor((mins-555)/n),key=day+'-'+bucket;
+     if(!groups.has(key))groups.set(key,{time:c.time,open:c.open,high:c.high,low:c.low,close:c.close,count:0,mins:555+bucket*n});
+     const g=groups.get(key);g.high=Math.max(g.high,c.high);g.low=Math.min(g.low,c.low);g.close=c.close;g.count++;
+    });
+    return [...groups.values()].filter(g=>g.count===n).map(g=>({...g,time:(()=>{const d=new Date(g.time);d.setHours(Math.floor(g.mins/60),g.mins%60,0,0);return d.toISOString();})()}));
+   }
+   function detect(rows){
+    const n=rows.length,marks={fvgs:[],obs:[],bos:[],mss:[],idm:[]};
+    // Three-candle fair-value gaps; boxes extend to the latest candle.
+    for(let i=Math.max(2,n-70);i<n;i++){
+     const a=rows[i-2],c=rows[i];
+     if(c.low>a.high)marks.fvgs.push({i,lo:a.high,hi:c.low,dir:'bull'});
+     if(c.high<a.low)marks.fvgs.push({i,lo:c.high,hi:a.low,dir:'bear'});
     }
-    return [...groups.values()].filter(g=>g.count===minutes).map(g=>({...g,time:(()=>{const [y,m,d]=new Date(g.time).toLocaleDateString('en-CA').split('-').map(Number);const hh=Math.floor(g.bucketStart/60),mm=g.bucketStart%60;return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00`;})()}));
-  }
-  function draw(rows, stale){
-    if(!rows.length){chart.innerHTML='<div style="height:100%;display:grid;place-items:center;text-align:center;padding:16px;color:light-dark(#64748b,#9aabc0);font-size:12px">No completed '+timeframe+' candles returned. Check the local API and market session.</div>';return;}
-    const W=900,H=260,L=66,R=14,T=12,B=28,pw=W-L-R,ph=H-T-B;
-    const lo=Math.min(...rows.map(c=>c.low)),hi=Math.max(...rows.map(c=>c.high)),pad=(hi-lo)*.08||1,min=lo-pad,max=hi+pad;
-    const y=v=>T+(max-v)/(max-min)*ph,x=i=>L+(i+.5)*pw/rows.length,cw=Math.max(2,Math.min(13,pw/rows.length*.62));
-    let svg=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="NIFTY ${timeframe} live candlestick chart">`;
-    for(let i=0;i<5;i++){const yy=T+i*ph/4,val=max-i*(max-min)/4;svg+=`<path d="M${L} ${yy}H${W-R}" stroke="currentColor" opacity=".14"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="10" fill="currentColor">${val.toFixed(0)}</text>`;}
-    rows.forEach((c,i)=>{const color=c.close>=c.open?'#16a477':'#d65d65',xx=x(i),top=y(Math.max(c.open,c.close)),bottom=y(Math.min(c.open,c.close));svg+=`<path d="M${xx} ${y(c.high)}V${y(c.low)}" stroke="${color}" stroke-width="1.5"/><rect x="${xx-cw/2}" y="${top}" width="${cw}" height="${Math.max(1,bottom-top)}" fill="${color}" rx="1"/>`;});
-    [0,Math.floor((rows.length-1)/2),rows.length-1].forEach(i=>{svg+=`<text x="${x(i)}" y="${H-7}" text-anchor="middle" font-size="10" fill="currentColor">${safe(new Date(rows[i].time).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}))}</text>`;});
+    // Approximate order block: final opposite candle before a strong displacement candle.
+    for(let i=Math.max(1,n-45);i<n;i++){
+     const c=rows[i],p=rows[i-1],avg=rows.slice(Math.max(0,i-10),i).reduce((s,x)=>s+Math.abs(x.close-x.open),0)/Math.max(1,Math.min(10,i));
+     const body=Math.abs(c.close-c.open);
+     if(body>avg*1.6 && ((c.close>c.open&&p.close<p.open)||(c.close<c.open&&p.close>p.open))){
+      marks.obs.push({i,lo:p.low,hi:p.high,dir:c.close>c.open?'bull':'bear'});
+     }
+    }
+    // BOS / MSS based on a close beyond prior ten-bar swing range.
+    for(let i=Math.max(10,n-35);i<n;i++){
+     const c=rows[i],prior=rows.slice(i-10,i),hh=Math.max(...prior.map(x=>x.high)),ll=Math.min(...prior.map(x=>x.low));
+     const up=c.close>hh,down=c.close<ll;
+     if(up||down){
+      const old=rows.slice(Math.max(0,i-15),i-1),slope=old.length>1?old[old.length-1].close-old[0].close:0;
+      const isMss=(up&&slope<0)||(down&&slope>0);
+      (isMss?marks.mss:marks.bos).push({i,level:up?hh:ll,dir:up?'bull':'bear'});
+     }
+    }
+    // IDM proxy: wick sweep of prior 12-bar internal liquidity and close reclaim.
+    for(let i=Math.max(12,n-30);i<n;i++){
+     const c=rows[i],prior=rows.slice(i-12,i),hh=Math.max(...prior.map(x=>x.high)),ll=Math.min(...prior.map(x=>x.low));
+     if(c.low<ll&&c.close>ll)marks.idm.push({i,level:ll,dir:'bull'});
+     if(c.high>hh&&c.close<hh)marks.idm.push({i,level:hh,dir:'bear'});
+    }
+    return marks;
+   }
+   function draw(rows){
+    if(!rows.length){chart.innerHTML='<div class="chart-message">No completed candles returned. Check Angel One connection and market session.</div>';return;}
+    const count=Math.min(rows.length,visibleCount),view=rows.slice(-count),offset=rows.length-count,marks=detect(rows);
+    const W=1100,H=420,L=76,R=18,T=20,B=38,pw=W-L-R,ph=H-T-B;
+    const lo=Math.min(...view.map(c=>c.low)),hi=Math.max(...view.map(c=>c.high)),pad=(hi-lo)*.10||2,min=lo-pad,max=hi+pad;
+    const y=v=>T+(max-v)/(max-min)*ph,x=i=>L+(i-offset+.5)*pw/count,cw=Math.max(3,Math.min(15,pw/count*.62));
+    const visible=m=>m.i>=offset;
+    let svg=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Live NIFTY ${timeframe} chart with SMC overlays">`;
+    for(let k=0;k<=5;k++){let yy=T+k*ph/5,val=max-k*(max-min)/5;svg+=`<path d="M${L} ${yy}H${W-R}" stroke="currentColor" opacity=".13"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="currentColor">${num(val)}</text>`;}
+    // FVG zones
+    marks.fvgs.filter(visible).slice(-8).forEach(m=>{let yy=y(m.hi),hh=Math.max(3,y(m.lo)-yy),xx=x(m.i);svg+=`<rect x="${xx}" y="${yy}" width="${Math.max(10,W-R-xx)}" height="${hh}" fill="${m.dir==='bull'?'#16a477':'#e0a23a'}" opacity=".16" stroke="${m.dir==='bull'?'#16a477':'#e0a23a'}" stroke-dasharray="4 3"><title>${m.dir.toUpperCase()} FVG ${num(m.lo)}–${num(m.hi)}</title></rect><text x="${Math.min(W-100,xx+4)}" y="${Math.max(12,yy+12)}" font-size="11" fill="${m.dir==='bull'?'#087c59':'#a66a00'}">${m.dir.toUpperCase()} FVG</text>`;});
+    // OB zones
+    marks.obs.filter(visible).slice(-5).forEach(m=>{let yy=y(m.hi),hh=Math.max(4,y(m.lo)-yy),xx=x(m.i);svg+=`<rect x="${xx-cw}" y="${yy}" width="${Math.max(12,W-R-(xx-cw))}" height="${hh}" fill="${m.dir==='bull'?'#2563eb':'#dc6470'}" opacity=".13" stroke="${m.dir==='bull'?'#2563eb':'#dc6470'}"><title>${m.dir.toUpperCase()} order-block proxy ${num(m.lo)}–${num(m.hi)}</title></rect><text x="${Math.min(W-100,xx+4)}" y="${Math.max(12,yy+24)}" font-size="11" fill="${m.dir==='bull'?'#2563eb':'#c23c4a'}">${m.dir.toUpperCase()} OB</text>`;});
+    // BOS/MSS break labels and IDM sweeps
+    marks.bos.filter(visible).slice(-5).forEach(m=>{const xx=x(m.i),yy=y(m.level);svg+=`<path d="M${xx} ${yy}H${W-R}" stroke="#7c3aed" stroke-dasharray="5 4" opacity=".8"/><text x="${Math.min(W-58,xx+4)}" y="${Math.max(13,yy-5)}" font-size="11" fill="#7c3aed">BOS</text>`;});
+    marks.mss.filter(visible).slice(-5).forEach(m=>{const xx=x(m.i),yy=y(m.level);svg+=`<path d="M${xx} ${yy}H${W-R}" stroke="#db2777" stroke-dasharray="3 3" opacity=".9"/><text x="${Math.min(W-58,xx+4)}" y="${Math.max(13,yy-5)}" font-size="11" fill="#db2777">MSS</text>`;});
+    marks.idm.filter(visible).slice(-5).forEach(m=>{const xx=x(m.i),yy=y(m.level);svg+=`<path d="M${xx} ${yy}H${Math.min(W-R,xx+80)}" stroke="#0891b2" stroke-dasharray="2 3"/><text x="${Math.min(W-58,xx+3)}" y="${Math.max(13,yy-4)}" font-size="10" fill="#0891b2">IDM</text>`;});
+    view.forEach((c,j)=>{const i=j+offset,color=c.close>=c.open?'#16a477':'#d65d65',xx=x(i),top=y(Math.max(c.open,c.close)),bottom=y(Math.min(c.open,c.close));svg+=`<path d="M${xx} ${y(c.high)}V${y(c.low)}" stroke="${color}" stroke-width="1.5"/><rect x="${xx-cw/2}" y="${top}" width="${cw}" height="${Math.max(1,bottom-top)}" fill="${color}" rx="1"><title>${safe(c.time)} O ${num(c.open)} H ${num(c.high)} L ${num(c.low)} C ${num(c.close)}</title></rect>`;});
+    [0,Math.floor((count-1)/2),count-1].forEach(j=>svg+=`<text x="${x(j+offset)}" y="${H-8}" text-anchor="middle" font-size="11" fill="currentColor">${safe(new Date(view[j].time).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}))}</text>`);
     svg+='</svg>';chart.innerHTML=svg;
-    if(label) label.textContent=`${timeframe} · ${rows.length} candles · Angel One ${stale?'(last tick stale)':'historical/live API'}`;
-    if(note) note.textContent='Candles are loaded from your local Angel One API. The 2-minute chart is aggregated from 1-minute candles starting at 09:15; only complete 2-minute buckets are shown. Chart candles are spot OHLC, not option premium.';
-  }
-  async function refreshChart(){
-    if(busy || document.visibilityState==='hidden') return;
-    busy=true;
+    if(label)label.textContent=`${timeframe} · ${rows.length} candles · ${count} visible · Angel One`;
+   }
+   async function refresh(){
+    if(busy||document.visibilityState==='hidden')return;busy=true;
     try{
-      const interval=timeframe==='2m'?'1m':timeframe;
-      const response=await fetch(base()+'/api/candles?interval='+interval+'&days=1');
-      const payload=await response.json();
-      if(!response.ok) throw new Error(payload.detail || 'HTTP '+response.status);
-      let candles=parseCandles(payload);
-      if(timeframe==='2m') candles=aggregateFromOneMinute(candles,2);
-      draw(candles, false);
-    }catch(err){
-      chart.innerHTML='<div style="height:100%;display:grid;place-items:center;text-align:center;padding:16px;color:#b45309;font-size:12px">Could not load real candles: '+safe(err.message)+'. Confirm Uvicorn is running and /api/candles is available.</div>';
-      if(label) label.textContent='Live candle data unavailable';
-    }finally{busy=false;}
-  }
-  document.querySelectorAll('.tf').forEach(button=>button.addEventListener('click',()=>{timeframe=button.dataset.tf;refreshChart();}));
-  const connect=document.getElementById('connect-python');
-  if(connect) connect.addEventListener('click',()=>setTimeout(refreshChart,800));
-  refreshChart();
-  setInterval(refreshChart,2000);
-})();
-</script>
-
-
-<script>
-// Candle zoom controls. Zoom stays anchored to the newest candle during refresh.
-(()=>{
-  const chart=document.querySelector('.chart');
-  if(!chart || document.getElementById('candle-zoom-controls')) return;
-  let zoom=1;
-  const controls=document.createElement('div');
-  controls.id='candle-zoom-controls';
-  controls.className='tfrow';
-  controls.style.cssText='align-items:center;margin:0 0 10px';
-  controls.innerHTML=
-    '<button type="button" class="tf" id="candle-zoom-in">＋ Zoom in</button>'+
-    '<button type="button" class="tf" id="candle-zoom-out">－ Zoom out</button>'+
-    '<button type="button" class="tf" id="candle-zoom-reset">Reset</button>'+
-    '<span class="muted" id="candle-zoom-level">100%</span>';
-  chart.parentNode.insertBefore(controls,chart);
-
-  function applyZoom(){
-    const svg=chart.querySelector('svg');
-    const level=document.getElementById('candle-zoom-level');
-    if(level) level.textContent=Math.round(zoom*100)+'%';
-    if(!svg) return;
-    // The chart renderer redraws a 900-unit-wide base viewBox every refresh.
-    const parts=(svg.dataset.baseViewBox || svg.getAttribute('viewBox') || '0 0 900 260').split(/\s+/).map(Number);
-    if(!svg.dataset.baseViewBox) svg.dataset.baseViewBox=parts.join(' ');
-    const [x,y,w,h]=parts;
-    const visibleWidth=w/zoom;
-    svg.setAttribute('viewBox',(x+w-visibleWidth)+' '+y+' '+visibleWidth+' '+h);
-  }
-
-  document.getElementById('candle-zoom-in').addEventListener('click',()=>{
-    zoom=Math.min(zoom*1.25,8);applyZoom();
-  });
-  document.getElementById('candle-zoom-out').addEventListener('click',()=>{
-    zoom=Math.max(zoom/1.25,1);applyZoom();
-  });
-  document.getElementById('candle-zoom-reset').addEventListener('click',()=>{
-    zoom=1;applyZoom();
-  });
-  new MutationObserver(()=>applyZoom()).observe(chart,{childList:true});
-  applyZoom();
-})();
+     const interval=timeframe==='2m'?'1m':timeframe;
+     const r=await fetch(base()+'/api/candles?interval='+interval+'&days=1');const p=await r.json();
+     if(!r.ok)throw new Error(p.detail||'HTTP '+r.status);
+     let rows=parse(p);if(timeframe==='2m')rows=aggregate(rows,2);
+     allRows=rows;if(rows.length&&visibleCount>rows.length)visibleCount=rows.length;draw(rows);
+    }catch(e){chart.innerHTML=`<div class="chart-message chart-error">Chart unavailable: ${safe(e.message)}. Check local API and /api/candles.</div>`;if(label)label.textContent='Live candle data unavailable';}
+    finally{busy=false;}
+   }
+   document.querySelectorAll('.tf').forEach(b=>b.addEventListener('click',()=>{timeframe=b.dataset.tf;visibleCount=60;refresh();}));
+   chart.addEventListener('wheel',e=>{e.preventDefault();const factor=e.deltaY<0?.8:1.25;visibleCount=Math.max(12,Math.min(240,Math.round(visibleCount*factor)));draw(allRows);},{passive:false});
+   refresh();setInterval(refresh,5000);
+  })();
 </script>
 
 <script>
-document.querySelectorAll('#user-historical-report iframe').forEach(frame=>{
- const fit=()=>{try{const doc=frame.contentDocument;if(doc&&doc.documentElement)frame.style.height=Math.max(360,doc.documentElement.scrollHeight+8)+'px'}catch(e){}};
- frame.addEventListener('load',()=>{fit();setTimeout(fit,200);setTimeout(fit,700)});
-});
+  document.querySelectorAll('#user-historical-report iframe').forEach(frame=>{
+   const fit=()=>{try{const doc=frame.contentDocument;if(doc&&doc.documentElement)frame.style.height=Math.max(0,doc.documentElement.scrollHeight+6)+'px'}catch(e){}};
+   frame.addEventListener('load',()=>{fit();setTimeout(fit,200);setTimeout(fit,700)});
+  });
+</script>
+<script>
+  document.querySelectorAll('.collapsible-heading').forEach(header=>{
+   const toggle=()=>{
+    let node=header.nextElementSibling;
+    let willHide=header.getAttribute('aria-expanded')!=='false';
+    while(node && !node.classList.contains('collapsible-heading')){
+     if(node.hasAttribute('data-collapse-content') || header.parentElement.classList.contains('layout') || header.parentElement.id==='user-historical-report' || header.parentElement.id==='live-monitor' || header.parentElement.id==='multi-timeframe-panel' || header.parentElement.classList.contains('card')){
+      node.style.display=willHide?'none':'';
+     }
+     node=node.nextElementSibling;
+    }
+    header.setAttribute('aria-expanded',willHide?'false':'true');
+    const icon=header.querySelector('.collapse-chevron');
+    if(icon) icon.textContent=willHide?'+':'−';
+   };
+   header.addEventListener('click',toggle);
+   header.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  });
+</script><script>
+  (()=>{
+   const apiBase=()=>{const el=document.getElementById('api-url');return (el?.value||'http://127.0.0.1:8000').trim().replace(/\/+$/,'');};
+   const connect=document.getElementById('connect-local-api');
+   if(connect) connect.addEventListener('click',async()=>{
+    const status=document.getElementById('connect-api-status');
+    connect.disabled=true;connect.textContent='Connecting…';status.textContent='Sending POST /api/connect…';
+    try{
+     const r=await fetch(apiBase()+'/api/connect',{method:'POST'});
+     const d=await r.json().catch(()=>({}));
+     if(!r.ok) throw new Error(d.detail||d.message||('HTTP '+r.status));
+     status.textContent=d.message||'API connect request completed. Check Live NIFTY feed status.';
+     connect.textContent='Retry API connection';
+    }catch(e){status.textContent='Connection failed: '+e.message+'. Confirm the local Python API is running and the API URL is correct.';connect.textContent='Retry API connection';}
+    finally{connect.disabled=false;}
+   });
+   const toggle=document.getElementById('auto-trading-toggle');
+   const qty=document.getElementById('auto-trading-quantity');
+   const state=document.getElementById('auto-trading-state');
+   const positions=document.getElementById('open-positions-rows');
+   const posStatus=document.getElementById('positions-status');
+   const refresh=document.getElementById('refresh-positions');
+   function render(d){
+    const on=!!d.enabled;
+    toggle.textContent=on?'ON · PAPER':'OFF';
+    toggle.classList.toggle('on',on);toggle.classList.toggle('off',!on);
+    toggle.setAttribute('aria-pressed',String(on));
+    qty.value=d.quantity_lots||1;
+    posStatus.textContent=on?'PAPER ON':'OFF';
+    state.textContent=on?'Paper auto mode is ON. It will simulate at most one open NIFTY spot position from a confirmed SMC signal. No broker order is sent.':'Paper auto mode is OFF. No new paper positions will be opened.';
+    const rows=d.open_positions||[];
+    positions.innerHTML=rows.length?rows.map(p=>{const m=p.monitoring||{};const status=v=>v==='HIT'?'HIT':'ACTIVE';const pnl=Number(p.unrealised_points);const pnlClass=pnl>0?'positive':pnl<0?'negative':'';return `<tr><td><b>${p.instrument||'NIFTY'}</b><br><small>${p.side||p.signal||'—'}</small></td><td>${p.quantity_lots}</td><td>${Number(p.entry_price).toFixed(2)}</td><td>${Number(p.stop_loss).toFixed(2)}<br><small class="${status(m.stop_loss||'ACTIVE')==='HIT'?'negative':'positive'}">${status(m.stop_loss||'ACTIVE')}</small></td><td>${Number(p.target_1).toFixed(2)}<br><small class="${status(m.target_1||(p.target_1_hit?'HIT':'ACTIVE'))==='HIT'?'positive':'muted'}">${status(m.target_1||(p.target_1_hit?'HIT':'ACTIVE'))}</small></td><td>${Number(p.target_2).toFixed(2)}<br><small class="${status(m.target_2||(p.target_2_hit?'HIT':'ACTIVE'))==='HIT'?'positive':'muted'}">${status(m.target_2||(p.target_2_hit?'HIT':'ACTIVE'))}</small></td><td>${Number(p.last_price).toFixed(2)}</td><td class="${pnlClass}">${Number.isFinite(pnl)?(pnl>0?'+':'')+pnl.toFixed(2):'—'}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">No open paper positions. Turn paper mode ON and wait for a valid signal during 09:30–11:40 IST.</td></tr>';
+   }
+   async function getStatus(){
+    const r=await fetch(apiBase()+'/api/paper-trading');const d=await r.json();if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));render(d);
+   }
+   if(toggle) toggle.addEventListener('click',async()=>{
+    toggle.disabled=true;
+    try{
+     const action=toggle.getAttribute('aria-pressed')==='true'?'stop':'start';
+     const r=await fetch(apiBase()+'/api/paper-trading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,quantity_lots:Number(qty.value||1)})});
+     const d=await r.json();if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));render(d);
+    }catch(e){state.textContent='Could not change paper mode: '+e.message+'. Check that the updated v3.15 package is running.';}
+    finally{toggle.disabled=false;}
+   });
+   if(qty) qty.addEventListener('change',async()=>{
+    try{
+     const r=await fetch(apiBase()+'/api/paper-trading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'quantity',quantity_lots:Number(qty.value||1)})});
+     const d=await r.json();if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));render(d);
+    }catch(e){state.textContent='Quantity update failed: '+e.message;}
+   });
+   if(refresh) refresh.addEventListener('click',async()=>{
+    refresh.disabled=true;refresh.textContent='Refreshing…';
+    try{await getStatus();}catch(e){posStatus.textContent='API unavailable';state.textContent='Cannot refresh paper status: '+e.message;}
+    finally{refresh.disabled=false;refresh.textContent='Refresh status';}
+   });
+   getStatus().catch(e=>{state.textContent='Paper controls unavailable. Start the updated v3.14 Python API.';posStatus.textContent='API unavailable';});
+   setInterval(()=>getStatus().catch(()=>{}),2000);
+   window.addEventListener('message',e=>{
+    const frame=document.querySelector('#user-historical-report iframe');
+    if(!frame||e.source!==frame.contentWindow||e.data?.type!=='smc-report-height')return;
+    const height=Number(e.data.height);
+    if(Number.isFinite(height)) frame.style.height=Math.max(0,Math.min(1500,height+4))+'px';
+   });
+  })();
+</script>
+<script>
+  // v3.16 daily signal journal: automatic 2-second refresh plus manual refresh.
+  (function(){
+   const apiBase=()=>((document.getElementById('api-url')?.value||'http://127.0.0.1:8000').trim().replace(/\/+$/,''));
+   const $=id=>document.getElementById(id);
+   const fmt=v=>(v===null||v===undefined||v===''?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}));
+   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+   async function refreshTodayJournal(){
+    const updated=$('today-journal-updated');
+    try{
+     const r=await fetch(apiBase()+'/api/signals/today',{cache:'no-store'});
+     const d=await r.json();
+     if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));
+     $('today-scan-count').textContent=d.scan_count??0;
+     $('today-confirmed-count').textContent=d.confirmed_count??0;
+     $('today-wait-count').textContent=d.wait_count??0;
+     $('today-journal-date').textContent=(d.date||'—')+' · IST';
+     const rows=(d.confirmed_signals||[]).slice().reverse();
+     const wrap=$('today-journal-table-wrap'),msg=$('today-journal-message'),body=$('today-journal-rows');
+     if(rows.length){
+      body.innerHTML=rows.map(x=>'<tr><td>'+esc(x.time||x.timestamp||'—')+'</td><td><b>'+esc(x.signal||'—')+'</b></td><td>'+fmt(x.entry)+'</td><td>'+fmt(x.stop_loss)+'</td><td>'+fmt(x.target_1)+'</td><td>'+fmt(x.target_2)+'</td><td><span class="tag">CONFIRMED</span></td></tr>').join('');
+      wrap.style.display='block';msg.style.display='none';
+     }else{
+      wrap.style.display='none';msg.style.display='block';
+      msg.textContent=d.scan_count>0
+        ?'No confirmed CE/PE entry signal recorded today. The scanner evaluated '+d.scan_count+' completed 1-minute candles ('+d.wait_count+' WAIT results). Latest analysis is shown in section 2.'
+        :'No completed 1-minute scans are available for today yet. Keep the Python API running; this journal will fill from local completed candles.';
+     }
+     if(updated)updated.textContent='Updated '+new Date().toLocaleTimeString('en-IN')+' · auto every 2 sec';
+    }catch(e){
+     if(updated)updated.textContent='History unavailable · '+e.message;
+     $('today-journal-message').textContent='Could not load today’s signal history: '+e.message+'. Check that the updated Python API is running.';
+    }
+   }
+   const button=$('refresh-today-journal');
+   if(button)button.addEventListener('click',async()=>{button.disabled=true;button.textContent='Refreshing…';try{await refreshTodayJournal()}finally{button.disabled=false;button.textContent='Refresh history'}});
+   refreshTodayJournal();
+   setInterval(refreshTodayJournal,2000);
+  })();
 </script>
 </body></html>
