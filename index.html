@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="#0b1220" name="theme-color"/>
-  <title>NIFTY SMC Scanner</title>
+  <title>TEJANSH RESEARCH SMC SCANNER</title>
   <style>
     :root{
      --site-primary:#173b68;--site-secondary:#0d766e;--site-background:#0b1220;
@@ -285,21 +285,751 @@
     #today-signal-history #today-journal-message {font-size:11px!important;line-height:1.55!important}
     #today-signal-history table {font-size:11px!important}
     #today-signal-history th,#today-signal-history td {font-size:11px!important}
+  
+    /* v3.19: compact header quote and independent MTF refresh/collapse controls */
+    header{gap:18px}
+    .header-market{
+      display:flex;align-items:center;gap:10px;flex:0 0 auto;
+      padding:7px 13px;border-left:1px solid light-dark(#d8e1ed,#34465f);
+      white-space:nowrap
+    }
+    .header-market span{
+      font-size:10px;font-weight:750;letter-spacing:.07em;
+      color:light-dark(#64748b,#9aabc3);text-transform:uppercase
+    }
+    .header-market strong{
+      font-size:clamp(19px,2vw,25px);font-weight:850;letter-spacing:-.7px;
+      font-variant-numeric:tabular-nums;color:light-dark(#172338,#f1f6ff)
+    }
+    #live-monitor .history-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+    #multi-timeframe-panel .section-title{display:flex;align-items:center;gap:14px}
+    #multi-timeframe-panel .section-title h3{flex:1;min-width:0}
+    #multi-timeframe-panel .mtf-actions{
+      display:flex;align-items:center;justify-content:flex-end;gap:10px;
+      flex:0 1 auto;min-width:0
+    }
+    #multi-timeframe-panel #mtf-last-refresh{white-space:nowrap}
+    #multi-timeframe-panel #refresh-mtf{white-space:nowrap;flex:0 0 auto}
+    #multi-timeframe-panel .collapse-chevron{
+      order:3;flex:0 0 28px;width:28px;min-width:28px;
+      display:grid;place-items:center;margin-left:2px;
+      border-radius:8px;cursor:pointer
+    }
+    @media(max-width:760px){
+      header{align-items:center;flex-wrap:wrap}
+      .header-market{margin-left:auto;border-left:0;padding:4px 0}
+      .header-market span{font-size:9px}
+      .header-market strong{font-size:18px}
+      .topright{width:100%;justify-content:flex-end}
+      #multi-timeframe-panel .section-title{flex-wrap:wrap}
+      #multi-timeframe-panel .section-title h3{flex:1 1 calc(100% - 42px)}
+      #multi-timeframe-panel .mtf-actions{
+        order:3;flex:1 1 auto;justify-content:flex-start;flex-wrap:wrap
+      }
+      #multi-timeframe-panel .collapse-chevron{order:2;margin-left:auto;align-self:flex-start}
+      #multi-timeframe-panel #mtf-last-refresh{white-space:normal}
+    }
+    @media(max-width:480px){
+      .brand{max-width:calc(100% - 120px)}
+      .brand h1{font-size:14px!important}
+      .brand .sub{font-size:9px}
+      .header-market{gap:6px}
+      .header-market strong{font-size:16px}
+      #live-monitor .history-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+      #multi-timeframe-panel .mtf-actions{width:100%}
+      #multi-timeframe-panel #refresh-mtf{padding:8px 10px;font-size:11px}
+    }
+
   </style>
+
+
+  <style>
+    /* v3.20 mobile layout: three live status metrics in one row */
+    @media (max-width: 600px) {
+      #live-monitor > .history-summary:not(#live-trade-plan) {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 7px !important;
+        overflow: visible !important;
+      }
+      #live-monitor > .history-summary:not(#live-trade-plan) .history-metric {
+        min-width: 0 !important;
+        padding: 9px 7px !important;
+      }
+      #live-monitor > .history-summary:not(#live-trade-plan) .history-metric span {
+        font-size: 9px !important;
+        line-height: 1.25 !important;
+      }
+      #live-monitor > .history-summary:not(#live-trade-plan) .history-metric strong {
+        font-size: 13px !important;
+        line-height: 1.25 !important;
+        overflow-wrap: anywhere !important;
+      }
+      #live-monitor #live-tick-time { font-size: 11px !important; }
+      #live-monitor #live-overall-signal { font-size: 15px !important; }
+
+      /* Four SMC timeframe cards: two columns x two rows on mobile */
+      #multi-timeframe-panel #live-timeframes,
+      #multi-timeframe-panel #live-timeframes.mtf-single-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 9px !important;
+        overflow: visible !important;
+        white-space: normal !important;
+      }
+      #multi-timeframe-panel #live-timeframes .history-metric {
+        min-width: 0 !important;
+        padding: 12px 10px !important;
+        white-space: normal !important;
+      }
+    }
+
+    /* A collapsed section hides every direct content block, not just selected nodes. */
+    .dashboard-section-collapsed > :not(.collapsible-heading) {
+      display: none !important;
+    }
+  </style>
+
+
+  <style>
+    /* v3.21: force Paper Trading and Signal History to match the dark dashboard */
+    #auto-trading-panel,
+    #today-signal-history {
+      background: linear-gradient(155deg,#132137,#101c2d) !important;
+      color: #e8f0fb !important;
+      border: 1px solid #293d58 !important;
+      border-radius: 16px !important;
+      box-shadow: 0 10px 28px rgba(0,0,0,.13) !important;
+    }
+    #auto-trading-panel .collapsible-heading,
+    #today-signal-history .collapsible-heading {
+      background: transparent !important;
+      border-bottom: 1px solid rgba(145,164,189,.15) !important;
+    }
+    #auto-trading-panel .collapsible-heading h3,
+    #today-signal-history .collapsible-heading h3 {
+      color: #edf4ff !important;
+    }
+    #auto-trading-panel .note,
+    #today-signal-history .note,
+    #today-signal-history .journal-actions small {
+      color: #9aadc4 !important;
+    }
+    #auto-trading-panel .auto-control,
+    #auto-trading-panel .panel,
+    #auto-trading-panel #positions-status,
+    #today-signal-history #today-journal-message,
+    #today-signal-history .empty-history {
+      background: #172940 !important;
+      color: #dce8f7 !important;
+      border-color: #344b69 !important;
+    }
+    #auto-trading-panel .auto-control label,
+    #auto-trading-panel .panel .section-title h3 {
+      color: #b9c9dc !important;
+    }
+    #auto-trading-panel input,
+    #auto-trading-panel select,
+    #auto-trading-panel button,
+    #today-signal-history button {
+      background: #172940 !important;
+      color: #e8f0fb !important;
+      border: 1px solid #344b69 !important;
+    }
+    #auto-trading-panel button.primary,
+    #today-signal-history button.primary {
+      background: linear-gradient(135deg,#2865a6,#1e568f) !important;
+      color: #fff !important;
+      border-color: #3477b9 !important;
+    }
+    #auto-trading-panel .history-metric,
+    #today-signal-history .history-metric {
+      background: #172940 !important;
+      color: #e8f0fb !important;
+      border: 1px solid rgba(116,145,180,.16) !important;
+    }
+    #auto-trading-panel .history-metric span,
+    #today-signal-history .history-metric span {
+      color: #9aadc4 !important;
+    }
+    #auto-trading-panel .history-metric strong,
+    #today-signal-history .history-metric strong {
+      color: #edf4ff !important;
+    }
+    #auto-trading-panel .table-wrap,
+    #today-signal-history .table-wrap {
+      background: #0e1a2b !important;
+      border: 1px solid #293d58 !important;
+    }
+    #auto-trading-panel table,
+    #today-signal-history table {
+      color: #dce8f7 !important;
+    }
+    #auto-trading-panel th,
+    #today-signal-history th {
+      background: #1b2d45 !important;
+      color: #bdcde0 !important;
+    }
+    #auto-trading-panel td,
+    #today-signal-history td {
+      color: #d3dfed !important;
+      border-color: rgba(145,164,189,.14) !important;
+    }
+  </style>
+
+
+<style>
+  /* v3.22: consistent section surfaces and heading dividers */
+  .wrap > .layout > section.card,
+  .wrap > section.card,
+  #auto-trading-panel,
+  #today-signal-history,
+  #user-historical-report {
+    background: #121f32 !important;
+    color: #e8f0fb !important;
+    border: 1px solid #293d58 !important;
+    border-radius: 16px !important;
+  }
+
+  .collapsible-heading {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    padding: 2px 2px 11px !important;
+    margin: 0 0 12px !important;
+    border-bottom: 1px solid rgba(145,164,189,.22) !important;
+    background: transparent !important;
+  }
+  .collapsible-heading h3 { color: #edf4ff !important; }
+  .collapsible-heading .collapse-chevron { color: #8fa4bf !important; }
+
+  /* Section 3: dark controls and subpanels */
+  #auto-trading-panel .auto-control,
+  #auto-trading-panel .panel,
+  #auto-trading-panel #positions-status,
+  #auto-trading-panel .history-metric {
+    background: #172940 !important;
+    color: #dce8f7 !important;
+    border-color: #344b69 !important;
+  }
+  #auto-trading-panel label,
+  #auto-trading-panel .note,
+  #auto-trading-panel .muted { color: #9aadc4 !important; }
+  #auto-trading-panel input,
+  #auto-trading-panel select {
+    background: #101d30 !important;
+    color: #e8f0fb !important;
+    border-color: #344b69 !important;
+  }
+
+  /* Section 4: dark history cards and table */
+  #today-signal-history .history-metric,
+  #today-signal-history .empty-history,
+  #today-signal-history .table-wrap {
+    background: #172940 !important;
+    color: #dce8f7 !important;
+    border-color: #344b69 !important;
+  }
+  #today-signal-history .note,
+  #today-signal-history small,
+  #today-signal-history .history-metric span { color: #9aadc4 !important; }
+  #today-signal-history table { color: #dce8f7 !important; }
+  #today-signal-history th {
+    background: #1b2d45 !important;
+    color: #bdcde0 !important;
+  }
+  #today-signal-history td {
+    color: #d3dfed !important;
+    border-color: rgba(145,164,189,.18) !important;
+  }
+
+  /* Section 6 iframe container remains transparent against the dark parent. */
+  #user-historical-report iframe {
+    display: block;
+    width: 100%;
+    background: transparent !important;
+    color-scheme: dark;
+    border: 0 !important;
+  }
+</style>
+
+
+<style>
+  /* v3.23: compact controls and balanced 2-column layouts */
+  #auto-trading-panel #auto-trading-toggle {
+    min-width: 0 !important;
+    width: auto !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 6px 13px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    border-radius: 8px !important;
+    align-self: flex-start !important;
+  }
+
+  @media (max-width: 650px) {
+    /* Section 4: four summary tiles in two columns / two rows */
+    #today-signal-history #today-journal-summary {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+    }
+    #today-signal-history #today-journal-summary .history-metric {
+      min-width: 0 !important;
+      padding: 10px !important;
+    }
+
+    /* If the journal header has multiple action buttons, place them 2 across. */
+    #today-signal-history .journal-actions {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, max-content)) !important;
+      align-items: center !important;
+      justify-content: end !important;
+      gap: 7px !important;
+      flex-wrap: wrap !important;
+    }
+    #today-signal-history .journal-actions small {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
+
+
+<style>
+  /* v3.24: two-column controls in Connection Setup and Python Scanner */
+  .connection-setup-section > .controls,
+  .python-scanner-section > .controls {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: center !important;
+    gap: 9px !important;
+    width: 100% !important;
+  }
+  .connection-setup-section > .controls > *,
+  .python-scanner-section > .controls > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .connection-setup-section > .controls > .primary,
+  .python-scanner-section > .controls > .primary {
+    min-height: 40px !important;
+    padding: 8px 11px !important;
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+  }
+  .python-scanner-section > .controls > #python-status {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+    width: max-content !important;
+  }
+  .connection-setup-section > .controls > select {
+    min-height: 40px !important;
+  }
+
+  /* Paper Trading: make the Auto Trading label and ON/OFF control compact. */
+  #auto-controls-row .auto-control:first-child {
+    align-items: flex-start !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+  }
+  #auto-controls-row .auto-control label {
+    display: block !important;
+    width: auto !important;
+    margin: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    letter-spacing: .03em !important;
+    font-weight: 650 !important;
+  }
+  #auto-controls-row #auto-trading-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 7px 14px !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    border-radius: 8px !important;
+  }
+
+  @media (max-width: 600px) {
+    .connection-setup-section > .controls,
+    .python-scanner-section > .controls {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+    }
+    .connection-setup-section > .controls > .primary,
+    .python-scanner-section > .controls > .primary {
+      min-height: 42px !important;
+      padding: 8px 9px !important;
+      font-size: 11px !important;
+    }
+    #auto-controls-row .auto-control:first-child {
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+  }
+</style>
+
+
+<style>
+  /* v3.25: compact Auto Trading label to match the other control labels */
+  #auto-trading-panel #auto-controls-row > .auto-control:first-child > label {
+    display: block !important;
+    width: auto !important;
+    max-width: max-content !important;
+    margin: 0 0 5px 0 !important;
+    padding: 0 !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    font-weight: 650 !important;
+    letter-spacing: .025em !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+</style>
+
+
+<style>
+  /* v3.26: separate NIFTY spot points from option premium points and rupee P&L */
+  #today-signal-history .pnl-positive { color: #35d68a !important; font-weight: 700 !important; }
+  #today-signal-history .pnl-negative { color: #ff6b78 !important; font-weight: 700 !important; }
+  #today-signal-history .pnl-flat { color: #b8c7d9 !important; font-weight: 650 !important; }
+  #today-signal-history .table-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  #today-signal-history table { min-width: 1050px; }
+  #today-signal-history th, #today-signal-history td { white-space: nowrap !important; }
+</style>
+
+
+<style>
+  /* v3.27: unify Paper Trading and Today's Signals with the dark dashboard */
+  #auto-trading-panel .auto-control,
+  #auto-trading-panel .trade-detail,
+  #auto-trading-panel .table-wrap,
+  #today-signal-history .history-metric,
+  #today-signal-history .trade-detail,
+  #today-signal-history .table-wrap,
+  #today-signal-history .empty-history {
+    background: #192a40 !important;
+    color: #e6eef9 !important;
+    border-color: #30445f !important;
+    box-shadow: none !important;
+  }
+
+  #auto-trading-panel .auto-control label,
+  #auto-trading-panel .auto-control > span,
+  #auto-trading-panel .note,
+  #today-signal-history .history-metric span,
+  #today-signal-history .note,
+  #today-signal-history .journal-actions small,
+  #today-signal-history .muted {
+    color: #a6b6cb !important;
+  }
+
+  #auto-trading-panel .collapsible-heading h3,
+  #today-signal-history .collapsible-heading h3 {
+    color: #e6eef9 !important;
+  }
+
+  #auto-trading-panel .auto-control input,
+  #auto-trading-panel .auto-control select,
+  #auto-trading-panel .auto-control button,
+  #today-signal-history input,
+  #today-signal-history select {
+    background: #101d30 !important;
+    color: #e6eef9 !important;
+    border-color: #3a506d !important;
+  }
+
+  #today-signal-history th {
+    background: #223650 !important;
+    color: #dce8f7 !important;
+    border-color: #30445f !important;
+  }
+  #today-signal-history td {
+    color: #dce8f7 !important;
+    border-color: #30445f !important;
+  }
+
+  #auto-trading-panel .collapsible-heading,
+  #today-signal-history .collapsible-heading {
+    border-bottom-color: #30445f !important;
+  }
+
+  #auto-trading-panel .auto-control label {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+    font-weight: 650 !important;
+  }
+</style>
+
+
+<style id="desktop-readable-dark-controls-fix">
+/* Targeted contrast repair for Sections 8–10.
+   Keeps the existing dashboard structure, mobile layout, and all JS/API logic intact. */
+.concept-coverage-section,
+.connection-setup-section,
+.python-scanner-section {
+  color-scheme: dark !important;
+  background: #121f32 !important;
+  color: #e8f0fb !important;
+  border-color: #293d58 !important;
+}
+
+/* Section 8: concept tiles were inheriting pale text on a light surface. */
+.concept-coverage-section .concept {
+  background: #192a40 !important;
+  color: #e6eef9 !important;
+  border: 1px solid #30445f !important;
+  box-shadow: none !important;
+}
+.concept-coverage-section .concept b,
+.concept-coverage-section .concept strong {
+  color: #eaf2fc !important;
+}
+.concept-coverage-section .concept span,
+.concept-coverage-section .note {
+  color: #a9b9ce !important;
+}
+
+/* Section 9: make every select, label, and action readable on the dark card. */
+.connection-setup-section .collapsible-heading,
+.python-scanner-section .collapsible-heading {
+  background: transparent !important;
+  border-bottom: 1px solid #30445f !important;
+}
+.connection-setup-section .collapsible-heading h3,
+.python-scanner-section .collapsible-heading h3 {
+  color: #edf4ff !important;
+}
+.connection-setup-section .controls,
+.python-scanner-section .controls {
+  color: #dce8f7 !important;
+}
+.connection-setup-section .controls label,
+.python-scanner-section .controls label,
+.connection-setup-section .note,
+.python-scanner-section .note,
+.python-scanner-section #connect-api-status,
+.python-scanner-section #python-detail {
+  color: #a9b9ce !important;
+}
+.connection-setup-section select,
+.connection-setup-section input,
+.python-scanner-section select,
+.python-scanner-section input,
+.connection-setup-section .select,
+.python-scanner-section .select {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  background-color: #192a40 !important;
+  background-image: none !important;
+  color: #eaf2fc !important;
+  -webkit-text-fill-color: #eaf2fc !important;
+  border: 1px solid #3a506d !important;
+  caret-color: #eaf2fc !important;
+  color-scheme: dark !important;
+}
+.connection-setup-section select option,
+.python-scanner-section select option {
+  background: #192a40 !important;
+  color: #eaf2fc !important;
+}
+.connection-setup-section input::placeholder,
+.python-scanner-section input::placeholder {
+  color: #8fa4bf !important;
+  opacity: 1 !important;
+}
+.connection-setup-section button,
+.python-scanner-section button {
+  background: #192a40 !important;
+  color: #eaf2fc !important;
+  -webkit-text-fill-color: #eaf2fc !important;
+  border: 1px solid #3a506d !important;
+}
+.connection-setup-section button.primary,
+.python-scanner-section button.primary,
+.python-scanner-section #connect-local-api {
+  background: #1d4778 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: #3477b9 !important;
+}
+.connection-setup-section .pill,
+.python-scanner-section .pill,
+.python-scanner-section #python-status {
+  background: #192a40 !important;
+  color: #c7d6e8 !important;
+  border: 1px solid #3a506d !important;
+}
+.connection-setup-section button:focus-visible,
+.python-scanner-section button:focus-visible,
+.connection-setup-section select:focus-visible,
+.python-scanner-section input:focus-visible {
+  outline: 2px solid #5796d6 !important;
+  outline-offset: 2px !important;
+}
+</style>
+
+
+<style id="match-sections-1-2-5-7-to-section-10">
+/* Match the dark navy surface and readable contrast already used by Section 10. */
+#live-monitor,
+#multi-timeframe-panel,
+.research-engine-section,
+.layout > .section-title,
+.layout > section.card,
+.layout > aside.card {
+  background: #121f32 !important;
+  color: #e8f0fb !important;
+  border: 1px solid #293d58 !important;
+  color-scheme: dark !important;
+}
+
+/* Section headings and separators */
+#live-monitor > .section-title,
+#multi-timeframe-panel > .section-title,
+.research-engine-section > .section-title,
+.layout > .section-title {
+  background: transparent !important;
+  color: #edf4ff !important;
+  border-bottom: 1px solid #30445f !important;
+}
+#live-monitor .section-title h3,
+#multi-timeframe-panel .section-title h3,
+.research-engine-section .section-title h3,
+.layout .section-title h3 {
+  color: #edf4ff !important;
+}
+
+/* Inner data tiles, findings, and signal cards */
+#live-monitor .history-metric,
+#multi-timeframe-panel .history-metric,
+#multi-timeframe-panel .trade-detail,
+.layout .signal,
+.research-engine-section .concept {
+  background: #192a40 !important;
+  color: #e6eef9 !important;
+  border: 1px solid #30445f !important;
+  box-shadow: none !important;
+}
+#live-monitor .history-metric span,
+#multi-timeframe-panel .history-metric span,
+#multi-timeframe-panel .trade-explain,
+#multi-timeframe-panel .muted,
+.layout .muted,
+.layout .note,
+.research-engine-section .concept span,
+.research-engine-section .note {
+  color: #a9b9ce !important;
+}
+#live-monitor .history-metric strong,
+#multi-timeframe-panel .history-metric strong,
+#multi-timeframe-panel .trade-detail h4,
+.layout .signal strong,
+.research-engine-section .concept b {
+  color: #eaf2fc !important;
+}
+
+/* Section 5 timeframe controls and chart canvas */
+.layout .tf {
+  background: #192a40 !important;
+  color: #dce8f7 !important;
+  border-color: #3a506d !important;
+}
+.layout .tf.active {
+  background: #1d4778 !important;
+  color: #ffffff !important;
+  border-color: #3477b9 !important;
+}
+.layout .chart {
+  background: #0d1727 !important;
+  border-color: #293d58 !important;
+}
+.layout .legend { color: #a9b9ce !important; }
+
+/* Section 1 and 2 action buttons retain the same navy/blue button treatment. */
+#multi-timeframe-panel button,
+#live-monitor button,
+.layout button,
+.research-engine-section button {
+  color: #eaf2fc !important;
+}
+#multi-timeframe-panel button.primary,
+.layout button.primary,
+.research-engine-section button.primary {
+  background: #1d4778 !important;
+  color: #ffffff !important;
+  border-color: #3477b9 !important;
+}
+</style>
+
+
+<style id="section5-wrapper-and-kpd-brand-fix">
+/* Section 5: the collapsible title is a child of .layout, so the
+   parent itself must also use the same dark surface as Section 10. */
+.layout {
+  background: #121f32 !important;
+  color: #e8f0fb !important;
+  border: 1px solid #293d58 !important;
+  border-radius: 16px !important;
+  padding: 14px !important;
+  color-scheme: dark !important;
+}
+.layout > .section-title {
+  background: transparent !important;
+  color: #edf4ff !important;
+  border: 0 !important;
+  border-bottom: 1px solid #30445f !important;
+  padding: 2px 2px 12px !important;
+  margin: 0 0 14px !important;
+}
+.layout > .section-title h3,
+.layout > .section-title .collapse-chevron {
+  color: #edf4ff !important;
+}
+.layout > section.card,
+.layout > aside.card {
+  background: #121f32 !important;
+  color: #e8f0fb !important;
+  border: 1px solid #293d58 !important;
+}
+
+/* Improve the brand title contrast against the light desktop page header. */
+header .brand h1 {
+  color: #173b68 !important;
+}
+header .brand .sub {
+  color: #536b88 !important;
+}
+header .logo {
+  background: linear-gradient(145deg, #1e4775, #12304f) !important;
+  color: #ffffff !important;
+  border: 1px solid #365574 !important;
+  font-weight: 900 !important;
+}
+</style>
 
 </head>
 <body><main id="app">
-  <header><div class="brand"><div class="logo">SMC</div><div><h1>NIFTY SMC Research Lab v3.18</h1><div class="sub">Angel One · Multi-timeframe market analysis</div></div></div><div class="topright"><span class="pill">LOCAL LIVE API</span><span class="pill">Weekly expiry · Moderate risk</span><span class="pill">Manual execution only</span></div></header>
+  <header><div class="brand"><div class="logo" aria-label="KPD logo">KPD</div><div><h1>TEJANSH RESEARCH SMC SCANNER</h1><div class="sub">NIFTY 50 · Smart Money Concepts · Multi-timeframe market research</div></div></div><div class="header-market"><span>NIFTY 50</span><strong id="hero-live-price">— —</strong></div><div class="topright"><span class="pill">LOCAL LIVE API</span><span class="pill">Weekly expiry · Moderate risk</span><span class="pill">Manual execution only</span></div></header>
   <div class="wrap">
-    <section class="hero"><div><h2>Smart Money Concepts dashboard</h2><p>5m structure → 2m FVG / OB / IDM → 1m entry<br/>Manual trade approval · Telugu + English explanations</p></div><div class="market">NIFTY 50<br/><strong id="hero-live-price" style="font-size:24px">— —</strong><br/>Price shown in live monitor below</div></section><section class="card bottom" id="live-monitor">
+    <section class="card bottom" id="live-monitor">
     <div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>1. Live NIFTY 50 · WebSocket 2.0</h3><span class="collapse-chevron">−</span></div>
     <div class="history-summary" data-collapse-content="true">
-      <div class="history-metric"><span>Latest NIFTY 50 price</span><strong id="live-price">—</strong></div>
+      <span id="live-price" hidden>—</span>
       <div class="history-metric"><span>Last exchange tick</span><strong id="live-tick-time" style="font-size:13px">—</strong></div>
       <div class="history-metric"><span>Tick age</span><strong id="live-tick-age">—</strong></div>
       <div class="history-metric"><span>Overall signal</span><strong id="live-overall-signal">WAIT</strong></div>
     </div><div class="history-summary" data-collapse-content="true" id="live-trade-plan" style="margin-top:12px;grid-template-columns:repeat(4,minmax(0,1fr))"><div class="history-metric"><span>Entry reference</span><strong id="live-plan-entry">Waiting for signal</strong></div><div class="history-metric"><span>Stop-loss</span><strong id="live-plan-stop">—</strong></div><div class="history-metric"><span>Target 1 · 1R</span><strong id="live-plan-t1">—</strong></div><div class="history-metric"><span>Target 2 · 2R</span><strong id="live-plan-t2">—</strong></div></div><p class="note" data-collapse-content="true" id="live-plan-note" style="margin-top:6px">Entry is the completed 1-minute signal candle close; stop and targets are NIFTY spot reference levels (1R and 2R), not option premium prices. Manual verification required; no orders are placed.</p>
-  </section><section class="card bottom" id="multi-timeframe-panel"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>2. Multi-timeframe SMC analysis</h3><span class="mtf-actions"><small id="mtf-last-refresh">Waiting for analysis</small><button class="primary" id="refresh-mtf" type="button">Refresh analysis</button><span class="collapse-chevron">−</span></span></div><div class="history-summary mtf-single-row" data-collapse-content="true" id="live-timeframes">
+  </section><section class="card bottom" id="multi-timeframe-panel"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>2. Multi-timeframe SMC analysis</h3><span class="mtf-actions"><small id="mtf-last-refresh">Waiting for analysis</small><button class="primary" id="refresh-mtf" type="button">Refresh analysis</button></span><span class="collapse-chevron" aria-hidden="true">−</span></div><div class="history-summary mtf-single-row" data-collapse-content="true" id="live-timeframes">
     <div class="history-metric"><span>5m · BOS / MSS</span><strong>Awaiting data</strong></div>
     <div class="history-metric"><span>5m · Structure</span><strong>Awaiting data</strong></div>
     <div class="history-metric"><span>2m · Setup</span><strong>WAIT</strong></div>
@@ -308,23 +1038,23 @@
     <div class="trade-detail"><h4>Detected SMC findings</h4><div class="trade-explain" id="live-findings">Waiting for live candle analysis.</div></div>
     <div class="trade-detail"><h4>Feed health &amp; connection</h4><div class="trade-explain" id="live-feed-detail">Connection status will appear here. A stale tick is normal outside market hours.</div></div>
   </div></section>
-    <section class="card bottom" id="auto-trading-panel"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>3&nbsp; Paper Trading</h3><span class="collapse-chevron">−</span></div><div data-collapse-content="true"><p class="note">Paper mode only: on a confirmed SMC signal, selects the nearest-expiry ATM NIFTY CE/PE contract. NIFTY spot levels trigger SL/targets; live option premium ticks calculate paper P&amp;L. No Angel One orders are placed.</p><div class="auto-controls-row" id="auto-controls-row"><div class="auto-control"><label>Auto trading</label><button aria-pressed="false" class="auto-toggle off" id="auto-trading-toggle" type="button">OFF</button></div><div class="auto-control"><label for="auto-trading-quantity">Quantity (lots)</label><input id="auto-trading-quantity" max="100" min="1" step="1" type="number" value="1"/></div><div class="auto-control"><label>Refresh</label><button id="refresh-positions" type="button">Refresh status</button></div></div><p class="note" id="auto-trading-state">Paper auto mode is OFF.</p><div class="panel" style="margin-top:10px"><div class="section-title"><h3>Paper open positions</h3><span class="pill" id="positions-status">OFF</span></div><div class="tablebox paper-table-wrap" style="overflow:auto"><table class="paper-positions-table"><thead><tr><th>ATM option contract</th><th>Lots</th><th>Entry premium</th><th>NIFTY SL</th><th>NIFTY Target 1</th><th>NIFTY Target 2</th><th>Last premium</th><th>Option P&amp;L (₹)</th></tr></thead><tbody id="open-positions-rows"><tr><td class="empty" colspan="8">No open paper positions.</td></tr></tbody></table></div></div></div></section><section class="card bottom" id="today-signal-history">
+    <section class="card bottom" id="auto-trading-panel"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>3&nbsp; Paper Trading</h3><span class="collapse-chevron">−</span></div><div data-collapse-content="true"><p class="note">Paper mode only: maximum 3 paper entries per day, only 09:30–11:50 IST, and never more than one open paper trade at a time. The signal journal records all completed scans from 09:30–15:00 IST. On a confirmed SMC signal, selects the nearest-expiry ATM NIFTY CE/PE contract. NIFTY spot levels trigger SL/targets; live option premium ticks calculate paper P&amp;L. No Angel One orders are placed.</p><div class="auto-controls-row" id="auto-controls-row"><div class="auto-control"><label>Auto trading</label><button aria-pressed="false" class="auto-toggle off" id="auto-trading-toggle" type="button">OFF</button></div><div class="auto-control"><label for="auto-trading-quantity">Quantity (lots)</label><input id="auto-trading-quantity" max="100" min="1" step="1" type="number" value="1"/></div><div class="auto-control"><label>Refresh</label><button id="refresh-positions" type="button">Refresh status</button></div></div><p class="note" id="auto-trading-state">Paper auto mode is OFF.</p><div class="panel" style="margin-top:10px"><div class="section-title"><h3>Paper open positions</h3><span class="pill" id="positions-status">OFF</span></div><div class="tablebox paper-table-wrap" style="overflow:auto"><table class="paper-positions-table"><thead><tr><th>ATM option contract</th><th>Lots</th><th>Entry premium</th><th>NIFTY SL</th><th>NIFTY Target 1</th><th>NIFTY Target 2</th><th>Last premium</th><th>Option P&amp;L (₹)</th></tr></thead><tbody id="open-positions-rows"><tr><td class="empty" colspan="8">No open paper positions.</td></tr></tbody></table></div></div></div></section><section class="card bottom" id="today-signal-history">
     <div class="section-title collapsible-heading" role="button" tabindex="0" aria-expanded="true">
       <h3>4&nbsp; Today's Signals &amp; Missed Entries</h3>
       <span class="journal-actions"><small id="today-journal-updated">Loading today's scan history…</small><button class="primary" id="refresh-today-journal" type="button">Refresh history</button><span class="collapse-chevron">−</span></span>
     </div>
     <div data-collapse-content="true">
       <div class="history-summary" id="today-journal-summary">
-        <div class="history-metric"><span>Completed 1m scans today</span><strong id="today-scan-count">—</strong></div>
-        <div class="history-metric"><span>Confirmed CE / PE signals</span><strong id="today-confirmed-count">—</strong></div>
-        <div class="history-metric"><span>WAIT scans</span><strong id="today-wait-count">—</strong></div>
-        <div class="history-metric"><span>Trading date · IST</span><strong id="today-journal-date">—</strong></div>
+        <div class="history-metric" style="background-color:#192a40 !important;color:#e6eef9 !important;border:1px solid #30445f !important;box-shadow:none !important;"><span style="color:#a9b9ce !important;">Completed 1m scans today</span><strong id="today-scan-count">—</strong></div>
+        <div class="history-metric" style="background-color:#192a40 !important;color:#e6eef9 !important;border:1px solid #30445f !important;box-shadow:none !important;"><span style="color:#a9b9ce !important;">Confirmed CE / PE signals</span><strong id="today-confirmed-count">—</strong></div>
+        <div class="history-metric" style="background-color:#192a40 !important;color:#e6eef9 !important;border:1px solid #30445f !important;box-shadow:none !important;"><span style="color:#a9b9ce !important;">WAIT scans</span><strong id="today-wait-count">—</strong></div>
+        <div class="history-metric" style="background-color:#192a40 !important;color:#e6eef9 !important;border:1px solid #30445f !important;box-shadow:none !important;"><span style="color:#a9b9ce !important;">Trading date · IST</span><strong id="today-journal-date">—</strong></div>
       </div>
-      <div id="today-journal-message" class="empty-history">Today's completed-candle signal history will appear here. The journal is reconstructed from local cached candles where available.</div>
+      <div id="today-journal-message" class="empty-history">Today's 09:30–15:00 IST completed-candle scan history will appear here, including WAIT scans. Paper entries are separately limited to 3 per day from 09:30–11:50 IST.</div>
       <div class="table-wrap" id="today-journal-table-wrap" style="display:none">
-        <table><thead><tr><th>Signal time</th><th>Side</th><th>Entry reference</th><th>Stop-loss</th><th>Target 1</th><th>Target 2</th><th>Outcome</th><th>Exit price</th><th>Points gained/lost</th><th>ATM option paper trade</th></tr></thead><tbody id="today-journal-rows"></tbody></table>
+        <table><thead><tr><th>Signal time</th><th>Side</th><th>Entry reference</th><th>Stop-loss</th><th>Target 1</th><th>Target 2</th><th>Outcome</th><th>Exit price</th><th>NIFTY spot P&amp;L (pts)</th><th>Premium P&amp;L (pts)</th><th>Premium P&amp;L (₹)</th><th>ATM option paper trade</th></tr></thead><tbody id="today-journal-rows"></tbody></table>
       </div>
-      <p class="note">This journal records completed 1-minute scans, including confirmed signals from before you opened the dashboard. It uses locally cached candles and saved scan records; it does not request historical data from Angel One. Outcome triggers are evaluated against NIFTY spot SL/target levels. If Paper Trading is ON, the journal also records the selected ATM option premium P&amp;L. Paper fills use the first received option LTP and exclude bid/ask, slippage, brokerage and taxes.</p>
+      <p class="note">This journal records every completed 1-minute scan from 09:30 AM to 03:00 PM IST, including WAIT and confirmed CE/PE signals. Paper entries are separately limited to 3 per day from 09:30 AM to 11:50 AM IST, with only one open paper trade at a time. It uses locally cached candles and saved scan records; it does not request historical data from Angel One. Outcome triggers are evaluated against NIFTY spot SL/target levels. If Paper Trading is ON, the journal also records the selected ATM option premium P&amp;L. Paper fills use the first received option LTP and exclude bid/ask, slippage, brokerage and taxes.</p>
     </div>
   </section><div class="layout"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>5. Price action &amp; SMC map + Signal monitor</h3><span class="collapse-chevron">−</span></div><section class="card" data-collapse-content="true"><div class="section-title"><h3>Price action &amp; SMC map</h3><span class="muted">Live Angel One candles · SMC overlays</span></div><div aria-label="Chart timeframe" class="tfrow" role="group"><button class="tf" data-tf="1m">1 min</button><button class="tf active" data-tf="2m">2 min</button><button class="tf" data-tf="5m">5 min</button></div><div class="chart" style="height:390px;min-height:320px;position:relative;overflow:hidden;touch-action:pan-y"></div><p class="note">Mouse wheel over chart to zoom in/out. Scroll up to zoom in; scroll down to zoom out.</p><div class="legend"><span><i class="dot" style="background:#16a477"></i> Bullish candle</span><span><i class="dot" style="background:#d65d65"></i> Bearish candle</span><span><i class="dot" style="background:#e0a23a"></i> FVG</span><span><i class="dot" style="background:#2563eb"></i> Order block</span><span><i class="dot" style="background:#7c3aed"></i> BOS</span><span><i class="dot" style="background:#db2777"></i> MSS</span><span><i class="dot" style="background:#0891b2"></i> IDM</span></div><p class="note">Live Angel One OHLC candles. FVG, OB, BOS, MSS and IDM labels are algorithmic chart annotations based on completed candles; OB and IDM are heuristic proxies, not official TradingView LuxAlgo signals. Use them for analysis, not automatic execution.</p></section>
     <aside class="card" data-collapse-content="true" id="signal-monitor"><div class="section-title"><h3>Signal monitor</h3><span class="tag wait" id="signal-overall">WAIT</span></div><div class="signal"><div><strong>CE setup</strong><div class="muted" id="signal-ce-detail">Waiting for live SMC confirmation</div></div><span class="tag wait" id="signal-ce-state">WAITING</span></div><div class="signal"><div><strong>PE setup</strong><div class="muted" id="signal-pe-detail">Waiting for live SMC confirmation</div></div><span class="tag wait" id="signal-pe-state">WAITING</span></div><div class="signal"><div><strong>Risk control</strong><div class="muted" id="signal-risk-detail">Manual approval · paper only</div></div><span class="tag" id="signal-risk-state">ON</span></div><p class="note" id="signal-monitor-note">Waiting for live analysis. Paper mode can simulate the nearest-expiry ATM NIFTY option using live option premium ticks; SL/targets remain NIFTY spot levels.</p></aside></div><section class="card bottom" id="user-historical-report"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>6. NIFTY SMC — Historical Trade Report</h3><span class="collapse-chevron">−</span></div><iframe data-collapse-content="true" loading="eager" srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
@@ -353,14 +1083,73 @@ th{position:sticky;top:0;background:light-dark(#f2f6fb,#1b2a40);z-index:1}tbody 
 #export-csv{background:#0b7a59;color:#fff;border-color:#0b7a59;font-weight:700}
 .tablebox.is-scroll{height:370px;max-height:370px;overflow-y:auto;overflow-x:auto}
 .tablebox.is-empty{display:none}
+
+/* v3.22 dark theme inherited from the main dashboard */
+html,body{background:#121f32!important;color:#e8f0fb!important;color-scheme:dark!important}
+.panel{background:#172940!important;color:#e8f0fb!important;border-color:#344b69!important}
+.metric{background:#1b2d45!important;color:#edf4ff!important}
+.metric span,.panel p,.muted,#detail,.empty{color:#9aadc4!important}
+.controls label{color:#b8c8dc!important}
+.controls input,.controls select,.controls button{
+  background:#101d30!important;color:#e8f0fb!important;border-color:#344b69!important
+}
+.controls button.primary{background:#245b96!important;color:#fff!important;border-color:#3477b9!important}
+.tablebox{background:#101d30!important;border-color:#344b69!important}
+th{background:#1b2d45!important;color:#bdcde0!important}
+td{color:#d3dfed!important;border-color:rgba(145,164,189,.18)!important}
+tbody tr:hover,tbody tr.selected{background:#203650!important}
+.status{background:#203650!important;color:#c6d5e7!important}
+
+
+/* v3.23: section 6 controls arranged in two columns */
+.controls {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: end !important;
+  gap: 10px !important;
+}
+.controls &gt; label {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  white-space: normal !important;
+  box-sizing: border-box !important;
+}
+.controls &gt; label input,
+.controls &gt; label select {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+.controls &gt; button,
+.controls &gt; select,
+.controls &gt; input {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 360px) {
+  .controls { gap: 7px !important; }
+  .controls &gt; label { font-size: 10px !important; }
+  .controls input, .controls select, .controls button {
+    font-size: 11px !important;
+    padding: 8px 7px !important;
+  }
+}
+
 &lt;/style&gt;
 &lt;/head&gt;&lt;body&gt;&lt;main class=&quot;wrap&quot;&gt;
-&lt;header&gt;&lt;div&gt;&lt;p&gt;Selectable 15–250 sessions · 5m → 2m → 1m SMC confirmation · NIFTY spot · 09:30–11:40 IST&lt;/p&gt;&lt;/div&gt;&lt;span class=&quot;status&quot; id=&quot;status&quot;&gt;Not loaded&lt;/span&gt;&lt;/header&gt;
+&lt;header&gt;&lt;div&gt;&lt;p&gt;Selectable 15–250 sessions · 5m → 2m → 1m SMC confirmation · NIFTY spot · 09:30–11:50 IST&lt;/p&gt;&lt;/div&gt;&lt;span class=&quot;status&quot; id=&quot;status&quot;&gt;Not loaded&lt;/span&gt;&lt;/header&gt;
 &lt;section class=&quot;panel&quot;&gt;
  &lt;div class=&quot;controls&quot;&gt;
-  &lt;label&gt;Python API &lt;input id=&quot;api&quot; value=&quot;http://127.0.0.1:8000&quot; style=&quot;width:min(310px,75vw)&quot;&gt;&lt;/label&gt;
+  &lt;label&gt;Python API &lt;input id=&quot;api&quot; value=&quot;http://100.127.151.105:8000&quot; style=&quot;width:min(310px,75vw)&quot;&gt;&lt;/label&gt;
   &lt;label&gt;Strategy view &lt;select id=&quot;strategy-view&quot;&gt;&lt;option value=&quot;smc_pac&quot;&gt;SMC FVG / OB / IDM / BOS / MSS&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;
-  &lt;label&gt;Trading sessions &lt;select id=&quot;sessions&quot;&gt;&lt;option value=&quot;250&quot; selected&gt;250 (default)&lt;/option&gt;&lt;option value=&quot;180&quot;&gt;180&lt;/option&gt;&lt;option value=&quot;90&quot;&gt;90&lt;/option&gt;&lt;option value=&quot;60&quot;&gt;60&lt;/option&gt;&lt;option value=&quot;30&quot;&gt;30&lt;/option&gt;&lt;option value=&quot;15&quot;&gt;15&lt;/option&gt;&lt;/select&gt;&lt;/label&gt; &lt;label&gt;Round-trip cost (spot pts) &lt;input id=&quot;cost-points&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;100&quot; step=&quot;0.25&quot; value=&quot;2&quot; style=&quot;width:76px&quot;&gt;&lt;/label&gt; &lt;button class=&quot;primary&quot; id=&quot;load&quot;&gt;Run corrected backtest&lt;/button&gt;
+  &lt;label&gt;From date (IST) &lt;input id=&quot;history-start-date&quot; type=&quot;date&quot;&gt;&lt;/label&gt; &lt;label&gt;To date (IST) &lt;input id=&quot;history-end-date&quot; type=&quot;date&quot;&gt;&lt;/label&gt; &lt;label&gt;Trading sessions &lt;select id=&quot;sessions&quot;&gt;&lt;option value=&quot;250&quot; selected&gt;250 (default)&lt;/option&gt;&lt;option value=&quot;180&quot;&gt;180&lt;/option&gt;&lt;option value=&quot;90&quot;&gt;90&lt;/option&gt;&lt;option value=&quot;60&quot;&gt;60&lt;/option&gt;&lt;option value=&quot;30&quot;&gt;30&lt;/option&gt;&lt;option value=&quot;15&quot;&gt;15&lt;/option&gt;&lt;/select&gt;&lt;/label&gt; &lt;label&gt;Round-trip cost (spot pts) &lt;input id=&quot;cost-points&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;100&quot; step=&quot;0.25&quot; value=&quot;2&quot; style=&quot;width:76px&quot;&gt;&lt;/label&gt; &lt;button class=&quot;primary&quot; id=&quot;load&quot;&gt;Run corrected backtest&lt;/button&gt;
   &lt;select id=&quot;direction&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All signals&lt;/option&gt;&lt;option value=&quot;BUY CE&quot;&gt;BUY CE only&lt;/option&gt;&lt;option value=&quot;BUY PE&quot;&gt;BUY PE only&lt;/option&gt;&lt;/select&gt;
   &lt;select id=&quot;result&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All outcomes&lt;/option&gt;&lt;option value=&quot;TARGET&quot;&gt;Target&lt;/option&gt;&lt;option value=&quot;STOP&quot;&gt;Stop-loss&lt;/option&gt;&lt;option value=&quot;EOD_EXIT&quot;&gt;EOD exit&lt;/option&gt;&lt;option value=&quot;OPEN&quot;&gt;Unresolved&lt;/option&gt;&lt;/select&gt;
   &lt;input id=&quot;search&quot; placeholder=&quot;Search date / signal…&quot; aria-label=&quot;Search trades&quot;&gt; &lt;button class=&quot;primary&quot; id=&quot;export-csv&quot; type=&quot;button&quot;&gt;Download CSV&lt;/button&gt;
@@ -390,69 +1179,69 @@ th{position:sticky;top:0;background:light-dark(#f2f6fb,#1b2a40);z-index:1}tbody 
 &lt;script&gt;
 let allTrades=[], strategyTrades={smc_pac:[]};
 const $=id=&gt;document.getElementById(id);
-const base=()=&gt; $('api').value.trim().replace(/\/+$/,'');
-const num=v=&gt;v==null||v===''?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
-function outcomeClass(x){return x==='TARGET'?'target':String(x||'').startsWith('STOP')?'stop':'open'}
+const base=()=&gt; $(&#x27;api&#x27;).value.trim().replace(/\/+$/,&#x27;&#x27;);
+const num=v=&gt;v==null||v===&#x27;&#x27;?&#x27;—&#x27;:Number(v).toLocaleString(&#x27;en-IN&#x27;,{minimumFractionDigits:2,maximumFractionDigits:2});
+function outcomeClass(x){return x===&#x27;TARGET&#x27;?&#x27;target&#x27;:String(x||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)?&#x27;stop&#x27;:&#x27;open&#x27;}
 function pointPnL(t){
  if(t.net_points!=null &amp;&amp; Number.isFinite(Number(t.net_points))) return Number(t.net_points);
  const entry=Number(t.entry); if(!Number.isFinite(entry)) return null;
  let exit=Number(t.exit_price);
- if(!Number.isFinite(exit)){const o=String(t.outcome||'').toUpperCase();if(o.includes('TARGET'))exit=Number(t.target);else if(o.includes('STOP'))exit=Number(t.stop_loss);else return null;}
+ if(!Number.isFinite(exit)){const o=String(t.outcome||&#x27;&#x27;).toUpperCase();if(o.includes(&#x27;TARGET&#x27;))exit=Number(t.target);else if(o.includes(&#x27;STOP&#x27;))exit=Number(t.stop_loss);else return null;}
  if(!Number.isFinite(exit))return null;
- return (t.signal==='BUY PE'?-1:1)*(exit-entry);
+ return (t.signal===&#x27;BUY PE&#x27;?-1:1)*(exit-entry);
 }
-function filtered(){const d=$('direction').value,r=$('result').value,q=$('search').value.toLowerCase();allTrades=strategyTrades[$('strategy-view').value]||[];return allTrades.filter(t=&gt;(d==='ALL'||t.signal===d)&amp;&amp;(r==='ALL'||(r==='OPEN'?String(t.outcome||'').startsWith('OPEN')||!t.outcome:r==='STOP'?String(t.outcome||'').startsWith('STOP'):t.outcome===r))&amp;&amp;(!q||(String(t.time)+' '+t.signal).toLowerCase().includes(q)))}
+function filtered(){const d=$(&#x27;direction&#x27;).value,r=$(&#x27;result&#x27;).value,q=$(&#x27;search&#x27;).value.toLowerCase();allTrades=strategyTrades[$(&#x27;strategy-view&#x27;).value]||[];return allTrades.filter(t=&gt;(d===&#x27;ALL&#x27;||t.signal===d)&amp;&amp;(r===&#x27;ALL&#x27;||(r===&#x27;OPEN&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;OPEN&#x27;)||!t.outcome:r===&#x27;STOP&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;):t.outcome===r))&amp;&amp;(!q||(String(t.time)+&#x27; &#x27;+t.signal).toLowerCase().includes(q)))}
 
-function csvCell(v){if(v===null||v===undefined)return '';let s=typeof v==='object'?JSON.stringify(v):String(v);return '&quot;'+s.replace(/&quot;/g,'&quot;&quot;')+'&quot;';}
-$('export-csv').addEventListener('click',()=&gt;{
+function csvCell(v){if(v===null||v===undefined)return &#x27;&#x27;;let s=typeof v===&#x27;object&#x27;?JSON.stringify(v):String(v);return &#x27;&quot;&#x27;+s.replace(/&quot;/g,&#x27;&quot;&quot;&#x27;)+&#x27;&quot;&#x27;;}
+$(&#x27;export-csv&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{
  const list=filtered();
- if(!list.length){alert('No trades to export. Run the backtest first or clear the filters.');return;}
- const cols=['time','signal','entry','stop_loss','target','outcome','exit_time','exit_price','gross_points','cost_points','net_points','reason','confluence_score','checks','signal_bar_time','strategy'];
- const lines=[cols.join(','),...list.map(t=&gt;cols.map(k=&gt;csvCell(t[k])).join(','))];
- const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
- const url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download='NIFTY_SMC_trade_history_'+new Date().toISOString().slice(0,10)+'.csv';
+ if(!list.length){alert(&#x27;No trades to export. Run the backtest first or clear the filters.&#x27;);return;}
+ const cols=[&#x27;time&#x27;,&#x27;signal&#x27;,&#x27;entry&#x27;,&#x27;stop_loss&#x27;,&#x27;target&#x27;,&#x27;outcome&#x27;,&#x27;exit_time&#x27;,&#x27;exit_price&#x27;,&#x27;gross_points&#x27;,&#x27;cost_points&#x27;,&#x27;net_points&#x27;,&#x27;reason&#x27;,&#x27;confluence_score&#x27;,&#x27;checks&#x27;,&#x27;signal_bar_time&#x27;,&#x27;strategy&#x27;];
+ const lines=[cols.join(&#x27;,&#x27;),...list.map(t=&gt;cols.map(k=&gt;csvCell(t[k])).join(&#x27;,&#x27;))];
+ const blob=new Blob([&#x27;\uFEFF&#x27;+lines.join(&#x27;\r\n&#x27;)],{type:&#x27;text/csv;charset=utf-8;&#x27;});
+ const url=URL.createObjectURL(blob),a=document.createElement(&#x27;a&#x27;);
+ a.href=url;a.download=&#x27;NIFTY_SMC_trade_history_&#x27;+new Date().toISOString().slice(0,10)+&#x27;.csv&#x27;;
  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 });
 function render(){
  const list=filtered(),wins=list.filter(t=&gt;pointPnL(t)!=null &amp;&amp; pointPnL(t)&gt;0).length,stops=list.filter(t=&gt;pointPnL(t)!=null &amp;&amp; pointPnL(t)&lt;=0).length;
- $('m-total').textContent=list.length;$('m-ce').textContent=list.filter(t=&gt;t.signal==='BUY CE').length;$('m-pe').textContent=list.filter(t=&gt;t.signal==='BUY PE').length;$('m-outcomes').textContent=list.filter(t=&gt;t.outcome==='TARGET').length+' / '+list.filter(t=&gt;String(t.outcome||'').startsWith('STOP')).length+' / '+list.filter(t=&gt;t.outcome==='EOD_EXIT').length+' EOD';$('m-win').textContent=wins+stops?(100*wins/(wins+stops)).toFixed(1)+'%':'N/A';
+ $(&#x27;m-total&#x27;).textContent=list.length;$(&#x27;m-ce&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY CE&#x27;).length;$(&#x27;m-pe&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY PE&#x27;).length;$(&#x27;m-outcomes&#x27;).textContent=list.filter(t=&gt;t.outcome===&#x27;TARGET&#x27;).length+&#x27; / &#x27;+list.filter(t=&gt;String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)).length+&#x27; / &#x27;+list.filter(t=&gt;t.outcome===&#x27;EOD_EXIT&#x27;).length+&#x27; EOD&#x27;;$(&#x27;m-win&#x27;).textContent=wins+stops?(100*wins/(wins+stops)).toFixed(1)+&#x27;%&#x27;:&#x27;N/A&#x27;;
  const points=list.map(pointPnL).filter(v=&gt;v!==null),net=points.reduce((a,b)=&gt;a+b,0);
- $('m-net-points').textContent=points.length?(net&gt;0?'+':'')+net.toFixed(2)+' pts':'—';
- $('m-net-points').className=net&gt;0?'pnl-positive':net&lt;0?'pnl-negative':'';
- $('count').textContent=list.length+' trades shown';
- const tableBox=document.querySelector('.tablebox');
- tableBox.classList.toggle('is-empty',list.length===0);
- tableBox.classList.toggle('is-scroll',list.length&gt;10);
- tableBox.style.height=list.length&gt;10?'370px':'auto';
- tableBox.style.maxHeight=list.length&gt;10?'370px':'none';
- tableBox.style.overflowY=list.length&gt;10?'auto':'visible';
- if(list.length&lt;=10){$('trade-detail-panel').style.display='none';}
- $('rows').innerHTML=list.length?list.map((t,i)=&gt;`&lt;tr data-i=&quot;${i}&quot;&gt;&lt;td&gt;${new Date(t.time).toLocaleString('en-IN')}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge ${t.signal==='BUY CE'?'ce':'pe'}&quot;&gt;${t.signal}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;${num(t.entry)}&lt;/td&gt;&lt;td&gt;${num(t.stop_loss)}&lt;/td&gt;&lt;td&gt;${num(t.target)}&lt;/td&gt;&lt;td class=&quot;${outcomeClass(t.outcome)}&quot;&gt;${t.outcome||'OPEN / unresolved'}&lt;/td&gt;&lt;td&gt;${t.exit_time?new Date(t.exit_time).toLocaleString('en-IN'):'—'}&lt;/td&gt;&lt;td class=&quot;${pointPnL(t)==null?'open':pointPnL(t)&gt;=0?'pnl-positive':'pnl-negative'}&quot;&gt;${pointPnL(t)==null?'Open':(pointPnL(t)&gt;0?'+':'')+pointPnL(t).toFixed(2)}&lt;/td&gt;&lt;/tr&gt;`).join(''):'&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;No trades match these filters.&lt;/td&gt;&lt;/tr&gt;';
- [...$('rows').querySelectorAll('tr[data-i]')].forEach(row=&gt;row.addEventListener('click',()=&gt;showTrade(list[Number(row.dataset.i)],row)));
+ $(&#x27;m-net-points&#x27;).textContent=points.length?(net&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+net.toFixed(2)+&#x27; pts&#x27;:&#x27;—&#x27;;
+ $(&#x27;m-net-points&#x27;).className=net&gt;0?&#x27;pnl-positive&#x27;:net&lt;0?&#x27;pnl-negative&#x27;:&#x27;&#x27;;
+ $(&#x27;count&#x27;).textContent=list.length+&#x27; trades shown&#x27;;
+ const tableBox=document.querySelector(&#x27;.tablebox&#x27;);
+ tableBox.classList.toggle(&#x27;is-empty&#x27;,list.length===0);
+ tableBox.classList.toggle(&#x27;is-scroll&#x27;,list.length&gt;10);
+ tableBox.style.height=list.length&gt;10?&#x27;370px&#x27;:&#x27;auto&#x27;;
+ tableBox.style.maxHeight=list.length&gt;10?&#x27;370px&#x27;:&#x27;none&#x27;;
+ tableBox.style.overflowY=list.length&gt;10?&#x27;auto&#x27;:&#x27;visible&#x27;;
+ if(list.length&lt;=10){$(&#x27;trade-detail-panel&#x27;).style.display=&#x27;none&#x27;;}
+ $(&#x27;rows&#x27;).innerHTML=list.length?list.map((t,i)=&gt;`&lt;tr data-i=&quot;${i}&quot;&gt;&lt;td&gt;${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge ${t.signal===&#x27;BUY CE&#x27;?&#x27;ce&#x27;:&#x27;pe&#x27;}&quot;&gt;${t.signal}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;${num(t.entry)}&lt;/td&gt;&lt;td&gt;${num(t.stop_loss)}&lt;/td&gt;&lt;td&gt;${num(t.target)}&lt;/td&gt;&lt;td class=&quot;${outcomeClass(t.outcome)}&quot;&gt;${t.outcome||&#x27;OPEN / unresolved&#x27;}&lt;/td&gt;&lt;td&gt;${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;—&#x27;}&lt;/td&gt;&lt;td class=&quot;${pointPnL(t)==null?&#x27;open&#x27;:pointPnL(t)&gt;=0?&#x27;pnl-positive&#x27;:&#x27;pnl-negative&#x27;}&quot;&gt;${pointPnL(t)==null?&#x27;Open&#x27;:(pointPnL(t)&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+pointPnL(t).toFixed(2)}&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;):&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;No trades match these filters.&lt;/td&gt;&lt;/tr&gt;&#x27;;
+ [...$(&#x27;rows&#x27;).querySelectorAll(&#x27;tr[data-i]&#x27;)].forEach(row=&gt;row.addEventListener(&#x27;click&#x27;,()=&gt;showTrade(list[Number(row.dataset.i)],row)));
 }
 function showTrade(t,row){
- const panel=$('trade-detail-panel');
- if(row.classList.contains('selected') &amp;&amp; panel.style.display!=='none'){
-  row.classList.remove('selected');panel.style.display='none';return;
+ const panel=$(&#x27;trade-detail-panel&#x27;);
+ if(row.classList.contains(&#x27;selected&#x27;) &amp;&amp; panel.style.display!==&#x27;none&#x27;){
+  row.classList.remove(&#x27;selected&#x27;);panel.style.display=&#x27;none&#x27;;return;
  }
- [...$('rows').querySelectorAll('tr')].forEach(x=&gt;x.classList.remove('selected'));row.classList.add('selected');
- panel.style.display='block';
- $('detail').innerHTML=`&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;${t.signal} · ${t.outcome||'Unresolved'}&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Entry time:&lt;/b&gt; ${new Date(t.time).toLocaleString('en-IN')}&lt;br&gt;&lt;b&gt;Signal candle:&lt;/b&gt; ${t.signal_bar_time?new Date(t.signal_bar_time).toLocaleString('en-IN'):'Not provided'}&lt;br&gt;&lt;b&gt;Exit time:&lt;/b&gt; ${t.exit_time?new Date(t.exit_time).toLocaleString('en-IN'):'Not recorded'}&lt;br&gt;&lt;b&gt;Exit price:&lt;/b&gt; ${num(t.exit_price)}&lt;br&gt;&lt;b&gt;Risk/reward:&lt;/b&gt; ${t.risk_reward||'—'}&lt;/div&gt;&lt;hr style=&quot;border:0;border-top:1px solid #e1e8f0;margin:12px 0&quot;&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Recorded explanation&lt;/b&gt;&lt;br&gt;${t.reason||'No detailed explanation was returned by the backend.'}&lt;br&gt;&lt;br&gt;&lt;b&gt;Outcome&lt;/b&gt;&lt;br&gt;${t.outcome||'Unresolved'}${t.exit_price?' at '+num(t.exit_price):''}&lt;/div&gt;`;
- $('diagram').innerHTML=[['Target',t.target,'tp'],['Entry',t.entry,''],['Stop-loss',t.stop_loss,'sl']].map(([label,value,cls])=&gt;`&lt;div class=&quot;level&quot;&gt;&lt;b&gt;${label}&lt;/b&gt;&lt;div class=&quot;line ${cls}&quot;&gt;&lt;/div&gt;&lt;strong&gt;${num(value)}&lt;/strong&gt;&lt;/div&gt;`).join('');
+ [...$(&#x27;rows&#x27;).querySelectorAll(&#x27;tr&#x27;)].forEach(x=&gt;x.classList.remove(&#x27;selected&#x27;));row.classList.add(&#x27;selected&#x27;);
+ panel.style.display=&#x27;block&#x27;;
+ $(&#x27;detail&#x27;).innerHTML=`&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;${t.signal} · ${t.outcome||&#x27;Unresolved&#x27;}&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Entry time:&lt;/b&gt; ${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;br&gt;&lt;b&gt;Signal candle:&lt;/b&gt; ${t.signal_bar_time?new Date(t.signal_bar_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not provided&#x27;}&lt;br&gt;&lt;b&gt;Exit time:&lt;/b&gt; ${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not recorded&#x27;}&lt;br&gt;&lt;b&gt;Exit price:&lt;/b&gt; ${num(t.exit_price)}&lt;br&gt;&lt;b&gt;Risk/reward:&lt;/b&gt; ${t.risk_reward||&#x27;—&#x27;}&lt;/div&gt;&lt;hr style=&quot;border:0;border-top:1px solid #e1e8f0;margin:12px 0&quot;&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Recorded explanation&lt;/b&gt;&lt;br&gt;${t.reason||&#x27;No detailed explanation was returned by the backend.&#x27;}&lt;br&gt;&lt;br&gt;&lt;b&gt;Outcome&lt;/b&gt;&lt;br&gt;${t.outcome||&#x27;Unresolved&#x27;}${t.exit_price?&#x27; at &#x27;+num(t.exit_price):&#x27;&#x27;}&lt;/div&gt;`;
+ $(&#x27;diagram&#x27;).innerHTML=[[&#x27;Target&#x27;,t.target,&#x27;tp&#x27;],[&#x27;Entry&#x27;,t.entry,&#x27;&#x27;],[&#x27;Stop-loss&#x27;,t.stop_loss,&#x27;sl&#x27;]].map(([label,value,cls])=&gt;`&lt;div class=&quot;level&quot;&gt;&lt;b&gt;${label}&lt;/b&gt;&lt;div class=&quot;line ${cls}&quot;&gt;&lt;/div&gt;&lt;strong&gt;${num(value)}&lt;/strong&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
 }
-$('trade-detail-toggle').addEventListener('click',()=&gt;{
- const d=$('detail'),g=$('diagram'),hidden=d.style.display==='none';
- d.style.display=hidden?'block':'none';g.style.display=hidden?'block':'none';
- $('trade-detail-toggle').setAttribute('aria-expanded',hidden?'true':'false');
- $('trade-detail-toggle').firstElementChild.textContent=hidden?'Trade details · click to hide':'Trade details · click to show';
- $('trade-detail-chevron').textContent=hidden?'−':'+';
+$(&#x27;trade-detail-toggle&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{
+ const d=$(&#x27;detail&#x27;),g=$(&#x27;diagram&#x27;),hidden=d.style.display===&#x27;none&#x27;;
+ d.style.display=hidden?&#x27;block&#x27;:&#x27;none&#x27;;g.style.display=hidden?&#x27;block&#x27;:&#x27;none&#x27;;
+ $(&#x27;trade-detail-toggle&#x27;).setAttribute(&#x27;aria-expanded&#x27;,hidden?&#x27;true&#x27;:&#x27;false&#x27;);
+ $(&#x27;trade-detail-toggle&#x27;).firstElementChild.textContent=hidden?&#x27;Trade details · click to hide&#x27;:&#x27;Trade details · click to show&#x27;;
+ $(&#x27;trade-detail-chevron&#x27;).textContent=hidden?&#x27;−&#x27;:&#x27;+&#x27;;
 });
-$('trade-detail-toggle').addEventListener('keydown',e=&gt;{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('trade-detail-toggle').click();}});
-$('load').addEventListener('click',async()=&gt;{const b=$('load'),prog=$('history-progress'),msg=$('progress-message');b.disabled=true;b.textContent='Starting…';prog.value=0;$('status').textContent='Starting backtest…';try{const sessions=$('sessions').value,cost=$('cost-points').value||'2';const start=await fetch(base()+'/api/history/start?sessions='+encodeURIComponent(sessions)+'&amp;cost_points='+encodeURIComponent(cost),{method:'POST'});const job=await start.json();if(!start.ok)throw new Error(job.detail||'HTTP '+start.status);let state;while(true){await new Promise(r=&gt;setTimeout(r,1200));const sr=await fetch(base()+'/api/history/status/'+job.job_id);state=await sr.json();if(!sr.ok)throw new Error(state.detail||'Could not read progress');prog.value=state.progress_pct||0;msg.textContent=(state.message||state.status)+' · '+(state.completed_chunks||0)+'/'+(state.total_chunks||0)+' chunks · '+(state.candles_received||0).toLocaleString()+' candles';$('status').textContent=state.status+' · '+(state.progress_pct||0)+'%';if(state.status==='failed')throw new Error(state.error||state.message);if(state.status==='completed')break;}const rr=await fetch(base()+'/api/history/result/'+job.job_id);const d=await rr.json();if(!rr.ok)throw new Error(d.detail||'HTTP '+rr.status);strategyTrades.smc_pac=[...(d.signals||[])];$('trade-detail-panel').style.display='none';allTrades=strategyTrades[$('strategy-view').value]||[];render();$('status').textContent='Loaded '+(d.session_dates||[]).length+' sessions · '+allTrades.length+' trades';msg.innerHTML='Completed · '+(d.summary?.one_minute_candles||0).toLocaleString()+' candles · cache chunks '+(d.summary?.cache_chunks_used||0)+'&lt;br&gt;&lt;b&gt;SMC FVG / OB / IDM / BOS / MSS:&lt;/b&gt; '+(d.summary?.trades??0)+' trades · win '+(d.summary?.win_rate_pct??'—')+'% · PF '+(d.summary?.profit_factor??'—')+' · net '+(d.summary?.net_points??'—')+' pts&lt;br&gt;&lt;b&gt;Diagnostics:&lt;/b&gt; BOS '+(d.summary?.diagnostics?.bos??0)+' · MSS '+(d.summary?.diagnostics?.mss??0)+' · FVG '+(d.summary?.diagnostics?.fvg_detected??0)+' · OB '+(d.summary?.diagnostics?.ob_detected??0)+' · IDM '+(d.summary?.diagnostics?.idm??0)+' · 1m triggers '+(d.summary?.diagnostics?.trigger??0)+'&lt;br&gt;&lt;span class=&quot;muted&quot;&gt;SMC-only morning window 09:30–11:40 IST. NIFTY spot points, not options-premium returns.&lt;/span&gt;'; $('detail').innerHTML='&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;Trade details&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;Select a row in the table to inspect its levels and recorded explanation.&lt;/div&gt;';$('diagram').innerHTML='&lt;div class=&quot;empty&quot;&gt;Select a trade to show its levels.&lt;/div&gt;';}catch(e){$('status').textContent='Could not load: '+e.message;msg.textContent='Backtest failed: '+e.message;$('rows').innerHTML='&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;'+e.message+'&lt;/td&gt;&lt;/tr&gt;';}finally{b.disabled=false;b.textContent='Run corrected backtest';}});
-['direction','result','strategy-view','search'].forEach(id=&gt;$(id).addEventListener(id==='search'?'input':'change',render));
-window.addEventListener('load',()=&gt;{const sendHeight=()=&gt;window.parent.postMessage({type:'smc-report-height',height:Math.ceil(document.documentElement.scrollHeight)},'*');sendHeight();if(window.ResizeObserver){new ResizeObserver(sendHeight).observe(document.body);}setTimeout(sendHeight,250);setTimeout(sendHeight,900);});
-&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="width:100%;height:420px;min-height:0;border:0;border-radius:10px;background:transparent;display:block;overflow:hidden" title="Historical trade report"></iframe></section><section class="card bottom" style="margin-bottom:16px"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>7. SMC · ICT · Price Action Research Engine v3.0</h3><span class="collapse-chevron">−</span></div><p class="note" data-collapse-content="true" style="margin-top:0">New rule sequence: 5m BOS / MSS → 2m FVG / OB / IDM retest → 1m entry confirmation · signals 09:30–11:40 IST close-confirmed trigger. Maximum one trade per session; no setup means no trade.</p><div class="concepts" data-collapse-content="true"><div class="concept"><b>SMC reference</b><span>BOS / CHoCH, swing structure, liquidity pools, order-block and FVG context.</span></div><div class="concept"><b>ICT reference</b><span>MSS, displacement, buy/sell-side liquidity sweeps and session timing.</span></div><div class="concept"><b>Price Action reference</b><span>Price structure, liquidity grabs, imbalance retests and multi-timeframe context.</span></div><div class="concept"><b>Validation gate</b><span>Win rate, profit factor, average net points, CE/PE split and out-of-sample checks.</span></div></div><p class="note" data-collapse-content="true">Independent implementation inspired by public descriptions; not LuxAlgo code or an endorsement. A 70% win rate is an unproven target, not a promise. Current replay is NIFTY spot points, not options-premium returns.</p><p class="note" data-collapse-content="true"><a href="https://www.luxalgo.com/library/indicator/smart-money-concepts-smc/" rel="noopener" target="_blank">LuxAlgo SMC</a> · <a href="https://www.luxalgo.com/library/indicator/ict-concepts/" rel="noopener" target="_blank">ICT Concepts</a> · <a href="https://www.luxalgo.com/library/indicator/luxalgo-price-action-concepts/" rel="noopener" target="_blank">Price Action Concepts</a> · <a href="https://github.com/harshatangirala/smc-ict-research" rel="noopener" target="_blank">Independent SMC/ICT study</a></p></section><section class="card bottom"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>8. SMC concept coverage</h3><span class="collapse-chevron">−</span></div><div class="concepts" data-collapse-content="true"><div class="concept"><b>Market structure</b><span>HH / HL · LH / LL · BOS · CHoCH · MSS</span></div><div class="concept"><b>Liquidity</b><span>BSL · SSL · EQH / EQL · sweeps · inducement</span></div><div class="concept"><b>Imbalances</b><span>FVG · IFVG · volume imbalance · displacement</span></div><div class="concept"><b>Institutional zones</b><span>Order blocks · breaker · mitigation · rejection</span></div><div class="concept"><b>Dealing range</b><span>Premium · discount · equilibrium · OTE</span></div><div class="concept"><b>Time &amp; session</b><span>Previous day levels · session highs/lows · kill zones</span></div></div><p class="note" data-collapse-content="true">Detection rules will be specified and tested individually. SMC labels are analytical interpretations, not proof of institutional orders.</p></section><section class="card bottom"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>9. Connection setup</h3><span class="collapse-chevron">−</span></div><div class="controls" data-collapse-content="true"><select aria-label="Data source" class="select"><option>Angel One SmartAPI · connected through local API</option><option>CSV candle upload (prototype)</option></select><select aria-label="Expiry" class="select"><option>Weekly expiry</option></select><select aria-label="Risk" class="select"><option>Moderate risk</option></select><button class="primary" id="setup">View integration checklist</button></div><p class="note" data-collapse-content="true" id="setup-note">Next: resolve Angel One app registration / static-IP form requirement, verify the NIFTY instrument token, then test historical candles. Live WebSocket 2.0 feed builds 1m candles locally; 2m and 5m are aggregated locally. Historical preload is guarded and cached to avoid repeated broker requests.</p></section><section class="card bottom"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>10. Connect to your local Python scanner</h3><span class="collapse-chevron">−</span></div><p class="note" data-collapse-content="true">Keep Uvicorn running on this Windows laptop. This page does not store SmartAPI credentials.</p><div class="controls" data-collapse-content="true"><input aria-label="Python API address" class="select" id="api-url" value="http://127.0.0.1:8000"/><button class="primary" id="connect-python">Test Python connection</button><button class="primary" id="connect-local-api" type="button">Retry API connection</button><button class="primary" id="run-scan">Run SMC scan</button><span class="pill" id="python-status">Not tested</span></div><p class="note" id="connect-api-status">Retry API connection sends POST /api/connect to the Python API URL above.</p><p class="note" data-collapse-content="true" id="python-detail">Test /api/status. Live chart and SMC scan use the local completed-candle engine; historical API is used only for one guarded warm-up. No orders are placed.</p><pre class="note" data-collapse-content="true" id="scan-results" style="white-space:pre-wrap;overflow-wrap:anywhere">No scan loaded yet.</pre></section><div class="footer">NIFTY SMC Scanner · Live market data · Paper/research only · No orders placed · Dashboard v3.15</div></div></main>
+$(&#x27;trade-detail-toggle&#x27;).addEventListener(&#x27;keydown&#x27;,e=&gt;{if(e.key===&#x27;Enter&#x27;||e.key===&#x27; &#x27;){e.preventDefault();$(&#x27;trade-detail-toggle&#x27;).click();}});
+$(&#x27;load&#x27;).addEventListener(&#x27;click&#x27;,async()=&gt;{const b=$(&#x27;load&#x27;),prog=$(&#x27;history-progress&#x27;),msg=$(&#x27;progress-message&#x27;);b.disabled=true;b.textContent=&#x27;Starting…&#x27;;prog.value=0;$(&#x27;status&#x27;).textContent=&#x27;Starting backtest…&#x27;;try{const sessions=$(&#x27;sessions&#x27;).value,cost=$(&#x27;cost-points&#x27;).value||&#x27;2&#x27;,from=$(&#x27;history-start-date&#x27;).value,to=$(&#x27;history-end-date&#x27;).value;let url=base()+&#x27;/api/history/start?sessions=&#x27;+encodeURIComponent(sessions)+&#x27;&amp;cost_points=&#x27;+encodeURIComponent(cost);if(from)url+=&#x27;&amp;start_date=&#x27;+encodeURIComponent(from);if(to)url+=&#x27;&amp;end_date=&#x27;+encodeURIComponent(to);const start=await fetch(url,{method:&#x27;POST&#x27;});const job=await start.json();if(!start.ok)throw new Error(job.detail||&#x27;HTTP &#x27;+start.status);let state;while(true){await new Promise(r=&gt;setTimeout(r,1200));const sr=await fetch(base()+&#x27;/api/history/status/&#x27;+job.job_id);state=await sr.json();if(!sr.ok)throw new Error(state.detail||&#x27;Could not read progress&#x27;);prog.value=state.progress_pct||0;msg.textContent=(state.message||state.status)+&#x27; · &#x27;+(state.completed_chunks||0)+&#x27;/&#x27;+(state.total_chunks||0)+&#x27; chunks · &#x27;+(state.candles_received||0).toLocaleString()+&#x27; candles&#x27;;$(&#x27;status&#x27;).textContent=state.status+&#x27; · &#x27;+(state.progress_pct||0)+&#x27;%&#x27;;if(state.status===&#x27;failed&#x27;)throw new Error(state.error||state.message);if(state.status===&#x27;completed&#x27;)break;}const rr=await fetch(base()+&#x27;/api/history/result/&#x27;+job.job_id);const d=await rr.json();if(!rr.ok)throw new Error(d.detail||&#x27;HTTP &#x27;+rr.status);strategyTrades.smc_pac=[...(d.signals||[])];$(&#x27;trade-detail-panel&#x27;).style.display=&#x27;none&#x27;;allTrades=strategyTrades[$(&#x27;strategy-view&#x27;).value]||[];render();$(&#x27;status&#x27;).textContent=&#x27;Loaded &#x27;+(d.session_dates||[]).length+&#x27; sessions · &#x27;+allTrades.length+&#x27; trades&#x27;;msg.innerHTML=&#x27;Completed · &#x27;+(d.summary?.one_minute_candles||0).toLocaleString()+&#x27; candles · cache chunks &#x27;+(d.summary?.cache_chunks_used||0)+&#x27;&lt;br&gt;&lt;b&gt;SMC FVG / OB / IDM / BOS / MSS:&lt;/b&gt; &#x27;+(d.summary?.trades??0)+&#x27; trades · win &#x27;+(d.summary?.win_rate_pct??&#x27;—&#x27;)+&#x27;% · PF &#x27;+(d.summary?.profit_factor??&#x27;—&#x27;)+&#x27; · net &#x27;+(d.summary?.net_points??&#x27;—&#x27;)+&#x27; pts&lt;br&gt;&lt;b&gt;Diagnostics:&lt;/b&gt; BOS &#x27;+(d.summary?.diagnostics?.bos??0)+&#x27; · MSS &#x27;+(d.summary?.diagnostics?.mss??0)+&#x27; · FVG &#x27;+(d.summary?.diagnostics?.fvg_detected??0)+&#x27; · OB &#x27;+(d.summary?.diagnostics?.ob_detected??0)+&#x27; · IDM &#x27;+(d.summary?.diagnostics?.idm??0)+&#x27; · 1m triggers &#x27;+(d.summary?.diagnostics?.trigger??0)+&#x27;&lt;br&gt;&lt;span class=&quot;muted&quot;&gt;SMC-only morning window 09:30–11:50 IST. NIFTY spot points, not options-premium returns.&lt;/span&gt;&#x27;; $(&#x27;detail&#x27;).innerHTML=&#x27;&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;Trade details&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;Select a row in the table to inspect its levels and recorded explanation.&lt;/div&gt;&#x27;;$(&#x27;diagram&#x27;).innerHTML=&#x27;&lt;div class=&quot;empty&quot;&gt;Select a trade to show its levels.&lt;/div&gt;&#x27;;}catch(e){$(&#x27;status&#x27;).textContent=&#x27;Could not load: &#x27;+e.message;msg.textContent=&#x27;Backtest failed: &#x27;+e.message;$(&#x27;rows&#x27;).innerHTML=&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;&#x27;+e.message+&#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;;}finally{b.disabled=false;b.textContent=&#x27;Run corrected backtest&#x27;;}});
+[&#x27;direction&#x27;,&#x27;result&#x27;,&#x27;strategy-view&#x27;,&#x27;search&#x27;].forEach(id=&gt;$(id).addEventListener(id===&#x27;search&#x27;?&#x27;input&#x27;:&#x27;change&#x27;,render));
+window.addEventListener(&#x27;load&#x27;,()=&gt;{const sendHeight=()=&gt;window.parent.postMessage({type:&#x27;smc-report-height&#x27;,height:Math.ceil(document.documentElement.scrollHeight)},&#x27;*&#x27;);sendHeight();if(window.ResizeObserver){new ResizeObserver(sendHeight).observe(document.body);}setTimeout(sendHeight,250);setTimeout(sendHeight,900);});
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="width:100%;height:420px;min-height:0;border:0;border-radius:10px;background:transparent;display:block;overflow:hidden" title="Historical trade report"></iframe></section><section class="card bottom research-engine-section" style="margin-bottom:16px"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>7. SMC · ICT · Price Action Research Engine v3.0</h3><span class="collapse-chevron">−</span></div><p class="note" data-collapse-content="true" style="margin-top:0">New rule sequence: 5m BOS / MSS → 2m FVG / OB / IDM retest → 1m entry confirmation · signals 09:30–11:50 IST close-confirmed trigger. Maximum one trade per session; no setup means no trade.</p><div class="concepts" data-collapse-content="true"><div class="concept"><b>SMC reference</b><span>BOS / CHoCH, swing structure, liquidity pools, order-block and FVG context.</span></div><div class="concept"><b>ICT reference</b><span>MSS, displacement, buy/sell-side liquidity sweeps and session timing.</span></div><div class="concept"><b>Price Action reference</b><span>Price structure, liquidity grabs, imbalance retests and multi-timeframe context.</span></div><div class="concept"><b>Validation gate</b><span>Win rate, profit factor, average net points, CE/PE split and out-of-sample checks.</span></div></div><p class="note" data-collapse-content="true">Independent implementation inspired by public descriptions; not LuxAlgo code or an endorsement. A 70% win rate is an unproven target, not a promise. Current replay is NIFTY spot points, not options-premium returns.</p><p class="note" data-collapse-content="true"><a href="https://www.luxalgo.com/library/indicator/smart-money-concepts-smc/" rel="noopener" target="_blank">LuxAlgo SMC</a> · <a href="https://www.luxalgo.com/library/indicator/ict-concepts/" rel="noopener" target="_blank">ICT Concepts</a> · <a href="https://www.luxalgo.com/library/indicator/luxalgo-price-action-concepts/" rel="noopener" target="_blank">Price Action Concepts</a> · <a href="https://github.com/harshatangirala/smc-ict-research" rel="noopener" target="_blank">Independent SMC/ICT study</a></p></section><section class="card bottom concept-coverage-section"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>8. SMC concept coverage</h3><span class="collapse-chevron">−</span></div><div class="concepts" data-collapse-content="true"><div class="concept"><b>Market structure</b><span>HH / HL · LH / LL · BOS · CHoCH · MSS</span></div><div class="concept"><b>Liquidity</b><span>BSL · SSL · EQH / EQL · sweeps · inducement</span></div><div class="concept"><b>Imbalances</b><span>FVG · IFVG · volume imbalance · displacement</span></div><div class="concept"><b>Institutional zones</b><span>Order blocks · breaker · mitigation · rejection</span></div><div class="concept"><b>Dealing range</b><span>Premium · discount · equilibrium · OTE</span></div><div class="concept"><b>Time &amp; session</b><span>Previous day levels · session highs/lows · kill zones</span></div></div><p class="note" data-collapse-content="true">Detection rules will be specified and tested individually. SMC labels are analytical interpretations, not proof of institutional orders.</p></section><section class="card bottom connection-setup-section"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>9. Connection setup</h3><span class="collapse-chevron">−</span></div><div class="controls" data-collapse-content="true"><select aria-label="Data source" class="select"><option>Angel One SmartAPI · connected through local API</option><option>CSV candle upload (prototype)</option></select><select aria-label="Expiry" class="select"><option>Weekly expiry</option></select><select aria-label="Risk" class="select"><option>Moderate risk</option></select><button class="primary" id="setup">View integration checklist</button></div><p class="note" data-collapse-content="true" id="setup-note">Next: resolve Angel One app registration / static-IP form requirement, verify the NIFTY instrument token, then test historical candles. Live WebSocket 2.0 feed builds 1m candles locally; 2m and 5m are aggregated locally. Historical preload is guarded and cached to avoid repeated broker requests.</p></section><section class="card bottom python-scanner-section"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>10. Connect to your local Python scanner</h3><span class="collapse-chevron">−</span></div><p class="note" data-collapse-content="true">Keep Uvicorn running on this Windows laptop. This page does not store SmartAPI credentials.</p><div class="controls" data-collapse-content="true"><input aria-label="Python API address" class="select" id="api-url" value="http://100.127.151.105:8000"/><button class="primary" id="connect-python">Test Python connection</button><button class="primary" id="connect-local-api" type="button">Retry API connection</button><button class="primary" id="run-scan">Run SMC scan</button><span class="pill" id="python-status">Not tested</span></div><p class="note" id="connect-api-status">Retry API connection sends POST /api/connect to the Python API URL above.</p><p class="note" data-collapse-content="true" id="python-detail">Test /api/status. Live chart and SMC scan use the local completed-candle engine; historical API is used only for one guarded warm-up. No orders are placed.</p><pre class="note" data-collapse-content="true" id="scan-results" style="white-space:pre-wrap;overflow-wrap:anywhere">No scan loaded yet.</pre></section><div class="footer">TEJANSH RESEARCH SMC SCANNER · Live market data · Paper/research only · No live orders placed</div></div></main>
 <script>
   // Timeframe buttons are wired to the real local candle API by the live chart module below.
   document.querySelectorAll('.tf').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tf').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}));
@@ -538,7 +1327,7 @@ window.addEventListener('load',()=&gt;{const sendHeight=()=&gt;window.parent.pos
   (function(){
    const chart=document.querySelector('.chart'); if(!chart)return;
    let timeframe=document.querySelector('.tf.active')?.dataset.tf||'2m',busy=false,allRows=[],visibleCount=60;
-   const base=()=> (document.getElementById('api-url')?.value||'http://127.0.0.1:8000').trim().replace(/\/+$/,'');
+   const base=()=> (document.getElementById('api-url')?.value||'http://100.127.151.105:8000').trim().replace(/\/+$/,'');
    const label=document.querySelector('.layout .card .section-title .muted');
    const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
    const num=v=>Number(v).toLocaleString('en-IN',{maximumFractionDigits:2});
@@ -640,26 +1429,64 @@ window.addEventListener('load',()=&gt;{const sendHeight=()=&gt;window.parent.pos
   });
 </script>
 <script>
-  document.querySelectorAll('.collapsible-heading').forEach(header=>{
-   const toggle=()=>{
-    let node=header.nextElementSibling;
-    let willHide=header.getAttribute('aria-expanded')!=='false';
-    while(node && !node.classList.contains('collapsible-heading')){
-     if(node.hasAttribute('data-collapse-content') || header.parentElement.classList.contains('layout') || header.parentElement.id==='user-historical-report' || header.parentElement.id==='live-monitor' || header.parentElement.id==='multi-timeframe-panel' || header.parentElement.classList.contains('card')){
-      node.style.display=willHide?'none':'';
-     }
-     node=node.nextElementSibling;
-    }
-    header.setAttribute('aria-expanded',willHide?'false':'true');
-    const icon=header.querySelector('.collapse-chevron');
-    if(icon) icon.textContent=willHide?'+':'−';
-   };
-   header.addEventListener('click',toggle);
-   header.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  // v3.21: collapse the whole section, including grid/flex children.
+  document.querySelectorAll('.collapsible-heading').forEach((header, sectionIndex) => {
+    const section = header.parentElement;
+    const icon = header.querySelector('.collapse-chevron');
+    const content = Array.from(section.children).filter(child => child !== header);
+
+    const setCollapsed = collapsed => {
+      section.classList.toggle('dashboard-section-collapsed', collapsed);
+      header.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+
+      content.forEach(child => {
+        if (collapsed) {
+          if (!child.hasAttribute('data-collapse-display-saved')) {
+            child.setAttribute('data-collapse-display-saved', 'true');
+            child.setAttribute('data-original-display', child.style.getPropertyValue('display'));
+            child.setAttribute('data-original-display-priority', child.style.getPropertyPriority('display'));
+          }
+          child.style.setProperty('display', 'none', 'important');
+        } else if (child.hasAttribute('data-collapse-display-saved')) {
+          const originalDisplay = child.getAttribute('data-original-display') || '';
+          const originalPriority = child.getAttribute('data-original-display-priority') || '';
+          if (originalDisplay) {
+            child.style.setProperty('display', originalDisplay, originalPriority);
+          } else {
+            child.style.removeProperty('display');
+          }
+          child.removeAttribute('data-collapse-display-saved');
+          child.removeAttribute('data-original-display');
+          child.removeAttribute('data-original-display-priority');
+        }
+      });
+
+      if (icon) icon.textContent = collapsed ? '+' : '−';
+    };
+
+    // First four dashboard sections stay open; section 5 onward starts minimized.
+    if (sectionIndex >= 4) setCollapsed(true);
+
+    const toggle = () => {
+      setCollapsed(header.getAttribute('aria-expanded') !== 'false');
+    };
+
+    header.addEventListener('click', event => {
+      if (event.target.closest('button,a,input,select,textarea')) return;
+      toggle();
+    });
+
+    header.addEventListener('keydown', event => {
+      if (event.target.closest('button,a,input,select,textarea')) return;
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggle();
+      }
+    });
   });
 </script><script>
   (()=>{
-   const apiBase=()=>{const el=document.getElementById('api-url');return (el?.value||'http://127.0.0.1:8000').trim().replace(/\/+$/,'');};
+   const apiBase=()=>{const el=document.getElementById('api-url');return (el?.value||'http://100.127.151.105:8000').trim().replace(/\/+$/,'');};
    const connect=document.getElementById('connect-local-api');
    if(connect) connect.addEventListener('click',async()=>{
     const status=document.getElementById('connect-api-status');
@@ -686,9 +1513,10 @@ window.addEventListener('load',()=&gt;{const sendHeight=()=&gt;window.parent.pos
     toggle.setAttribute('aria-pressed',String(on));
     qty.value=d.quantity_lots||1;
     posStatus.textContent=on?'PAPER ON':'OFF';
-    state.textContent=d.last_error?('Paper option status: '+d.last_error):(on?'Paper auto mode is ON. It simulates at most one nearest-expiry ATM NIFTY CE/PE option from a confirmed SMC signal. SL/targets use NIFTY spot levels; P&amp;L uses live option premium. No broker order is sent.':'Paper auto mode is OFF. No new ATM option paper positions will be opened.');
+    const dailyCount=Number(d.daily_trade_count||0),dailyLimit=Number(d.daily_trade_limit||3);
+    state.textContent=d.last_error?('Paper option status: '+d.last_error):(on?('Paper mode ON · '+dailyCount+'/'+dailyLimit+' daily entries used. Entries only 09:30–11:50 IST; maximum one open trade at a time. Signal journal continues until 15:00 IST. PAPER ONLY; no broker order is sent.'):'Paper auto mode is OFF. No new ATM option paper positions will be opened.');
     const rows=d.open_positions||[];
-    positions.innerHTML=rows.length?rows.map(p=>{const m=p.monitoring||{};const status=v=>v==='HIT'?'HIT':'ACTIVE';const pnl=Number(p.unrealised_pnl_rupees);const pnlClass=pnl>0?'positive':pnl<0?'negative':'';const premium=v=>v===null||v===undefined?'WAITING':Number(v).toFixed(2);return `<tr><td><b>${p.option_symbol||'Selecting ATM contract…'}</b><br><small>${p.option_expiry||''} · ${p.option_strike||''} ${p.option_type||p.signal||''} · ${p.status||''}</small></td><td>${p.quantity_lots}</td><td>${premium(p.entry_price)}</td><td>${Number(p.stop_loss).toFixed(2)}<br><small class="${status(m.stop_loss||'ACTIVE')==='HIT'?'negative':'positive'}">${status(m.stop_loss||'ACTIVE')}</small></td><td>${Number(p.target_1).toFixed(2)}<br><small class="${status(m.target_1||(p.target_1_hit?'HIT':'ACTIVE'))==='HIT'?'positive':'muted'}">${status(m.target_1||(p.target_1_hit?'HIT':'ACTIVE'))}</small></td><td>${Number(p.target_2).toFixed(2)}<br><small class="${status(m.target_2||(p.target_2_hit?'HIT':'ACTIVE'))==='HIT'?'positive':'muted'}">${status(m.target_2||(p.target_2_hit?'HIT':'ACTIVE'))}</small></td><td>${premium(p.last_price)}</td><td class="${pnlClass}">${Number.isFinite(pnl)?(pnl>0?'+':'')+pnl.toLocaleString('en-IN',{maximumFractionDigits:2}):'—'}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">No open ATM option paper positions. Turn paper mode ON and wait for a confirmed signal during 09:30–11:40 IST.</td></tr>';
+    positions.innerHTML=rows.length?rows.map(p=>{const m=p.monitoring||{};const status=v=>v==='HIT'?'HIT':'ACTIVE';const pnl=Number(p.unrealised_pnl_rupees);const pnlClass=pnl>0?'positive':pnl<0?'negative':'';const premium=v=>v===null||v===undefined?'WAITING':Number(v).toFixed(2);return `<tr><td><b>${p.option_symbol||'Selecting ATM contract…'}</b><br><small>${p.option_expiry||''} · ${p.option_strike||''} ${p.option_type||p.signal||''} · ${p.status||''}</small></td><td>${p.quantity_lots}</td><td>${premium(p.entry_price)}</td><td>${Number(p.stop_loss).toFixed(2)}<br><small class="${status(m.stop_loss||'ACTIVE')==='HIT'?'negative':'positive'}">${status(m.stop_loss||'ACTIVE')}</small></td><td>${Number(p.target_1).toFixed(2)}<br><small class="${status(m.target_1||(p.target_1_hit?'HIT':'ACTIVE'))==='HIT'?'positive':'muted'}">${status(m.target_1||(p.target_1_hit?'HIT':'ACTIVE'))}</small></td><td>${Number(p.target_2).toFixed(2)}<br><small class="${status(m.target_2||(p.target_2_hit?'HIT':'ACTIVE'))==='HIT'?'positive':'muted'}">${status(m.target_2||(p.target_2_hit?'HIT':'ACTIVE'))}</small></td><td>${premium(p.last_price)}</td><td class="${pnlClass}">${Number.isFinite(pnl)?(pnl>0?'+':'')+pnl.toLocaleString('en-IN',{maximumFractionDigits:2}):'—'}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">No open ATM option paper positions. Turn paper mode ON and wait for a confirmed signal during 09:30–11:50 IST.</td></tr>';
    }
    async function getStatus(){
     const r=await fetch(apiBase()+'/api/paper-trading');const d=await r.json();if(!r.ok)throw new Error(d.detail||('HTTP '+r.status));render(d);
@@ -726,7 +1554,7 @@ window.addEventListener('load',()=&gt;{const sendHeight=()=&gt;window.parent.pos
 <script>
   // v3.16 daily signal journal: automatic 2-second refresh plus manual refresh.
   (function(){
-   const apiBase=()=>((document.getElementById('api-url')?.value||'http://127.0.0.1:8000').trim().replace(/\/+$/,''));
+   const apiBase=()=>((document.getElementById('api-url')?.value||'http://100.127.151.105:8000').trim().replace(/\/+$/,''));
    const $=id=>document.getElementById(id);
    const fmt=v=>(v===null||v===undefined||v===''?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}));
    const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -740,10 +1568,10 @@ window.addEventListener('load',()=&gt;{const sendHeight=()=&gt;window.parent.pos
      $('today-confirmed-count').textContent=d.confirmed_count??0;
      $('today-wait-count').textContent=d.wait_count??0;
      $('today-journal-date').textContent=(d.date||'—')+' · IST';
-     const rows=(d.confirmed_signals||[]).slice().reverse();
+     const rows=(d.all_scans||d.confirmed_signals||[]).slice().reverse();
      const wrap=$('today-journal-table-wrap'),msg=$('today-journal-message'),body=$('today-journal-rows');
      if(rows.length){
-      body.innerHTML=rows.map(x=>{const outcome=x.outcome||'OPEN';const cls=outcome==='SL HIT'?'wait':outcome==='TARGET 1 HIT'||outcome==='TARGET 2 HIT'?'':'wait';const paper=x.paper_instrument?('<br><small>'+esc(x.paper_instrument)+' · '+esc(x.paper_trade_status||'')+'</small>'):'<small>Not taken · paper mode OFF</small>';const pts=(x.points_gained_lost!==null&&x.points_gained_lost!==undefined)?x.points_gained_lost:x.paper_points_gained_lost;const points=pts===null||pts===undefined?'—':(Number(pts)>0?'+':'')+fmt(pts);return '<tr><td>'+esc(x.time||x.timestamp||'—')+'</td><td><b>'+esc(x.signal||'—')+'</b></td><td>'+fmt(x.entry)+'</td><td>'+fmt(x.stop_loss)+'</td><td>'+fmt(x.target_1)+'</td><td>'+fmt(x.target_2)+'</td><td><span class="tag '+cls+'">'+esc(outcome)+'</span></td><td>'+fmt(x.exit_price)+'</td><td>'+points+(x.points_basis?'<br><small>'+esc(x.points_basis)+'</small>':'')+'</td><td>'+paper+(x.paper_entry_premium!==null&&x.paper_entry_premium!==undefined?'<br><small>Entry premium '+fmt(x.paper_entry_premium)+' · P&amp;L ₹'+fmt(x.option_pnl_rupees)+'</small>':'')+'</td></tr>'}).join('');
+      body.innerHTML=rows.map(x=>{const outcome=x.status==='WAIT'?'WAIT':(x.outcome||'OPEN');const cls=outcome==='SL HIT'?'wait':outcome==='TARGET 1 HIT'||outcome==='TARGET 2 HIT'?'':'wait';const paper=x.paper_instrument?('<br><small>'+esc(x.paper_instrument)+' · '+esc(x.paper_trade_status||'')+'</small>'):(x.status==='WAIT'?'<small>WAIT scan · no entry</small>':'<small>Not taken · paper mode OFF or entry limit/window</small>');const pts=(x.points_gained_lost!==null&&x.points_gained_lost!==undefined)?x.points_gained_lost:null;const points=pts===null?'—':(Number(pts)>0?'+':'')+fmt(pts);const premiumEntry=x.paper_entry_premium;const premiumExit=x.paper_exit_premium;const premiumPts=(x.paper_points_gained_lost!==null&&x.paper_points_gained_lost!==undefined)?Number(x.paper_points_gained_lost):(premiumEntry!==null&&premiumEntry!==undefined&&premiumExit!==null&&premiumExit!==undefined?Number(premiumExit)-Number(premiumEntry):null);const premiumPoints=premiumPts===null||!Number.isFinite(premiumPts)?'—':(premiumPts>0?'+':'')+fmt(premiumPts);const premiumRupees=(x.option_pnl_rupees!==null&&x.option_pnl_rupees!==undefined)?Number(x.option_pnl_rupees):null;const premiumPnl=premiumRupees===null||!Number.isFinite(premiumRupees)?'—':(premiumRupees>0?'+':'')+'₹'+fmt(premiumRupees);const premiumClass=premiumPts===null?'':premiumPts>0?'pnl-positive':premiumPts<0?'pnl-negative':'pnl-flat';const rupeeClass=premiumRupees===null?'':premiumRupees>0?'pnl-positive':premiumRupees<0?'pnl-negative':'pnl-flat';return '<tr><td>'+esc(x.time||x.timestamp||'—')+'</td><td><b>'+esc(x.signal||'—')+'</b></td><td>'+fmt(x.entry)+'</td><td>'+fmt(x.stop_loss)+'</td><td>'+fmt(x.target_1)+'</td><td>'+fmt(x.target_2)+'</td><td><span class="tag '+cls+'">'+esc(outcome)+'</span></td><td>'+fmt(x.exit_price)+'</td><td>'+points+(x.points_basis?'<br><small>'+esc(x.points_basis)+'</small>':'')+'</td><td class="'+premiumClass+'">'+premiumPoints+'</td><td class="'+rupeeClass+'">'+premiumPnl+'</td><td>'+paper+(premiumEntry!==null&&premiumEntry!==undefined?'<br><small>Entry premium '+fmt(premiumEntry)+(premiumExit!==null&&premiumExit!==undefined?' · Exit premium '+fmt(premiumExit):'')+'</small>':'')+'</td></tr>'}).join('');
       wrap.style.display='block';msg.style.display='none';
      }else{
       wrap.style.display='none';msg.style.display='block';
@@ -763,4 +1591,248 @@ window.addEventListener('load',()=&gt;{const sendHeight=()=&gt;window.parent.pos
    setInterval(refreshTodayJournal,2000);
   })();
 </script>
+
+<style>
+  /* v3.28: late dark-theme overrides for sections 3 and 4 */
+  #auto-trading-panel .auto-controls-row,
+  #auto-trading-panel .auto-controls-row .auto-control,
+  #auto-trading-panel .auto-control,
+  #auto-trading-panel .panel,
+  #auto-trading-panel .paper-table-wrap,
+  #auto-trading-panel .paper-positions-table {
+    background-color: #192a40 !important;
+    color: #e6eef9 !important;
+    border-color: #30445f !important;
+    box-shadow: none !important;
+  }
+  #auto-trading-panel .auto-control label,
+  #auto-trading-panel .auto-control span,
+  #auto-trading-panel .panel .section-title,
+  #auto-trading-panel p,
+  #auto-trading-panel small {
+    color: #a9b9ce !important;
+  }
+  #auto-trading-panel .auto-control input,
+  #auto-trading-panel .auto-control select,
+  #auto-trading-panel .auto-control button,
+  #auto-trading-panel input,
+  #auto-trading-panel select {
+    background-color: #101d30 !important;
+    color: #e6eef9 !important;
+    border-color: #3a506d !important;
+  }
+  #auto-trading-panel .paper-positions-table th {
+    background-color: #223650 !important;
+    color: #e6eef9 !important;
+    border-color: #30445f !important;
+  }
+  #auto-trading-panel .paper-positions-table td {
+    background-color: #192a40 !important;
+    color: #dce8f7 !important;
+    border-color: #30445f !important;
+  }
+
+  #today-signal-history .history-summary .history-metric,
+  #today-signal-history .history-metric,
+  #today-signal-history .empty-history,
+  #today-signal-history .table-wrap,
+  #today-signal-history .history-card,
+  #today-signal-history .panel {
+    background-color: #192a40 !important;
+    color: #e6eef9 !important;
+    border-color: #30445f !important;
+    box-shadow: none !important;
+  }
+  #today-signal-history .history-metric *,
+  #today-signal-history .empty-history *,
+  #today-signal-history .table-wrap * {
+    color: inherit;
+  }
+  #today-signal-history .history-metric .label,
+  #today-signal-history .history-metric span,
+  #today-signal-history .history-metric small,
+  #today-signal-history .muted,
+  #today-signal-history .journal-actions small {
+    color: #a9b9ce !important;
+  }
+  #today-signal-history .history-metric strong,
+  #today-signal-history .history-metric b,
+  #today-signal-history .history-metric .value {
+    color: #e6eef9 !important;
+  }
+  #today-signal-history .table-wrap th {
+    background-color: #223650 !important;
+    color: #e6eef9 !important;
+    border-color: #30445f !important;
+  }
+  #today-signal-history .table-wrap td {
+    background-color: #192a40 !important;
+    color: #dce8f7 !important;
+    border-color: #30445f !important;
+  }
+</style>
+
+
+<style id="section4-summary-inline-guard">
+html body section#today-signal-history #today-journal-summary > div.history-metric {
+  background-color:#192a40 !important;
+  color:#e6eef9 !important;
+  border:1px solid #30445f !important;
+}
+html body section#today-signal-history #today-journal-summary > div.history-metric > span {
+  color:#a9b9ce !important;
+}
+html body section#today-signal-history #today-journal-summary > div.history-metric > strong {
+  color:#e6eef9 !important;
+}
+</style>
+
+
+<style id="v3-30-paper-label-and-journal-table">
+  /* Compact Auto Trading label: size to its text, not the whole control card. */
+  #auto-trading-panel #auto-controls-row .auto-control:first-child {
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 7px !important;
+  }
+  #auto-trading-panel #auto-controls-row .auto-control:first-child > label {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: max-content !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    letter-spacing: .02em !important;
+    white-space: nowrap !important;
+    text-transform: uppercase !important;
+    color: #a9b9ce !important;
+  }
+  #auto-trading-panel #auto-controls-row .auto-control:first-child .auto-toggle {
+    width: auto !important;
+    min-width: 62px !important;
+    min-height: 42px !important;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+
+  /* Section 4: keep the live journal dark and make its data table readable.
+     Rows remain populated by the existing API; no sample trades are inserted. */
+  #today-signal-history,
+  #today-signal-history #today-journal-message,
+  #today-signal-history #today-journal-table-wrap,
+  #today-signal-history .table-wrap {
+    background: #132238 !important;
+    color: #e6eef9 !important;
+    border-color: #30445f !important;
+    box-shadow: none !important;
+  }
+  #today-signal-history #today-journal-summary .history-metric {
+    background: #192a40 !important;
+    color: #e6eef9 !important;
+    border: 1px solid #30445f !important;
+    box-shadow: none !important;
+  }
+  #today-signal-history #today-journal-summary .history-metric span {
+    color: #a9b9ce !important;
+  }
+  #today-signal-history #today-journal-summary .history-metric strong {
+    color: #e6eef9 !important;
+  }
+  #today-signal-history #today-journal-message {
+    background: #192a40 !important;
+    color: #dce8f7 !important;
+    border: 1px dashed #3a506d !important;
+  }
+  #today-signal-history #today-journal-table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border: 1px solid #30445f !important;
+    border-radius: 10px !important;
+  }
+  #today-signal-history #today-journal-table-wrap table {
+    width: 100% !important;
+    min-width: 900px !important;
+    border-collapse: collapse !important;
+    background: #132238 !important;
+    color: #e6eef9 !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+  #today-signal-history #today-journal-table-wrap th {
+    position: sticky !important;
+    top: 0 !important;
+    background: #223650 !important;
+    color: #e6eef9 !important;
+    border-bottom: 1px solid #3a506d !important;
+    padding: 10px 9px !important;
+  }
+  #today-signal-history #today-journal-table-wrap td {
+    background: #132238 !important;
+    color: #dce8f7 !important;
+    border-bottom: 1px solid #263b55 !important;
+    padding: 9px !important;
+  }
+  #today-signal-history #today-journal-table-wrap tr:nth-child(even) td {
+    background: #172a42 !important;
+  }
+  #today-signal-history #today-journal-table-wrap .positive {
+    color: #22c55e !important;
+    font-weight: 800 !important;
+  }
+  #today-signal-history #today-journal-table-wrap .negative {
+    color: #f87171 !important;
+    font-weight: 800 !important;
+  }
+  @media (max-width: 600px) {
+    #auto-trading-panel #auto-controls-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+    #auto-trading-panel #auto-controls-row .auto-control:first-child {
+      grid-column: auto !important;
+    }
+    #today-signal-history #today-journal-summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+  }
+</style>
+
+
+<style id="tejansh-brand-header-footer">
+  header .brand { min-width: 0; }
+  header .brand h1 {
+    color: #e6eef9;
+    font-size: clamp(15px, 2.2vw, 21px);
+    line-height: 1.25;
+    letter-spacing: .025em;
+    overflow-wrap: anywhere;
+  }
+  header .brand .sub {
+    color: #9fb1c9;
+    line-height: 1.4;
+  }
+  header .logo {
+    flex: 0 0 42px;
+    background: linear-gradient(145deg, #1e4775, #12304f);
+    border: 1px solid #365574;
+  }
+  .footer {
+    color: #91a4bd !important;
+    border-top: 1px solid #263b55;
+    padding: 14px 8px 4px;
+    margin-top: 22px !important;
+    line-height: 1.6;
+    letter-spacing: .035em;
+    font-weight: 600;
+  }
+  @media (max-width: 600px) {
+    header { align-items: center !important; }
+    header .brand { flex: 1 1 100%; }
+    header .brand h1 { font-size: 15px; }
+    header .brand .sub { font-size: 10px; }
+    .footer { font-size: 9px !important; }
+  }
+</style>
+
 </body></html>

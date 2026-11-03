@@ -142,3 +142,16 @@ Important: paper positions are in-memory in this version and will reset when the
 - The top Entry/SL/T1/T2 panel displays the active paper position's original entry and risk levels while a paper position is open, even if the latest scanner result returns to WAIT.
 - CE/PE signal monitor shows OPEN · PAPER for the side of the active paper position until the backend closes it.
 - Current scanner setup and open paper position are separate states. No broker orders are submitted.
+
+### v3.18 update
+Paper mode can simulate a nearest-expiry ATM NIFTY CE/PE using Angel One option instrument metadata and live option WebSocket LTP. SL/targets are still NIFTY spot levels; option premium points and estimated rupee P&L are shown separately. No broker orders are sent. See `angel_smc_scanner/README_LIVE.txt` for assumptions and limitations.
+
+
+## Final rule clarification — signal journal and paper limits
+
+- Signal journal: every completed 1-minute scan from 09:30 to 15:00 IST is recorded and displayed, including WAIT scans and confirmed CE/PE signals. There is no three-row limit on signals.
+- Paper entries: maximum 3 per IST day, only from 09:30 to 11:50 IST.
+- Only one paper position may be open at a time. After it closes, another confirmed signal may open the next paper trade if the daily limit and entry window allow it.
+- Signal logging continues after 11:50 until 15:00, but no new paper trade can open after 11:50.
+- Remaining open paper positions are force-closed at 15:20 IST.
+- Paper state and daily trade count persist across Oracle service restarts. No live Angel One orders are submitted.
