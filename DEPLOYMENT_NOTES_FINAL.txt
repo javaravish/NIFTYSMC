@@ -1,0 +1,37 @@
+FINAL BACKEND UPDATE — IST ENTRY WINDOW AND FORCED PAPER EOD EXIT
+===================================================================
+
+Included:
+- Signal journal continues independently of paper-trading enable/disable.
+- Existing daily journal rows are merged by timestamp during backfill; existing records are not intentionally replaced by duplicate timestamps.
+- Stable trade_id added to CE/PE signal rows and corresponding paper positions; journal matching uses trade_id with timestamp fallback.
+- Eligible entry window is 09:30–11:50 Asia/Kolkata (IST).
+- Out-of-window scans remain in the signal journal and carry entry_window / eligible_for_entry labels.
+- Historical report UI accepts optional From/To dates; API accepts start_date and end_date in YYYY-MM-DD.
+- Paper state persisted at ~/.nifty_smc_research_lab/paper_trading_state.json and restored on startup.
+- Background engine starts with FastAPI and processes live() without a browser.
+- A hard paper-position close is enforced at 15:20 IST (10 minutes before the regular 15:30 NSE close), even if no fresh tick arrives, as long as the Oracle service and background engine are running.
+- If no option premium quote is available at forced close, the position is still closed in the paper ledger but premium P&L is marked unknown (null), never fabricated.
+- All trading remains PAPER ONLY. No Angel One order placement is called.
+
+DEPLOYMENT:
+- This ZIP deliberately excludes .env. Preserve the existing private .env on Oracle; never upload/share it.
+- Keep one Uvicorn worker only. Multiple workers could run duplicate background engines.
+- Back up the existing Oracle project and paper state before deploying.
+- Restart the existing systemd service after deployment.
+- Verify /api/status, /api/signals/today, /api/paper-trading.
+- Confirm system clock / timezone handling and verify journal times are IST.
+- Background close is not an exchange-side order: this is a simulated paper close. It does not close real Angel One positions.
+- Hard close runs at 15:20 IST, earlier than 15:30 to provide a buffer. For holidays, no trades should be opened because live market data is unavailable, but the timer still checks.
+- This is not a guarantee of trading performance. Existing strategy logic is retained; run PAPER mode and validate in market hours.
+
+FINAL RULE CLARIFICATION — DAILY TRADE LIMIT AND FULL-DAY SIGNAL JOURNAL
+========================================================================
+- Today's Signals & Missed Entries records every completed 1-minute scan, including WAIT and confirmed CE/PE signals, from 09:30 through 15:00 IST. There is no daily cap on journal rows.
+- Paper trading is a separate execution simulation: maximum 3 paper entries per IST calendar day.
+- At most 1 paper position may be open at any time. A new paper entry is allowed only after the prior one closes, if fewer than 3 entries have been used and the time is still within 09:30–11:50 IST.
+- No new paper entries after 11:50 IST, even though signal recording continues until 15:00 IST.
+- Any open paper position is force-closed at 15:20 IST.
+- Daily paper entry count is persisted and restored across service restarts.
+- Dashboard journal now displays all scans returned by the API, not only confirmed CE/PE rows.
+- Automated verification: Python syntax compilation succeeded; existing test suite: 5 passed.

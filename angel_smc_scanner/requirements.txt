@@ -1,0 +1,9 @@
+streamlit>=1.32
+pandas>=2.0
+python-dotenv>=1.0
+smartapi-python
+pyotp
+requests
+websocket-client
+fastapi>=0.110
+uvicorn[standard]>=0.27
