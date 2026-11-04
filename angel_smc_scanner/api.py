@@ -3,10 +3,13 @@ from zoneinfo import ZoneInfo
 from pathlib import Path
 from collections import deque
 import logging
+import os
+import re
 import threading
 import uuid
 import math
 import json
+import time
 import hashlib
 import requests
 import pandas as pd
@@ -307,13 +310,14 @@ def _journal_option_trade(pos):
                     row["paper_points_gained_lost"] = pos.get("realised_option_points", pos.get("unrealised_option_points"))
                     row["paper_pnl_rupees"] = pos.get("realised_pnl_rupees", pos.get("unrealised_pnl_rupees"))
                     row["paper_trade_status"] = pos.get("status")
-                    row["points_basis"] = "ATM option premium points" if pos.get("option_symbol") else "NIFTY spot points"
+                    row["points_basis"] = "NIFTY spot points"
                     row["option_pnl_rupees"] = pos.get("realised_pnl_rupees", pos.get("unrealised_pnl_rupees"))
                     if pos.get("exit_reason"):
-                        row["outcome"] = pos["exit_reason"]
-                        row["exit_price"] = pos.get("exit_price")
-                        row["points_gained_lost"] = pos.get("realised_option_points")
-                        row["spot_exit_reference"] = pos.get("exit_spot_price")
+                        # Keep NIFTY spot outcome/exit_price/points_gained_lost from
+                        # the independent spot-signal evaluator. Option values belong
+                        # only in the paper_* fields.
+                        row["paper_exit_reason"] = pos.get("exit_reason")
+                        row["paper_exit_spot_reference"] = pos.get("exit_spot_price")
                     break
             tmp = path.with_suffix(".tmp")
             tmp.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -367,6 +371,65 @@ def _signal_row(candle_frame, analysis, frames=None):
         "checks": checks, "reasons": reasons, "timeframes": tf
     }
 
+_signal_retention_last_run = 0.0
+
+def _prune_signal_journal(force=False):
+    """Keep the newest 10 confirmed CE/PE signal rows; preserve today's WAIT rows for scan counters."""
+    global _signal_retention_last_run
+    try:
+        now_ts = time.time()
+        if not force and now_ts - _signal_retention_last_run < 300:
+            return
+        today = _now_ist().date().isoformat()
+        with _signal_log_lock:
+            files = list(SIGNAL_LOG_DIR.glob("nifty_signals_*.json"))
+            loaded = []
+            for journal_file in files:
+                try:
+                    rows = json.loads(journal_file.read_text(encoding="utf-8"))
+                    if isinstance(rows, list):
+                        loaded.append((journal_file, rows))
+                except Exception:
+                    # Never delete or overwrite a journal that cannot be read safely.
+                    logger.warning("Leaving unreadable signal journal untouched: %s", journal_file)
+            confirmed = []
+            for journal_file, rows in loaded:
+                for row in rows:
+                    if (not isinstance(row, dict)
+                            or row.get("status") != "CONFIRMED"
+                            or str(row.get("signal", "")).upper() not in ("CE", "PE")):
+                        continue
+                    try:
+                        stamp = pd.Timestamp(row.get("timestamp"))
+                        stamp = stamp.tz_localize(IST) if stamp.tzinfo is None else stamp.tz_convert(IST)
+                        if SIGNAL_LOG_START <= stamp.time() <= SIGNAL_LOG_END:
+                            confirmed.append((stamp, journal_file, row))
+                    except Exception:
+                        continue
+            confirmed.sort(key=lambda item: item[0], reverse=True)
+            keep_keys = {(str(path), row.get("timestamp")) for _, path, row in confirmed[:10]}
+            for journal_file, rows in loaded:
+                day_from_name = journal_file.stem.replace("nifty_signals_", "")
+                kept = []
+                for row in rows:
+                    if not isinstance(row, dict):
+                        continue
+                    if row.get("status") == "CONFIRMED" and str(row.get("signal", "")).upper() in ("CE", "PE"):
+                        if (str(journal_file), row.get("timestamp")) in keep_keys:
+                            kept.append(row)
+                    elif day_from_name == today and row.get("status") == "WAIT":
+                        # Today's WAIT rows are retained only to keep the dashboard's scan counters accurate.
+                        kept.append(row)
+                if kept:
+                    tmp = journal_file.with_suffix(".tmp")
+                    tmp.write_text(json.dumps(kept, ensure_ascii=False, indent=2), encoding="utf-8")
+                    tmp.replace(journal_file)
+                else:
+                    journal_file.unlink(missing_ok=True)
+            _signal_retention_last_run = now_ts
+    except Exception:
+        logger.exception("Signal journal retention cleanup failed")
+
 def _save_signal_rows(rows, day):
     if not rows:
         return
@@ -397,6 +460,7 @@ def _save_signal_rows(rows, day):
         if changed or not path.exists():
             ordered = sorted(existing.values(), key=lambda r: r.get("timestamp", ""))
             path.write_text(json.dumps(ordered, ensure_ascii=False, indent=2), encoding="utf-8")
+    _prune_signal_journal()
 
 def _record_current_live_signal(candle_frame, analysis, frames):
     row = _signal_row(candle_frame, analysis, frames)
@@ -820,6 +884,64 @@ def _cached_chunk(client_obj, token, start, end):
     return fetched, "angel_one"
 
 
+# Storage retention: preserve the existing 250-session replay window and its
+# existing 45-calendar-day indicator warm-up margin. Cleanup runs only after a
+# successful report build, never while a report is downloading/replaying.
+HISTORY_CACHE_SESSIONS = 250
+HISTORY_CACHE_WARMUP_CALENDAR_DAYS = 45
+BACKTEST_RESULT_CACHE_KEEP = 3
+
+def _prune_history_cache():
+    """Remove only complete historical chunks older than the 250-session + warm-up window."""
+    try:
+        calendar_days = int(math.ceil(HISTORY_CACHE_SESSIONS * 7 / 5)) + HISTORY_CACHE_WARMUP_CALENDAR_DAYS
+        cutoff = (_now_ist().replace(tzinfo=None) - timedelta(days=calendar_days)).date()
+        pattern = re.compile(r"^nifty_1m_(\\d{8})_(\\d{8})\\.csv$")
+        removed = 0
+        for cache_file in CACHE_DIR.iterdir():
+            match = pattern.match(cache_file.name)
+            if not match or not cache_file.is_file():
+                continue
+            try:
+                chunk_end = datetime.strptime(match.group(2), "%Y%m%d").date()
+                # Keep the chunk intersecting the cutoff boundary and all newer chunks.
+                if chunk_end <= cutoff:
+                    cache_file.unlink()
+                    removed += 1
+            except (OSError, ValueError):
+                logger.warning("Could not evaluate historical cache file %s", cache_file)
+        if removed:
+            logger.info("Historical cache retention removed %s expired chunks (cutoff %s)", removed, cutoff)
+    except Exception:
+        logger.exception("Historical cache retention cleanup failed")
+
+def _prune_backtest_result_cache():
+    """Keep the three newest valid SMC replay result caches; leave unrelated files alone."""
+    try:
+        candidates = []
+        pattern = re.compile(r"^[a-f0-9]{64}_cost_[0-9]+\\.[0-9]{2}_smc_morning_v2\\.json$")
+        for result_file in RESULT_CACHE_DIR.iterdir():
+            if result_file.is_file() and pattern.match(result_file.name):
+                try:
+                    # Only manage files belonging to this known cache format.
+                    json.loads(result_file.read_text(encoding="utf-8"))
+                    candidates.append(result_file)
+                except Exception:
+                    logger.warning("Leaving unreadable backtest cache untouched: %s", result_file)
+        candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+        for stale_file in candidates[BACKTEST_RESULT_CACHE_KEEP:]:
+            try:
+                stale_file.unlink()
+            except OSError:
+                logger.warning("Could not remove obsolete backtest result cache %s", stale_file)
+    except Exception:
+        logger.exception("Backtest result cache cleanup failed")
+
+def _run_storage_retention():
+    _prune_history_cache()
+    _prune_backtest_result_cache()
+
+
 def _run_history_job(job_id, sessions, cost_points, start_date=None, end_date=None):
     def update(**kwargs):
         with _history_jobs_lock:
@@ -888,6 +1010,11 @@ def _run_history_job(job_id, sessions, cost_points, start_date=None, end_date=No
                     "replay_engine": "cached_shared_single_pass_v1"})
                 update(status="completed", progress_pct=100, message="Loaded completed report from local result cache",
                        result=cached_result, completed_at=datetime.now().isoformat())
+                try:
+                    os.utime(result_cache_file, None)
+                except OSError:
+                    pass
+                _run_storage_retention()
                 return
             except Exception:
                 logger.warning("Ignoring invalid replay result cache %s", result_cache_file)
@@ -913,6 +1040,7 @@ def _run_history_job(job_id, sessions, cost_points, start_date=None, end_date=No
             logger.exception("Could not save replay result cache")
         update(status="completed", progress_pct=100, message="Historical backtest completed", result=result,
                completed_at=datetime.now().isoformat())
+        _run_storage_retention()
     except Exception as exc:
         logger.exception("Historical job %s failed", job_id)
         update(status="failed", message=str(exc)[:400], error=str(exc)[:400], completed_at=datetime.now().isoformat())
@@ -1002,9 +1130,60 @@ def history(sessions: int = Query(250, ge=15, le=250), days: int | None = Query(
 
 
 
+def _attach_paper_trade_details(signal_rows):
+    """Decorate signal rows from persisted paper positions so the journal reflects live paper trades."""
+    if not signal_rows:
+        return signal_rows
+    try:
+        with _paper_lock:
+            positions = list(_paper_state.get("open_positions", [])) + list(_paper_state.get("closed_positions", []))
+        by_trade_id = {str(p.get("trade_id")): p for p in positions if p.get("trade_id")}
+        by_signal_time = {}
+        for pos in positions:
+            signal_time = pos.get("signal_time")
+            if signal_time:
+                try:
+                    stamp = pd.Timestamp(signal_time)
+                    stamp = stamp.tz_localize(IST) if stamp.tzinfo is None else stamp.tz_convert(IST)
+                    by_signal_time[stamp.isoformat()] = pos
+                except Exception:
+                    pass
+        for row in signal_rows:
+            pos = by_trade_id.get(str(row.get("trade_id"))) if row.get("trade_id") else None
+            if pos is None and row.get("timestamp"):
+                try:
+                    stamp = pd.Timestamp(row.get("timestamp"))
+                    stamp = stamp.tz_localize(IST) if stamp.tzinfo is None else stamp.tz_convert(IST)
+                    pos = by_signal_time.get(stamp.isoformat())
+                except Exception:
+                    pass
+            if pos is None:
+                continue
+            row["paper_instrument"] = pos.get("option_symbol") or row.get("paper_instrument")
+            row["paper_expiry"] = pos.get("option_expiry") or row.get("paper_expiry")
+            row["paper_strike"] = pos.get("option_strike") if pos.get("option_strike") is not None else row.get("paper_strike")
+            row["paper_entry_premium"] = pos.get("entry_price") if pos.get("entry_price") is not None else row.get("paper_entry_premium")
+            row["paper_exit_premium"] = pos.get("exit_price") if pos.get("exit_price") is not None else row.get("paper_exit_premium")
+            row["paper_last_premium"] = pos.get("last_price") if pos.get("last_price") is not None else row.get("paper_last_premium")
+            row["paper_points_gained_lost"] = pos.get("realised_option_points", pos.get("unrealised_option_points", row.get("paper_points_gained_lost")))
+            row["paper_pnl_rupees"] = pos.get("realised_pnl_rupees", pos.get("unrealised_pnl_rupees", row.get("paper_pnl_rupees")))
+            row["option_pnl_rupees"] = pos.get("realised_pnl_rupees", pos.get("unrealised_pnl_rupees", row.get("option_pnl_rupees")))
+            row["paper_trade_status"] = pos.get("status") or row.get("paper_trade_status")
+            row["points_basis"] = "NIFTY spot points"
+            if pos.get("exit_reason"):
+                # Do not mix option premium exit/P&L into NIFTY spot columns.
+                row["paper_exit_reason"] = pos.get("exit_reason")
+                row["paper_exit_spot_reference"] = pos.get("exit_spot_price")
+        return signal_rows
+    except Exception:
+        logger.exception("Could not enrich signal journal with paper position state")
+        return signal_rows
+
+
 @app.get("/api/signals/today")
 def today_signal_history():
     """Today's completed-candle journal, backfilled from local cache only."""
+    _prune_signal_journal()
     day = _now_ist().date().isoformat()
     _backfill_today_signal_log()
     _update_today_signal_outcomes(_live_frame(include_forming=False))
@@ -1023,13 +1202,56 @@ def today_signal_history():
         except Exception:
             continue
     confirmed = [r for r in journal_rows if r.get("status") == "CONFIRMED"]
+
+    # Section 4 displays the newest 10 confirmed signals across saved trading days.
+    # Keep today's scan counters and full today's scan payload unchanged for compatibility.
+    recent_confirmed = []
+    try:
+        with _signal_log_lock:
+            journal_files = list(SIGNAL_LOG_DIR.glob("nifty_signals_*.json"))
+            for journal_file in journal_files:
+                try:
+                    saved_rows = json.loads(journal_file.read_text(encoding="utf-8"))
+                except Exception:
+                    logger.warning("Skipping unreadable signal journal: %s", journal_file)
+                    continue
+                if not isinstance(saved_rows, list):
+                    continue
+                for saved_row in saved_rows:
+                    if (not isinstance(saved_row, dict)
+                            or saved_row.get("status") != "CONFIRMED"
+                            or str(saved_row.get("signal", "")).upper() not in ("CE", "PE")):
+                        continue
+                    try:
+                        signal_stamp = pd.Timestamp(saved_row.get("timestamp"))
+                        if signal_stamp.tzinfo is None:
+                            signal_stamp = signal_stamp.tz_localize(IST)
+                        else:
+                            signal_stamp = signal_stamp.tz_convert(IST)
+                        if SIGNAL_LOG_START <= signal_stamp.time() <= SIGNAL_LOG_END:
+                            recent_confirmed.append((signal_stamp, saved_row))
+                    except Exception:
+                        continue
+        recent_confirmed.sort(key=lambda item: item[0], reverse=True)
+        recent_confirmed = [row for _, row in recent_confirmed[:10]]
+    except Exception:
+        logger.exception("Could not build recent confirmed signal list")
+        recent_confirmed = sorted(confirmed, key=lambda r: r.get("timestamp", ""), reverse=True)[:10]
+
+    _attach_paper_trade_details(journal_rows)
+    _attach_paper_trade_details(recent_confirmed)
+    # Keep confirmed-only response semantics while carrying the matching paper trade state.
     return {
         "ok": True, "date": day, "timezone": "Asia/Kolkata",
         "scan_count": len(journal_rows), "confirmed_count": len(confirmed),
         "wait_count": max(0, len(journal_rows) - len(confirmed)),
-        "confirmed_signals": confirmed, "all_scans": journal_rows, "recent_scans": journal_rows,
+        "confirmed_signals": confirmed, "recent_confirmed_signals": recent_confirmed,
+        "recent_confirmed_count": len(recent_confirmed),
+        "all_scans": journal_rows, "recent_scans": journal_rows,
         "scan_window": "09:30-15:00 IST",
         "paper_entry_window": "09:30-11:50 IST",
+        "recent_signal_limit": 10,
+        "recent_signal_scope": "latest confirmed CE/PE signals across saved trading days",
         "source": "local completed 1m candles and saved live scans; no historical broker request",
         "outcome_basis": "SL/targets use NIFTY spot levels; option paper P&L uses live ATM option premium ticks."
     }
