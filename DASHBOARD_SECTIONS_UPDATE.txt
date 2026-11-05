@@ -1,0 +1,24 @@
+Dashboard Sections 7 and 9 update
+
+Section 7
+- Sections 7 and 8 have been combined into one practical SMC Engine panel.
+- Descriptions are limited to rules present in angel_smc_scanner/scanner.py: 5m BOS/MSS proxy and structure fallback, 2m FVG, 2m order-block displacement/retest, 2m IDM sweep/reclaim proxy, 1m trigger, and 09:30-11:40 IST time filter.
+- Live diagnostic values are fetched from GET /api/scan. The panel refreshes every 15 seconds and can be refreshed manually.
+- Concepts not independently implemented in the current code are explicitly listed as not active: CHoCH, EQH/EQL, IFVG, volume imbalance, breaker blocks, premium/discount arrays, OTE, previous-day levels, and kill-zone logic.
+
+Section 9
+- Replaced display-only data-source, weekly-expiry, and moderate-risk dropdowns with a factual Trading Configuration panel.
+- API and Angel One/WebSocket status are read from GET /api/status.
+- The current option selector chooses the nearest valid NIFTY OPTIDX expiry and the closest available strike to spot; there is no user-configurable weekly/monthly selector in this code.
+- The current strategy has no active Moderate-risk profile setting, so the UI no longer implies that such a setting is applied.
+- Manual execution / paper-research only is stated; no live orders are placed by this scanner.
+
+Backend trading logic was not modified. scanner.py and api.py are unchanged in this update.
+
+Validation
+- PYTHONPATH=. pytest -q: 7 passed.
+- Python syntax compilation: passed.
+- Inline JavaScript syntax check with Node: passed.
+
+Security
+- The project ZIP intentionally excludes .env, .git, IDE metadata, caches, logs, and compiled Python files. Keep the existing server-side .env file during deployment.

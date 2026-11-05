@@ -1,0 +1,26 @@
+NIFTY SMC - PREMIUM TRACKING UPDATE
+
+Changes
+1. Section 4 now tracks the nearest-expiry ATM NIFTY option premium for every NEW confirmed CE/PE signal independently of Paper Trading ON/OFF.
+2. It uses actual Angel One option WebSocket LTP ticks. The first received option quote is recorded as simulated premium entry. After the NIFTY spot signal outcome resolves, the first subsequent option quote is recorded as simulated premium exit.
+3. Premium P&L (pts) = option exit/last LTP minus option entry LTP. Premium P&L (Rs) = premium points x configured paper quantity (lots) x contract lot size.
+4. Option subscriptions are queued and restored after WebSocket reconnects.
+5. Section 6 adds Premium P&L (pts). Historical replay uses NIFTY spot candles only and does not fetch historical option candles, so this column intentionally displays — rather than inventing a premium result.
+
+Important limitations
+- Tracking starts only for new confirmed signals after this version is deployed. Existing journal rows are not backfilled with guessed option premiums.
+- If Angel One is disconnected, option quotes are unavailable, or the option contract cannot be resolved, premium fields remain blank until real quotes are received.
+- The first option LTP after the signal is a simulated mark, not a guaranteed executable fill. Bid/ask spread, slippage, brokerage, taxes and market impact are not modeled.
+- Premium P&L in rupees uses the quantity-lots setting in Paper Trading even when Paper Trading itself is OFF. This is a display/simulation quantity only; no orders are sent.
+- NIFTY spot SL/target outcomes remain independent from option-premium P&L.
+
+Deployment
+1. Back up the current Oracle project folder.
+2. Extract this ZIP over the existing project folder, preserving your current angel_smc_scanner/.env file. This ZIP intentionally excludes .env.
+3. From angel_smc_scanner, activate your existing virtual environment and run: pip install -r requirements.txt
+4. Restart the existing Uvicorn service using your normal service command.
+5. Connect Angel One and verify the WebSocket is connected. New confirmed signals will start premium tracking automatically, regardless of Paper Trading ON/OFF.
+
+Validation performed
+- Python syntax compilation passed for api.py, angel_client.py and scanner.py.
+- Existing automated test suite: 7 passed.
