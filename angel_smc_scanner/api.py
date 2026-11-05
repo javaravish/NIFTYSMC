@@ -16,7 +16,7 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from angel_client import AngelClient, Credentials
-from scanner import build_timeframes, analyze_smc_stack, historical_replay_all
+from scanner import build_timeframes, analyze_smc_stack, historical_replay_all, build_trade_plan, evaluate_trade_plan
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nifty-smc-api")
@@ -130,6 +130,7 @@ _scrip_master_lock = threading.RLock()
 _scrip_master_rows = None
 _nifty_spot_token = None
 _option_tick_lock = threading.RLock()
+_signal_option_tokens = set()  # option tokens subscribed for signal-only simulated premium tracking
 
 def _signal_log_path(day):
     return SIGNAL_LOG_DIR / f"nifty_signals_{day}.json"
@@ -211,55 +212,18 @@ def _resolve_atm_nifty_option(spot_price, signal):
 
 
 def _signal_outcome_update(row, candle_frame):
-    """Resolve spot-reference SL/T1/T2 using subsequent completed candles; stop-first on same-bar ambiguity."""
+    """Update live journal outcomes using the same evaluator as historical replay."""
     if (row.get("status") != "CONFIRMED" or not row.get("timestamp")
         or row.get("paper_trade_status") == "CLOSED"
         or row.get("outcome") not in (None, "", "OPEN", "TARGET 1 HIT", "SL HIT", "TARGET 2 HIT", "EOD EXIT")):
         return row
-    if row.get("entry") is None or row.get("stop_loss") is None:
-        return row
-    stamp = pd.Timestamp(row["timestamp"])
-    later = candle_frame[pd.to_datetime(candle_frame["datetime"]) > stamp]
-    side = row.get("signal")
-    sl, t1, t2 = float(row["stop_loss"]), float(row["target_1"]), float(row["target_2"])
-    sign = 1 if side == "CE" else -1
-    target1_seen = False
-    for candle in later.itertuples(index=False):
-        high, low = float(candle.high), float(candle.low)
-        stop_hit = low <= sl if side == "CE" else high >= sl
-        t1_hit = high >= t1 if side == "CE" else low <= t1
-        t2_hit = high >= t2 if side == "CE" else low <= t2
-        # OHLC cannot reveal the order if SL and a target are touched in one bar.
-        if stop_hit:
-            row.update({"outcome": "SL HIT", "exit_price": round(sl, 2),
-                        "points_gained_lost": round((sl - float(row["entry"])) * sign, 2),
-                        "exit_time": pd.Timestamp(candle.datetime).isoformat(),
-                        "outcome_note": "Conservative stop-first rule; same-candle sequence may be unknown."})
-            return row
-        if t2_hit:
-            row.update({"outcome": "TARGET 2 HIT", "exit_price": round(t2, 2),
-                        "points_gained_lost": round((t2 - float(row["entry"])) * sign, 2),
-                        "exit_time": pd.Timestamp(candle.datetime).isoformat()})
-            return row
-        if t1_hit:
-            target1_seen = True
-    # End-of-day close uses the last completed candle for any still-open signal.
-    if not later.empty and pd.Timestamp(later.iloc[-1]["datetime"]).strftime("%H:%M") >= "15:25":
-        last = later.iloc[-1]
-        exit_price = float(last["close"])
-        row.update({"outcome": "EOD EXIT", "exit_price": round(exit_price, 2),
-                    "points_gained_lost": round((exit_price - float(row["entry"])) * sign, 2),
-                    "exit_time": pd.Timestamp(last["datetime"]).isoformat()})
-    else:
-        row["outcome"] = "TARGET 1 HIT" if target1_seen else "OPEN"
-        if target1_seen:
-            # This is a milestone, not a full exit; keep realized exit fields blank.
-            row["exit_price"] = None
-            row["points_gained_lost"] = None
-            row["outcome_note"] = "Target 1 reached; monitoring continues for SL or Target 2."
-        else:
-            row["exit_price"] = None
-            row["points_gained_lost"] = None
+    plan = {"timestamp": row["timestamp"], "signal": row.get("signal"), "entry": row.get("entry"),
+            "stop_loss": row.get("stop_loss"), "target_1": row.get("target_1"), "target_2": row.get("target_2")}
+    result = evaluate_trade_plan(plan, candle_frame)
+    row.update({"outcome": result.get("outcome", "OPEN"), "exit_price": result.get("exit_price"),
+                "points_gained_lost": result.get("points_gained_lost"), "exit_time": result.get("exit_time"),
+                "target_1_hit": bool(result.get("target_1_hit")),
+                "target_1_hit_time": result.get("target_1_hit_time"), "outcome_note": result.get("outcome_note")})
     return row
 
 
@@ -334,40 +298,23 @@ def _signal_row(candle_frame, analysis, frames=None):
     signal = str((analysis or {}).get("signal") or "WAIT").upper()
     checks = (analysis or {}).get("checks", {}) or {}
     reasons = (analysis or {}).get("reasons", []) or []
-    entry = stop = target_1 = target_2 = None
-    if signal in ("CE", "PE"):
-        entry = float(last["close"])
-        recent = candle_frame.tail(10)
-        ob = (analysis or {}).get("order_block_zone")
-        if signal == "CE":
-            stop = float(ob["low"]) if ob and float(ob["low"]) < entry else float(recent["low"].min())
-            risk = entry - stop
-            target_1, target_2 = entry + risk, entry + 2.0 * risk
-        else:
-            stop = float(ob["high"]) if ob and float(ob["high"]) > entry else float(recent["high"].max())
-            risk = stop - entry
-            target_1, target_2 = entry - risk, entry - 2.0 * risk
-        if risk <= 0:
-            entry = stop = target_1 = target_2 = None
-            signal = "WAIT"
+    plan = build_trade_plan(candle_frame, analysis)
     tf = _timeframe_view(analysis, frames or {}) if analysis else {}
     signal_trade_id = hashlib.sha256(f"{stamp.isoformat()}|{signal}".encode("utf-8")).hexdigest()[:20] if signal in ("CE", "PE") else None
     in_entry_window = ENTRY_START <= stamp.time() <= ENTRY_END
     in_scan_window = SIGNAL_LOG_START <= stamp.time() <= SIGNAL_LOG_END
+    valid_signal = signal in ("CE", "PE") and plan is not None
     return {
         "trade_id": signal_trade_id,
         "entry_window": "ENTRY WINDOW" if in_entry_window else ("SCAN ONLY" if in_scan_window else "OUTSIDE SCAN WINDOW"),
-        "scan_window": bool(in_scan_window),
-        "eligible_for_entry": bool(in_entry_window and signal in ("CE", "PE")),
+        "scan_window": bool(in_scan_window), "eligible_for_entry": bool(in_entry_window and valid_signal),
         "timestamp": stamp.isoformat(), "time": stamp.strftime("%H:%M:%S"),
-        "status": "CONFIRMED" if signal in ("CE", "PE") else "WAIT",
-        "signal": signal, "price": round(float(last["close"]), 2),
-        "outcome": "OPEN" if signal in ("CE", "PE") else None,
+        "status": "CONFIRMED" if valid_signal else "WAIT", "signal": signal if valid_signal else "WAIT",
+        "price": round(float(last["close"]), 2), "outcome": "OPEN" if valid_signal else None,
         "exit_price": None, "points_gained_lost": None, "exit_time": None,
-        "entry": round(entry, 2) if entry is not None else None,
-        "stop_loss": round(stop, 2) if stop is not None else None,
-        "target_1": round(target_1, 2) if target_1 is not None else None,
-        "target_2": round(target_2, 2) if target_2 is not None else None,
+        "entry": plan["entry"] if plan else None, "stop_loss": plan["stop_loss"] if plan else None,
+        "target_1": plan["target_1"] if plan else None, "target_2": plan["target_2"] if plan else None,
+        "target_1_hit": False, "target_1_hit_time": None,
         "checks": checks, "reasons": reasons, "timeframes": tf
     }
 
@@ -444,9 +391,13 @@ def _save_signal_rows(rows, day):
         changed = False
         preserve_fields = (
             "outcome", "exit_price", "points_gained_lost", "exit_time", "outcome_note",
-            "points_basis", "paper_instrument", "paper_expiry", "paper_strike",
+            "target_1_hit", "target_1_hit_time", "points_basis", "paper_instrument", "paper_expiry", "paper_strike",
             "paper_entry_premium", "paper_exit_premium", "paper_points_gained_lost",
-            "paper_pnl_rupees", "paper_trade_status", "option_pnl_rupees", "spot_exit_reference"
+            "paper_pnl_rupees", "paper_trade_status", "option_pnl_rupees", "spot_exit_reference",
+            "sim_option_symbol", "sim_option_token", "sim_option_expiry", "sim_option_strike",
+            "sim_option_lot_size", "sim_premium_status", "sim_premium_source", "sim_premium_entry",
+            "sim_premium_entry_time", "sim_premium_last", "sim_premium_last_time", "sim_premium_exit",
+            "sim_premium_exit_time", "sim_premium_points", "sim_premium_rupees"
         )
         for row in rows:
             if row and row.get("timestamp"):
@@ -462,10 +413,46 @@ def _save_signal_rows(rows, day):
             path.write_text(json.dumps(ordered, ensure_ascii=False, indent=2), encoding="utf-8")
     _prune_signal_journal()
 
+def _start_signal_premium_tracking(row):
+    """Subscribe to real option LTP for every confirmed signal, independent of paper mode."""
+    if not row or row.get("status") != "CONFIRMED" or not row.get("trade_id"):
+        return
+    try:
+        contract = _resolve_atm_nifty_option(float(row.get("entry") or row.get("price")), row["signal"])
+        row.update({
+            "sim_option_symbol": contract["symbol"], "sim_option_token": contract["token"],
+            "sim_option_expiry": contract["expiry"], "sim_option_strike": contract["strike"],
+            "sim_option_lot_size": contract["lot_size"], "sim_premium_status": "WAITING FOR OPTION QUOTE",
+            "sim_premium_source": "Angel One live option WebSocket LTP"
+        })
+        path = _signal_log_path(pd.Timestamp(row["timestamp"]).strftime("%Y-%m-%d"))
+        with _signal_log_lock:
+            rows = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+            for saved in rows:
+                if saved.get("trade_id") == row["trade_id"]:
+                    saved.update({k: v for k, v in row.items() if k.startswith("sim_")})
+            tmp = path.with_suffix(".tmp")
+            tmp.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
+            tmp.replace(path)
+        token = str(contract["token"])
+        with _option_tick_lock:
+            _signal_option_tokens.add(token)
+        c = _angel_client
+        if c and c.ws_connected:
+            c.subscribe_market_tokens([token], exchange_type=2)
+        else:
+            row["sim_premium_status"] = "WAITING FOR ANGEL ONE WEBSOCKET"
+    except Exception as exc:
+        logger.warning("Could not start signal premium tracking for %s: %s", row.get("trade_id"), exc)
+        row["sim_premium_status"] = "UNAVAILABLE: " + str(exc)[:160]
+
+
 def _record_current_live_signal(candle_frame, analysis, frames):
     row = _signal_row(candle_frame, analysis, frames)
     if row and row.get("scan_window"):
         _save_signal_rows([row], pd.Timestamp(row["timestamp"]).strftime("%Y-%m-%d"))
+        if row.get("status") == "CONFIRMED":
+            _start_signal_premium_tracking(row)
 
 def _backfill_today_signal_log():
     """Rebuild today's per-completed-minute journal from local cached candles; no broker request."""
@@ -670,7 +657,9 @@ def _on_market_tick(message):
     with _paper_lock:
         active_option_token = (str(_paper_state["open_positions"][0].get("option_token"))
                                if _paper_state["open_positions"] else None)
-    if token and active_option_token and token == active_option_token:
+    with _option_tick_lock:
+        is_signal_option_token = token in _signal_option_tokens
+    if token and ((active_option_token and token == active_option_token) or is_signal_option_token):
         _on_option_tick(message)
         return
     if _nifty_spot_token and token and token != str(_nifty_spot_token):
@@ -706,7 +695,11 @@ def _on_market_tick(message):
 @app.get("/api/status")
 def status():
     return {"ok": True, "service": "nifty-smc-local-api", "mode": "local-smartapi-scanner",
-            "angel_one_connected": bool(_angel_client and _angel_client.jwt),
+            # "angel_one_connected" means the live Angel One market connection is active.
+            # The JWT may intentionally remain available after disconnect so the API,
+            # cached candles and dashboard continue running.
+            "angel_one_connected": bool(_angel_client and _angel_client.ws_connected),
+            "session_authenticated": bool(_angel_client and _angel_client.jwt),
             "websocket_connected": bool(_angel_client and _angel_client.ws_connected),
             "websocket_error": _angel_client.ws_error if _angel_client else None,
             "historical_candles_loaded": bool(_live.get("history_loaded")),
@@ -770,6 +763,52 @@ def connect():
             _angel_client.close_market_websocket()
         _angel_client = None
         raise HTTPException(status_code=400, detail=str(e)[:300])
+
+@app.post("/api/disconnect")
+def disconnect():
+    """Disconnect Angel One WebSocket without stopping Uvicorn or deleting local data."""
+    global _angel_client
+    try:
+        if _angel_client:
+            _angel_client.close_market_websocket()
+        with _live_lock:
+            _live.update({"price": None, "timestamp": None, "timestamp_dt": None,
+                          "sequence": None, "forming": None})
+        return {"ok": True, "angel_one_connected": False,
+                "message": "Angel One WebSocket disconnected. API and saved data remain available."}
+    except Exception as exc:
+        logger.exception("Angel One disconnect failed")
+        raise HTTPException(status_code=400, detail=str(exc)[:250])
+
+
+@app.get("/api/scanner/status")
+def scanner_status():
+    running = bool(_engine_thread and _engine_thread.is_alive() and not _engine_stop.is_set())
+    return {"ok": True, "scanner_running": running,
+            "angel_one_connected": bool(_angel_client and _angel_client.ws_connected),
+            "api_running": True}
+
+
+@app.post("/api/scanner/start")
+def scanner_start():
+    global _engine_thread
+    if _engine_thread is not None and _engine_thread.is_alive() and not _engine_stop.is_set():
+        return {"ok": True, "scanner_running": True, "message": "Scanner is already running."}
+    _engine_stop.clear()
+    _engine_thread = threading.Thread(target=_background_engine,
+        name="nifty-smc-background-engine", daemon=True)
+    _engine_thread.start()
+    return {"ok": True, "scanner_running": True, "message": "Background SMC scanner started."}
+
+
+@app.post("/api/scanner/stop")
+def scanner_stop():
+    _engine_stop.set()
+    if _engine_thread and _engine_thread.is_alive():
+        _engine_thread.join(timeout=5)
+    return {"ok": True, "scanner_running": bool(_engine_thread and _engine_thread.is_alive()),
+            "message": "Scanner stop requested. API and Angel One connection remain available."}
+
 
 @app.get("/api/candles")
 def candles(interval: str = Query("1m", pattern="^(1m|2m|3m|5m)$"), days: int = Query(1, ge=1, le=30)):
@@ -999,7 +1038,7 @@ def _run_history_job(job_id, sessions, cost_points, start_date=None, end_date=No
         update(status="replaying", progress_pct=0, message="Preparing completed four-timeframe candles for shared replay",
                sessions_found=len(selected_dates), candle_count=len(selected))
         fingerprint = hashlib.sha256(pd.util.hash_pandas_object(selected, index=False).values.tobytes()).hexdigest()
-        result_cache_file = RESULT_CACHE_DIR / f"{fingerprint}_cost_{float(cost_points):.2f}_smc_morning_v2.json"
+        result_cache_file = RESULT_CACHE_DIR / f"{fingerprint}_cost_{float(cost_points):.2f}_smc_unified_v3.json"
         if result_cache_file.exists():
             try:
                 cached_result = json.loads(result_cache_file.read_text(encoding="utf-8"))
@@ -1007,7 +1046,7 @@ def _run_history_job(job_id, sessions, cost_points, start_date=None, end_date=No
                     "calendar_days_searched": calendar_days, "one_minute_candles": len(selected),
                     "cache_chunks_used": cache_hits, "download_chunks": len(chunks),
                     "cache_location": str(CACHE_DIR), "strict_four_timeframe": True,
-                    "replay_engine": "cached_shared_single_pass_v1"})
+                    "replay_engine": "cached_unified_live_matched_v3"})
                 update(status="completed", progress_pct=100, message="Loaded completed report from local result cache",
                        result=cached_result, completed_at=datetime.now().isoformat())
                 try:
@@ -1033,7 +1072,7 @@ def _run_history_job(job_id, sessions, cost_points, start_date=None, end_date=No
             "calendar_days_searched": calendar_days, "one_minute_candles": len(selected),
             "cache_chunks_used": cache_hits, "download_chunks": len(chunks),
             "cache_location": str(CACHE_DIR), "strict_four_timeframe": True,
-            "replay_engine": "shared_single_pass_v1"})
+            "replay_engine": "unified_live_matched_v3"})
         try:
             result_cache_file.write_text(json.dumps(result, separators=(",", ":")), encoding="utf-8")
         except Exception:
@@ -1247,13 +1286,16 @@ def today_signal_history():
         "wait_count": max(0, len(journal_rows) - len(confirmed)),
         "confirmed_signals": confirmed, "recent_confirmed_signals": recent_confirmed,
         "recent_confirmed_count": len(recent_confirmed),
+        # Latest Angel One NIFTY spot tick for live, unrealised journal P&L.
+        "live_spot_price": _live.get("price"),
+        "live_spot_timestamp": _live.get("timestamp"),
         "all_scans": journal_rows, "recent_scans": journal_rows,
         "scan_window": "09:30-15:00 IST",
         "paper_entry_window": "09:30-11:50 IST",
         "recent_signal_limit": 10,
         "recent_signal_scope": "latest confirmed CE/PE signals across saved trading days",
         "source": "local completed 1m candles and saved live scans; no historical broker request",
-        "outcome_basis": "SL/targets use NIFTY spot levels; option paper P&L uses live ATM option premium ticks."
+        "outcome_basis": "SL/targets use NIFTY spot levels; simulated signal premium P&L and paper P&L use actual Angel One option LTP ticks when available."
     }
 
 
@@ -1413,6 +1455,50 @@ def _paper_update(price, trade_plan, signal, quote_time):
         logger.exception("Option WebSocket subscription update failed")
 
 
+def _update_signal_premium_tick(token, premium, stamp):
+    """Persist real option quotes against signal rows; paper mode is not required."""
+    if token not in _signal_option_tokens:
+        return
+    for path in SIGNAL_LOG_DIR.glob("nifty_signals_*.json"):
+        try:
+            with _signal_log_lock:
+                rows = json.loads(path.read_text(encoding="utf-8"))
+                changed = False
+                for row in rows:
+                    if str(row.get("sim_option_token") or "") != token:
+                        continue
+                    new_entry_quote = row.get("sim_premium_entry") is None
+                    if new_entry_quote:
+                        row["sim_premium_entry"] = round(float(premium), 2)
+                        row["sim_premium_entry_time"] = stamp.isoformat(timespec="seconds")
+                        row["sim_premium_status"] = "OPEN · SIMULATED"
+                    row["sim_premium_last"] = round(float(premium), 2)
+                    row["sim_premium_last_time"] = stamp.isoformat(timespec="seconds")
+                    if row.get("sim_premium_entry") is not None:
+                        pts = round(float(premium) - float(row["sim_premium_entry"]), 2)
+                        row["sim_premium_points"] = pts
+                        lots = max(1, int(_paper_state.get("quantity_lots", 1)))
+                        lot_size = int(row.get("sim_option_lot_size") or 0)
+                        row["sim_premium_rupees"] = round(pts * lots * lot_size, 2) if lot_size else None
+                    outcome = str(row.get("outcome") or "OPEN").upper()
+                    if (not new_entry_quote and outcome not in ("OPEN", "TARGET 1 HIT", "")
+                            and row.get("sim_premium_entry") is not None):
+                        row["sim_premium_exit"] = round(float(premium), 2)
+                        row["sim_premium_exit_time"] = stamp.isoformat(timespec="seconds")
+                        row["sim_premium_points"] = round(float(premium) - float(row["sim_premium_entry"]), 2)
+                        lots = max(1, int(_paper_state.get("quantity_lots", 1)))
+                        lot_size = int(row.get("sim_option_lot_size") or 0)
+                        row["sim_premium_rupees"] = round(row["sim_premium_points"] * lots * lot_size, 2) if lot_size else None
+                        row["sim_premium_status"] = "CLOSED · SIMULATED"
+                    changed = True
+                if changed:
+                    tmp = path.with_suffix(".tmp")
+                    tmp.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
+                    tmp.replace(path)
+        except Exception:
+            logger.exception("Could not persist simulated signal option quote")
+
+
 def _on_option_tick(message):
     token = str(message.get("token", "")).strip()
     raw = message.get("last_traded_price")
@@ -1421,6 +1507,7 @@ def _on_option_tick(message):
     # SmartAPI WebSocket LTP values are integer paise for both index and option contracts.
     premium = float(raw) / 100.0
     stamp = _tick_time(message)
+    _update_signal_premium_tick(token, premium, stamp)
     with _paper_lock:
         if not _paper_state["open_positions"]:
             return

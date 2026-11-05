@@ -3,7 +3,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="#0b1220" name="theme-color"/>
-  <title>TEJANSH RESEARCH SMC SCANNER</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%23173b68%27/%3E%3Ctext x=%2732%27 y=%2747%27 font-family=%27Arial,sans-serif%27 font-size=%2746%27 font-weight=%27900%27 text-anchor=%27middle%27 fill=%27white%27%3EK%3C/text%3E%3C/svg%3E"/>
+  <title>TEJANSH SMC SCANNER</title>
   <style>
     :root{
      --site-primary:#173b68;--site-secondary:#0d766e;--site-background:#0b1220;
@@ -162,6 +163,11 @@
 
 
   <style>
+    /* Section 4 outcome colors match the Historical Trade Report. */
+    #today-journal-rows .target{color:#35d68a!important;font-weight:800}
+    #today-journal-rows .stop{color:#ff6b78!important;font-weight:800}
+    #today-journal-rows .open{color:#b8c7d9!important;font-weight:700}
+    #today-journal-rows .pnl-flat{color:#b8c7d9!important;font-weight:700}
     /* Screenshot-matched styling: Paper Trading and Today's Signals only. */
     #auto-trading-panel, #today-signal-history{
       background:#fff!important;color:#172338!important;border:1px solid #dce5ef!important;
@@ -1017,18 +1023,152 @@ header .logo {
 }
 </style>
 
+
+<style id="journal-pnl-color-fix-v3-28">
+  /* Ensure journal P&L colors win over the table-cell base color rules. */
+  #today-signal-history #today-journal-table-wrap td.pnl-positive { color: #35d68a !important; font-weight: 800 !important; }
+  #today-signal-history #today-journal-table-wrap td.pnl-negative { color: #ff6b78 !important; font-weight: 800 !important; }
+  #today-signal-history #today-journal-table-wrap td.pnl-flat { color: #b8c7d9 !important; font-weight: 750 !important; }
+</style>
+
+<style id="active-smc-engine-and-trading-config">
+.active-smc-engine-section,
+.trading-configuration-section {
+  color-scheme: dark !important;
+  background: #121f32 !important;
+  color: #e8f0fb !important;
+  border: 1px solid #293d58 !important;
+}
+.active-smc-engine-section .collapsible-heading,
+.trading-configuration-section .collapsible-heading {
+  background: transparent !important;
+  border-bottom: 1px solid #30445f !important;
+}
+.active-smc-engine-section .collapsible-heading h3,
+.trading-configuration-section .collapsible-heading h3 {
+  color: #edf4ff !important;
+}
+.smc-rule-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+}
+.smc-rule-card,
+.trading-config-item {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 10px;
+  background: #192a40;
+  border: 1px solid #30445f;
+}
+.smc-rule-card b {
+  display: block;
+  color: #edf4ff;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+.smc-rule-card span {
+  display: block;
+  color: #b5c5d9;
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.smc-rule-card code,
+.active-smc-engine-section code {
+  color: #d9e9ff;
+}
+.smc-live-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 11px;
+  background: #0e1a2b;
+  border: 1px solid #30445f;
+}
+.smc-live-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: #edf4ff;
+  font-size: 12px;
+}
+.smc-live-grid {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 8px;
+}
+.smc-live-grid > div {
+  min-width: 0;
+  padding: 9px;
+  border-radius: 8px;
+  background: #192a40;
+}
+.smc-live-grid small,
+.trading-config-item small {
+  display: block;
+  color: #91a6c0;
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+.smc-live-grid strong {
+  color: #e9f2ff;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.smc-live-grid strong.good { color: #35d39a; }
+.smc-live-grid strong.bad { color: #ff707b; }
+.trading-config-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 9px;
+}
+.trading-config-item strong {
+  display: block;
+  color: #edf4ff;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.trading-config-item span {
+  display: block;
+  color: #a9b9ce;
+  font-size: 10px;
+  line-height: 1.45;
+  margin-top: 5px;
+}
+.trading-config-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+.trading-config-footer .note { margin: 0; }
+.trading-config-footer button { flex: 0 0 auto; }
+@media(max-width:760px) {
+  .trading-config-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .smc-live-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:480px) {
+  .smc-rule-grid,
+  .trading-config-grid { grid-template-columns: 1fr; }
+  .trading-config-footer { align-items: stretch; flex-direction: column; }
+}
+</style>
+
 </head>
 <body><main id="app">
-  <header><div class="brand"><div class="logo" aria-label="KPD logo">KPD</div><div><h1>TEJANSH RESEARCH SMC SCANNER</h1><div class="sub">NIFTY 50 · Smart Money Concepts · Multi-timeframe market research</div></div></div><div class="header-market"><span>NIFTY 50</span><strong id="hero-live-price">— —</strong></div><div class="topright"><span class="pill">LOCAL LIVE API</span><span class="pill">Weekly expiry · Moderate risk</span><span class="pill">Manual execution only</span></div></header>
+  <header><div class="brand"><div class="logo" aria-label="KPD logo">KPD</div><div><h1>TEJANSH SMC SCANNER</h1><div class="sub">Smart Money Concepts · Multi-timeframe</div></div></div><div class="header-market"><span>NIFTY 50</span><strong id="hero-live-price">— —</strong></div><div class="topright"><span class="pill">LIVE API</span><span class="pill">Auto nearest expiry · Paper / research</span><span class="pill">Manual execution only</span></div></header>
   <div class="wrap">
     <section class="card bottom" id="live-monitor">
-    <div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>1. Live NIFTY 50 · WebSocket 2.0</h3><span class="collapse-chevron">−</span></div>
+    <div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>1. Live NIFTY 50</h3><span class="collapse-chevron">−</span></div>
     <div class="history-summary" data-collapse-content="true">
       <span id="live-price" hidden>—</span>
       <div class="history-metric"><span>Last exchange tick</span><strong id="live-tick-time" style="font-size:13px">—</strong></div>
       <div class="history-metric"><span>Tick age</span><strong id="live-tick-age">—</strong></div>
       <div class="history-metric"><span>Overall signal</span><strong id="live-overall-signal">WAIT</strong></div>
-    </div><div class="history-summary" data-collapse-content="true" id="live-trade-plan" style="margin-top:12px;grid-template-columns:repeat(4,minmax(0,1fr))"><div class="history-metric"><span>Entry reference</span><strong id="live-plan-entry">Waiting for signal</strong></div><div class="history-metric"><span>Stop-loss</span><strong id="live-plan-stop">—</strong></div><div class="history-metric"><span>Target 1 · 1R</span><strong id="live-plan-t1">—</strong></div><div class="history-metric"><span>Target 2 · 2R</span><strong id="live-plan-t2">—</strong></div></div><p class="note" data-collapse-content="true" id="live-plan-note" style="margin-top:6px">Entry is the completed 1-minute signal candle close; stop and targets are NIFTY spot reference levels (1R and 2R), not option premium prices. Manual verification required; no orders are placed.</p>
+    </div><div class="history-summary" data-collapse-content="true" id="live-trade-plan" style="margin-top:12px;grid-template-columns:repeat(4,minmax(0,1fr))"><div class="history-metric"><span>Entry reference</span><strong id="live-plan-entry">Waiting for signal</strong></div><div class="history-metric"><span>Stop-loss</span><strong id="live-plan-stop">—</strong></div><div class="history-metric"><span>Target 1 · 1R</span><strong id="live-plan-t1">—</strong></div><div class="history-metric"><span>Target 2 · 2R</span><strong id="live-plan-t2">—</strong></div></div><p class="note" data-collapse-content="true" id="live-plan-note" style="margin-top:6px">Entry is the completed 1-minute signal candle close; stop and targets are NIFTY spot reference levels (1R and 2R), not option premium prices. Manual verification required.</p>
   </section><section class="card bottom" id="multi-timeframe-panel"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>2. Multi-timeframe SMC analysis</h3><span class="mtf-actions"><small id="mtf-last-refresh">Waiting for analysis</small><button class="primary" id="refresh-mtf" type="button">Refresh analysis</button></span><span class="collapse-chevron" aria-hidden="true">−</span></div><div class="history-summary mtf-single-row" data-collapse-content="true" id="live-timeframes">
     <div class="history-metric"><span>5m · BOS / MSS</span><strong>Awaiting data</strong></div>
     <div class="history-metric"><span>5m · Structure</span><strong>Awaiting data</strong></div>
@@ -1054,7 +1194,7 @@ header .logo {
       <div class="table-wrap" id="today-journal-table-wrap" style="display:none">
         <table><thead><tr><th>Signal time</th><th>Side</th><th>Entry reference</th><th>Stop-loss</th><th>Target 1</th><th>Target 2</th><th>Outcome</th><th>Exit price</th><th>NIFTY spot P&amp;L (pts)</th><th>Premium entry</th><th>Premium exit</th><th>Premium P&amp;L (pts)</th><th>Premium P&amp;L (₹)</th><th>ATM option paper trade</th></tr></thead><tbody id="today-journal-rows"></tbody></table>
       </div>
-      <p class="note">This table displays the latest 10 confirmed CE/PE signals across today and previously saved trading days, newest first. WAIT scans are excluded from this table; today's scan counters above still include WAIT scans. Signals are recorded independently of Paper Trading ON/OFF and include missed or entry-window-ineligible signals. The journal uses locally cached candles and saved scan records; it does not request historical data from Angel One. Outcome triggers are evaluated against NIFTY spot SL/target levels. If Paper Trading is ON, the journal also records the selected ATM option premium P&amp;L. Paper fills use the first received option LTP and exclude bid/ask, slippage, brokerage and taxes.</p>
+      <p class="note">This table displays the latest 10 confirmed CE/PE signals across today and previously saved trading days, newest first. Signals are recorded independently of Paper Trading ON/OFF and include missed or entry-window-ineligible signals.</p>
     </div>
   </section><div class="layout"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>5. Price action &amp; SMC map + Signal monitor</h3><span class="collapse-chevron">−</span></div><section class="card" data-collapse-content="true"><div class="section-title"><h3>Price action &amp; SMC map</h3><span class="muted">Live Angel One candles · SMC overlays</span></div><div aria-label="Chart timeframe" class="tfrow" role="group"><button class="tf" data-tf="1m">1 min</button><button class="tf active" data-tf="2m">2 min</button><button class="tf" data-tf="5m">5 min</button></div><div class="chart" style="height:390px;min-height:320px;position:relative;overflow:hidden;touch-action:pan-y"></div><p class="note">Mouse wheel over chart to zoom in/out. Scroll up to zoom in; scroll down to zoom out.</p><div class="legend"><span><i class="dot" style="background:#16a477"></i> Bullish candle</span><span><i class="dot" style="background:#d65d65"></i> Bearish candle</span><span><i class="dot" style="background:#e0a23a"></i> FVG</span><span><i class="dot" style="background:#2563eb"></i> Order block</span><span><i class="dot" style="background:#7c3aed"></i> BOS</span><span><i class="dot" style="background:#db2777"></i> MSS</span><span><i class="dot" style="background:#0891b2"></i> IDM</span></div><p class="note">Live Angel One OHLC candles. FVG, OB, BOS, MSS and IDM labels are algorithmic chart annotations based on completed candles; OB and IDM are heuristic proxies, not official TradingView LuxAlgo signals. Use them for analysis, not automatic execution.</p></section>
     <aside class="card" data-collapse-content="true" id="signal-monitor"><div class="section-title"><h3>Signal monitor</h3><span class="tag wait" id="signal-overall">WAIT</span></div><div class="signal"><div><strong>CE setup</strong><div class="muted" id="signal-ce-detail">Waiting for live SMC confirmation</div></div><span class="tag wait" id="signal-ce-state">WAITING</span></div><div class="signal"><div><strong>PE setup</strong><div class="muted" id="signal-pe-detail">Waiting for live SMC confirmation</div></div><span class="tag wait" id="signal-pe-state">WAITING</span></div><div class="signal"><div><strong>Risk control</strong><div class="muted" id="signal-risk-detail">Manual approval · paper only</div></div><span class="tag" id="signal-risk-state">ON</span></div><p class="note" id="signal-monitor-note">Waiting for live analysis. Paper mode can simulate the nearest-expiry ATM NIFTY option using live option premium ticks; SL/targets remain NIFTY spot levels.</p></aside></div><section class="card bottom" id="user-historical-report"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>6. NIFTY SMC — Historical Trade Report</h3><span class="collapse-chevron">−</span></div><iframe data-collapse-content="true" loading="eager" srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
@@ -1078,7 +1218,7 @@ th{position:sticky;top:0;background:light-dark(#f2f6fb,#1b2a40);z-index:1}tbody 
 #detail{font-size:11px;line-height:1.6;color:light-dark(#64748b,#a6b5c9)}.empty{padding:20px;text-align:center;color:light-dark(#718098,#9aabc0)}.muted{font-size:11px;color:light-dark(#718098,#9aabc0)}
 @media(max-width:900px){.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:10px}}
-.metric strong{overflow-wrap:anywhere}.pnl-positive{color:#0b946b;font-weight:800}.pnl-negative{color:#d34d58;font-weight:800}
+.metric strong{overflow-wrap:anywhere}.pnl-positive{color:#35d68a!important;font-weight:800}.pnl-negative{color:#ff6b78!important;font-weight:800}.pnl-flat{color:#b8c7d9!important;font-weight:700}.target{color:#35d68a!important;font-weight:800}.stop{color:#ff6b78!important;font-weight:800}.open{color:#b8c7d9!important;font-weight:700}
 .tablebox{max-height:none;overflow:visible}
 #export-csv{background:#0b7a59;color:#fff;border-color:#0b7a59;font-weight:700}
 .tablebox.is-scroll{height:370px;max-height:370px;overflow-y:auto;overflow-x:auto}
@@ -1151,7 +1291,7 @@ tbody tr:hover,tbody tr.selected{background:#203650!important}
   &lt;label&gt;Strategy view &lt;select id=&quot;strategy-view&quot;&gt;&lt;option value=&quot;smc_pac&quot;&gt;SMC FVG / OB / IDM / BOS / MSS&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;
   &lt;label&gt;From date (IST) &lt;input id=&quot;history-start-date&quot; type=&quot;date&quot;&gt;&lt;/label&gt; &lt;label&gt;To date (IST) &lt;input id=&quot;history-end-date&quot; type=&quot;date&quot;&gt;&lt;/label&gt; &lt;label&gt;Trading sessions &lt;select id=&quot;sessions&quot;&gt;&lt;option value=&quot;250&quot; selected&gt;250 (default)&lt;/option&gt;&lt;option value=&quot;180&quot;&gt;180&lt;/option&gt;&lt;option value=&quot;90&quot;&gt;90&lt;/option&gt;&lt;option value=&quot;60&quot;&gt;60&lt;/option&gt;&lt;option value=&quot;30&quot;&gt;30&lt;/option&gt;&lt;option value=&quot;15&quot;&gt;15&lt;/option&gt;&lt;/select&gt;&lt;/label&gt; &lt;label&gt;Round-trip cost (spot pts) &lt;input id=&quot;cost-points&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;100&quot; step=&quot;0.25&quot; value=&quot;2&quot; style=&quot;width:76px&quot;&gt;&lt;/label&gt; &lt;button class=&quot;primary&quot; id=&quot;load&quot;&gt;Run corrected backtest&lt;/button&gt;
   &lt;select id=&quot;direction&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All signals&lt;/option&gt;&lt;option value=&quot;BUY CE&quot;&gt;BUY CE only&lt;/option&gt;&lt;option value=&quot;BUY PE&quot;&gt;BUY PE only&lt;/option&gt;&lt;/select&gt;
-  &lt;select id=&quot;result&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All outcomes&lt;/option&gt;&lt;option value=&quot;TARGET&quot;&gt;Target&lt;/option&gt;&lt;option value=&quot;STOP&quot;&gt;Stop-loss&lt;/option&gt;&lt;option value=&quot;EOD_EXIT&quot;&gt;EOD exit&lt;/option&gt;&lt;option value=&quot;OPEN&quot;&gt;Unresolved&lt;/option&gt;&lt;/select&gt;
+  &lt;select id=&quot;result&quot;&gt;&lt;option value=&quot;ALL&quot;&gt;All outcomes&lt;/option&gt;&lt;option value=&quot;TARGET 1 HIT&quot;&gt;Target 1 hit&lt;/option&gt;&lt;option value=&quot;TARGET 2 HIT&quot;&gt;Target 2 hit&lt;/option&gt;&lt;option value=&quot;STOP&quot;&gt;Stop-loss&lt;/option&gt;&lt;option value=&quot;EOD_EXIT&quot;&gt;EOD exit&lt;/option&gt;&lt;option value=&quot;OPEN&quot;&gt;Unresolved&lt;/option&gt;&lt;/select&gt;
   &lt;input id=&quot;search&quot; placeholder=&quot;Search date / signal…&quot; aria-label=&quot;Search trades&quot;&gt; &lt;button class=&quot;primary&quot; id=&quot;export-csv&quot; type=&quot;button&quot;&gt;Download CSV&lt;/button&gt;
  &lt;/div&gt;
  &lt;div style=&quot;margin-top:10px&quot;&gt;&lt;div id=&quot;progress-message&quot; class=&quot;muted&quot;&gt;Select a history range and run the backtest. Downloaded candles are cached locally.&lt;/div&gt;&lt;progress id=&quot;history-progress&quot; value=&quot;0&quot; max=&quot;100&quot; style=&quot;width:100%;height:12px&quot;&gt;&lt;/progress&gt;&lt;/div&gt;
@@ -1167,36 +1307,36 @@ tbody tr:hover,tbody tr.selected{background:#203650!important}
 &lt;/section&gt;
 &lt;section class=&quot;panel&quot;&gt;
  &lt;div style=&quot;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap&quot;&gt;&lt;h2 style=&quot;font-size:16px;margin:0&quot;&gt;Trade history&lt;/h2&gt;&lt;span class=&quot;status&quot; id=&quot;count&quot;&gt;0 trades&lt;/span&gt;&lt;/div&gt;
- &lt;div class=&quot;tablebox is-empty&quot;&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Date &amp;amp; time&lt;/th&gt;&lt;th&gt;Signal&lt;/th&gt;&lt;th&gt;Entry&lt;/th&gt;&lt;th&gt;Stop-loss&lt;/th&gt;&lt;th&gt;Target&lt;/th&gt;&lt;th&gt;Outcome&lt;/th&gt;&lt;th&gt;Exit time&lt;/th&gt;&lt;th&gt;Net points P/L&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;rows&quot;&gt;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;Run corrected backtest to load historical trades.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
+ &lt;div class=&quot;tablebox is-empty&quot;&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Date &amp;amp; time&lt;/th&gt;&lt;th&gt;Signal&lt;/th&gt;&lt;th&gt;Entry&lt;/th&gt;&lt;th&gt;Stop-loss&lt;/th&gt;&lt;th&gt;Target 1&lt;/th&gt;&lt;th&gt;Target 2&lt;/th&gt;&lt;th&gt;Outcome&lt;/th&gt;&lt;th&gt;Exit time&lt;/th&gt;&lt;th&gt;Net points P/L&lt;/th&gt;&lt;th&gt;Premium P&amp;amp;L (pts)&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;rows&quot;&gt;&lt;tr&gt;&lt;td colspan=&quot;10&quot; class=&quot;empty&quot;&gt;Run corrected backtest to load historical trades.&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;
  &lt;div id=&quot;trade-detail-panel&quot; style=&quot;display:none;margin-top:12px;border:1px solid light-dark(#e0e7f0,#293a52);border-radius:9px;padding:12px&quot;&gt;
   &lt;div id=&quot;trade-detail-toggle&quot; role=&quot;button&quot; tabindex=&quot;0&quot; aria-expanded=&quot;true&quot; style=&quot;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:700;font-size:14px;margin-bottom:8px&quot;&gt;&lt;span&gt;Trade details · click to hide&lt;/span&gt;&lt;span id=&quot;trade-detail-chevron&quot;&gt;−&lt;/span&gt;&lt;/div&gt;
   &lt;div id=&quot;detail&quot; class=&quot;muted&quot;&gt;Select a trade row to inspect its details.&lt;/div&gt;
   &lt;div id=&quot;diagram&quot; style=&quot;margin-top:8px&quot;&gt;&lt;/div&gt;
  &lt;/div&gt;
 &lt;/section&gt;
-&lt;p class=&quot;muted&quot;&gt;Method note: historical signals are generated by the local scanner using completed candles. This report is educational analysis, not a recommendation. Estimated spot-point costs are deducted as configured; actual brokerage, taxes, slippage, option Greeks and option fills are not modeled. No orders are placed.&lt;/p&gt;
+&lt;p class=&quot;muted&quot;&gt;Method note: historical signals are generated by the local scanner using completed candles. This report is educational analysis, not a recommendation. Estimated spot-point costs are deducted as configured. Historical option-premium P&amp;L is not available in this spot-only replay and is shown as —; live simulated option premiums are reported separately in Section 4. Actual brokerage, taxes, slippage, option Greeks and executable option fills are not modeled. No orders are placed.&lt;/p&gt;
 &lt;/main&gt;
 &lt;script&gt;
 let allTrades=[], strategyTrades={smc_pac:[]};
 const $=id=&gt;document.getElementById(id);
 const base=()=&gt; $(&#x27;api&#x27;).value.trim().replace(/\/+$/,&#x27;&#x27;);
 const num=v=&gt;v==null||v===&#x27;&#x27;?&#x27;—&#x27;:Number(v).toLocaleString(&#x27;en-IN&#x27;,{minimumFractionDigits:2,maximumFractionDigits:2});
-function outcomeClass(x){return x===&#x27;TARGET&#x27;?&#x27;target&#x27;:String(x||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)?&#x27;stop&#x27;:&#x27;open&#x27;}
+function outcomeClass(x,t){const o=String(x||&#x27;&#x27;).toUpperCase();if(o.includes(&#x27;TARGET&#x27;))return &#x27;target&#x27;;if(o.startsWith(&#x27;STOP&#x27;))return &#x27;stop&#x27;;const p=pointPnL(t);return p==null?&#x27;open&#x27;:p&gt;0?&#x27;target&#x27;:p&lt;0?&#x27;stop&#x27;:&#x27;pnl-flat&#x27;}
 function pointPnL(t){
  if(t.net_points!=null &amp;&amp; Number.isFinite(Number(t.net_points))) return Number(t.net_points);
  const entry=Number(t.entry); if(!Number.isFinite(entry)) return null;
  let exit=Number(t.exit_price);
- if(!Number.isFinite(exit)){const o=String(t.outcome||&#x27;&#x27;).toUpperCase();if(o.includes(&#x27;TARGET&#x27;))exit=Number(t.target);else if(o.includes(&#x27;STOP&#x27;))exit=Number(t.stop_loss);else return null;}
+ if(!Number.isFinite(exit)){const o=String(t.outcome||&#x27;&#x27;).toUpperCase();if(o.includes(&#x27;TARGET&#x27;))exit=Number(t.target_2??t.target);else if(o.includes(&#x27;STOP&#x27;))exit=Number(t.stop_loss);else return null;}
  if(!Number.isFinite(exit))return null;
  return (t.signal===&#x27;BUY PE&#x27;?-1:1)*(exit-entry);
 }
-function filtered(){const d=$(&#x27;direction&#x27;).value,r=$(&#x27;result&#x27;).value,q=$(&#x27;search&#x27;).value.toLowerCase();allTrades=strategyTrades[$(&#x27;strategy-view&#x27;).value]||[];return allTrades.filter(t=&gt;(d===&#x27;ALL&#x27;||t.signal===d)&amp;&amp;(r===&#x27;ALL&#x27;||(r===&#x27;OPEN&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;OPEN&#x27;)||!t.outcome:r===&#x27;STOP&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;):t.outcome===r))&amp;&amp;(!q||(String(t.time)+&#x27; &#x27;+t.signal).toLowerCase().includes(q)))}
+function filtered(){const d=$(&#x27;direction&#x27;).value,r=$(&#x27;result&#x27;).value,q=$(&#x27;search&#x27;).value.toLowerCase();allTrades=strategyTrades[$(&#x27;strategy-view&#x27;).value]||[];return allTrades.filter(t=&gt;(d===&#x27;ALL&#x27;||t.signal===d)&amp;&amp;(r===&#x27;ALL&#x27;||(r===&#x27;OPEN&#x27;?(String(t.outcome||&#x27;&#x27;).startsWith(&#x27;OPEN&#x27;)||t.outcome===&#x27;TARGET 1 HIT&#x27;||!t.outcome):r===&#x27;STOP&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;):t.outcome===r))&amp;&amp;(!q||(String(t.time)+&#x27; &#x27;+t.signal).toLowerCase().includes(q)))}
 
 function csvCell(v){if(v===null||v===undefined)return &#x27;&#x27;;let s=typeof v===&#x27;object&#x27;?JSON.stringify(v):String(v);return &#x27;&quot;&#x27;+s.replace(/&quot;/g,&#x27;&quot;&quot;&#x27;)+&#x27;&quot;&#x27;;}
 $(&#x27;export-csv&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{
  const list=filtered();
  if(!list.length){alert(&#x27;No trades to export. Run the backtest first or clear the filters.&#x27;);return;}
- const cols=[&#x27;time&#x27;,&#x27;signal&#x27;,&#x27;entry&#x27;,&#x27;stop_loss&#x27;,&#x27;target&#x27;,&#x27;outcome&#x27;,&#x27;exit_time&#x27;,&#x27;exit_price&#x27;,&#x27;gross_points&#x27;,&#x27;cost_points&#x27;,&#x27;net_points&#x27;,&#x27;reason&#x27;,&#x27;confluence_score&#x27;,&#x27;checks&#x27;,&#x27;signal_bar_time&#x27;,&#x27;strategy&#x27;];
+ const cols=[&#x27;time&#x27;,&#x27;signal&#x27;,&#x27;entry&#x27;,&#x27;stop_loss&#x27;,&#x27;target_1&#x27;,&#x27;target_2&#x27;,&#x27;target_1_hit&#x27;,&#x27;target_1_hit_time&#x27;,&#x27;outcome&#x27;,&#x27;exit_time&#x27;,&#x27;exit_price&#x27;,&#x27;gross_points&#x27;,&#x27;cost_points&#x27;,&#x27;net_points&#x27;,&#x27;reason&#x27;,&#x27;confluence_score&#x27;,&#x27;checks&#x27;,&#x27;signal_bar_time&#x27;,&#x27;strategy&#x27;];
  const lines=[cols.join(&#x27;,&#x27;),...list.map(t=&gt;cols.map(k=&gt;csvCell(t[k])).join(&#x27;,&#x27;))];
  const blob=new Blob([&#x27;\uFEFF&#x27;+lines.join(&#x27;\r\n&#x27;)],{type:&#x27;text/csv;charset=utf-8;&#x27;});
  const url=URL.createObjectURL(blob),a=document.createElement(&#x27;a&#x27;);
@@ -1205,7 +1345,7 @@ $(&#x27;export-csv&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{
 });
 function render(){
  const list=filtered(),wins=list.filter(t=&gt;pointPnL(t)!=null &amp;&amp; pointPnL(t)&gt;0).length,stops=list.filter(t=&gt;pointPnL(t)!=null &amp;&amp; pointPnL(t)&lt;=0).length;
- $(&#x27;m-total&#x27;).textContent=list.length;$(&#x27;m-ce&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY CE&#x27;).length;$(&#x27;m-pe&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY PE&#x27;).length;$(&#x27;m-outcomes&#x27;).textContent=list.filter(t=&gt;t.outcome===&#x27;TARGET&#x27;).length+&#x27; / &#x27;+list.filter(t=&gt;String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)).length+&#x27; / &#x27;+list.filter(t=&gt;t.outcome===&#x27;EOD_EXIT&#x27;).length+&#x27; EOD&#x27;;$(&#x27;m-win&#x27;).textContent=wins+stops?(100*wins/(wins+stops)).toFixed(1)+&#x27;%&#x27;:&#x27;N/A&#x27;;
+ $(&#x27;m-total&#x27;).textContent=list.length;$(&#x27;m-ce&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY CE&#x27;).length;$(&#x27;m-pe&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY PE&#x27;).length;$(&#x27;m-outcomes&#x27;).textContent=&#x27;T1 &#x27;+list.filter(t=&gt;t.target_1_hit).length+&#x27; / T2 &#x27;+list.filter(t=&gt;t.outcome===&#x27;TARGET 2 HIT&#x27;).length+&#x27; / SL &#x27;+list.filter(t=&gt;String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)).length+&#x27; / EOD &#x27;+list.filter(t=&gt;t.outcome===&#x27;EOD_EXIT&#x27;).length;$(&#x27;m-win&#x27;).textContent=wins+stops?(100*wins/(wins+stops)).toFixed(1)+&#x27;%&#x27;:&#x27;N/A&#x27;;
  const points=list.map(pointPnL).filter(v=&gt;v!==null),net=points.reduce((a,b)=&gt;a+b,0);
  $(&#x27;m-net-points&#x27;).textContent=points.length?(net&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+net.toFixed(2)+&#x27; pts&#x27;:&#x27;—&#x27;;
  $(&#x27;m-net-points&#x27;).className=net&gt;0?&#x27;pnl-positive&#x27;:net&lt;0?&#x27;pnl-negative&#x27;:&#x27;&#x27;;
@@ -1217,7 +1357,7 @@ function render(){
  tableBox.style.maxHeight=list.length&gt;10?&#x27;370px&#x27;:&#x27;none&#x27;;
  tableBox.style.overflowY=list.length&gt;10?&#x27;auto&#x27;:&#x27;visible&#x27;;
  if(list.length&lt;=10){$(&#x27;trade-detail-panel&#x27;).style.display=&#x27;none&#x27;;}
- $(&#x27;rows&#x27;).innerHTML=list.length?list.map((t,i)=&gt;`&lt;tr data-i=&quot;${i}&quot;&gt;&lt;td&gt;${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge ${t.signal===&#x27;BUY CE&#x27;?&#x27;ce&#x27;:&#x27;pe&#x27;}&quot;&gt;${t.signal}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;${num(t.entry)}&lt;/td&gt;&lt;td&gt;${num(t.stop_loss)}&lt;/td&gt;&lt;td&gt;${num(t.target)}&lt;/td&gt;&lt;td class=&quot;${outcomeClass(t.outcome)}&quot;&gt;${t.outcome||&#x27;OPEN / unresolved&#x27;}&lt;/td&gt;&lt;td&gt;${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;—&#x27;}&lt;/td&gt;&lt;td class=&quot;${pointPnL(t)==null?&#x27;open&#x27;:pointPnL(t)&gt;=0?&#x27;pnl-positive&#x27;:&#x27;pnl-negative&#x27;}&quot;&gt;${pointPnL(t)==null?&#x27;Open&#x27;:(pointPnL(t)&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+pointPnL(t).toFixed(2)}&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;):&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;No trades match these filters.&lt;/td&gt;&lt;/tr&gt;&#x27;;
+ $(&#x27;rows&#x27;).innerHTML=list.length?list.map((t,i)=&gt;`&lt;tr data-i=&quot;${i}&quot;&gt;&lt;td&gt;${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;/td&gt;&lt;td&gt;&lt;span class=&quot;badge ${t.signal===&#x27;BUY CE&#x27;?&#x27;ce&#x27;:&#x27;pe&#x27;}&quot;&gt;${t.signal}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;${num(t.entry)}&lt;/td&gt;&lt;td&gt;${num(t.stop_loss)}&lt;/td&gt;&lt;td&gt;${num(t.target_1)}&lt;/td&gt;&lt;td&gt;${num(t.target_2??t.target)}&lt;/td&gt;&lt;td class=&quot;${outcomeClass(t.outcome,t)}&quot;&gt;${t.outcome||&#x27;OPEN / unresolved&#x27;}&lt;/td&gt;&lt;td&gt;${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;—&#x27;}&lt;/td&gt;&lt;td class=&quot;${pointPnL(t)==null?&#x27;open&#x27;:pointPnL(t)&gt;0?&#x27;pnl-positive&#x27;:pointPnL(t)&lt;0?&#x27;pnl-negative&#x27;:&#x27;pnl-flat&#x27;}&quot;&gt;${pointPnL(t)==null?&#x27;Open&#x27;:(pointPnL(t)&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+pointPnL(t).toFixed(2)}&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;/tr&gt;`).join(&#x27;&#x27;):&#x27;&lt;tr&gt;&lt;td colspan=&quot;9&quot; class=&quot;empty&quot;&gt;No trades match these filters.&lt;/td&gt;&lt;/tr&gt;&#x27;;
  [...$(&#x27;rows&#x27;).querySelectorAll(&#x27;tr[data-i]&#x27;)].forEach(row=&gt;row.addEventListener(&#x27;click&#x27;,()=&gt;showTrade(list[Number(row.dataset.i)],row)));
 }
 function showTrade(t,row){
@@ -1227,8 +1367,8 @@ function showTrade(t,row){
  }
  [...$(&#x27;rows&#x27;).querySelectorAll(&#x27;tr&#x27;)].forEach(x=&gt;x.classList.remove(&#x27;selected&#x27;));row.classList.add(&#x27;selected&#x27;);
  panel.style.display=&#x27;block&#x27;;
- $(&#x27;detail&#x27;).innerHTML=`&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;${t.signal} · ${t.outcome||&#x27;Unresolved&#x27;}&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Entry time:&lt;/b&gt; ${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;br&gt;&lt;b&gt;Signal candle:&lt;/b&gt; ${t.signal_bar_time?new Date(t.signal_bar_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not provided&#x27;}&lt;br&gt;&lt;b&gt;Exit time:&lt;/b&gt; ${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not recorded&#x27;}&lt;br&gt;&lt;b&gt;Exit price:&lt;/b&gt; ${num(t.exit_price)}&lt;br&gt;&lt;b&gt;Risk/reward:&lt;/b&gt; ${t.risk_reward||&#x27;—&#x27;}&lt;/div&gt;&lt;hr style=&quot;border:0;border-top:1px solid #e1e8f0;margin:12px 0&quot;&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Recorded explanation&lt;/b&gt;&lt;br&gt;${t.reason||&#x27;No detailed explanation was returned by the backend.&#x27;}&lt;br&gt;&lt;br&gt;&lt;b&gt;Outcome&lt;/b&gt;&lt;br&gt;${t.outcome||&#x27;Unresolved&#x27;}${t.exit_price?&#x27; at &#x27;+num(t.exit_price):&#x27;&#x27;}&lt;/div&gt;`;
- $(&#x27;diagram&#x27;).innerHTML=[[&#x27;Target&#x27;,t.target,&#x27;tp&#x27;],[&#x27;Entry&#x27;,t.entry,&#x27;&#x27;],[&#x27;Stop-loss&#x27;,t.stop_loss,&#x27;sl&#x27;]].map(([label,value,cls])=&gt;`&lt;div class=&quot;level&quot;&gt;&lt;b&gt;${label}&lt;/b&gt;&lt;div class=&quot;line ${cls}&quot;&gt;&lt;/div&gt;&lt;strong&gt;${num(value)}&lt;/strong&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
+ $(&#x27;detail&#x27;).innerHTML=`&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;${t.signal} · ${t.outcome||&#x27;Unresolved&#x27;}&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Entry time:&lt;/b&gt; ${new Date(t.time).toLocaleString(&#x27;en-IN&#x27;)}&lt;br&gt;&lt;b&gt;Signal candle:&lt;/b&gt; ${t.signal_bar_time?new Date(t.signal_bar_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not provided&#x27;}&lt;br&gt;&lt;b&gt;Exit time:&lt;/b&gt; ${t.exit_time?new Date(t.exit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;Not recorded&#x27;}&lt;br&gt;&lt;b&gt;Exit price:&lt;/b&gt; ${num(t.exit_price)}&lt;br&gt;&lt;b&gt;Risk/reward:&lt;/b&gt; ${t.risk_reward||&#x27;—&#x27;}&lt;/div&gt;&lt;hr style=&quot;border:0;border-top:1px solid #e1e8f0;margin:12px 0&quot;&gt;&lt;div class=&quot;muted&quot;&gt;&lt;b&gt;Recorded explanation&lt;/b&gt;&lt;br&gt;${t.reason||&#x27;No detailed explanation was returned by the backend.&#x27;}&lt;br&gt;&lt;br&gt;&lt;b&gt;Outcome&lt;/b&gt;&lt;br&gt;${t.outcome||&#x27;Unresolved&#x27;}${t.exit_price?&#x27; at &#x27;+num(t.exit_price):&#x27;&#x27;}&lt;br&gt;&lt;b&gt;Target 1 reached:&lt;/b&gt; ${t.target_1_hit?&#x27;Yes&#x27;+(t.target_1_hit_time?&#x27; · &#x27;+new Date(t.target_1_hit_time).toLocaleString(&#x27;en-IN&#x27;):&#x27;&#x27;):&#x27;No&#x27;}&lt;/div&gt;`;
+ $(&#x27;diagram&#x27;).innerHTML=[[&#x27;Target 1&#x27;,t.target_1,&#x27;tp&#x27;],[&#x27;Target 2&#x27;,t.target_2??t.target,&#x27;tp&#x27;],[&#x27;Entry&#x27;,t.entry,&#x27;&#x27;],[&#x27;Stop-loss&#x27;,t.stop_loss,&#x27;sl&#x27;]].map(([label,value,cls])=&gt;`&lt;div class=&quot;level&quot;&gt;&lt;b&gt;${label}&lt;/b&gt;&lt;div class=&quot;line ${cls}&quot;&gt;&lt;/div&gt;&lt;strong&gt;${num(value)}&lt;/strong&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
 }
 $(&#x27;trade-detail-toggle&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{
  const d=$(&#x27;detail&#x27;),g=$(&#x27;diagram&#x27;),hidden=d.style.display===&#x27;none&#x27;;
@@ -1238,23 +1378,232 @@ $(&#x27;trade-detail-toggle&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{
  $(&#x27;trade-detail-chevron&#x27;).textContent=hidden?&#x27;−&#x27;:&#x27;+&#x27;;
 });
 $(&#x27;trade-detail-toggle&#x27;).addEventListener(&#x27;keydown&#x27;,e=&gt;{if(e.key===&#x27;Enter&#x27;||e.key===&#x27; &#x27;){e.preventDefault();$(&#x27;trade-detail-toggle&#x27;).click();}});
-$(&#x27;load&#x27;).addEventListener(&#x27;click&#x27;,async()=&gt;{const b=$(&#x27;load&#x27;),prog=$(&#x27;history-progress&#x27;),msg=$(&#x27;progress-message&#x27;);b.disabled=true;b.textContent=&#x27;Starting…&#x27;;prog.value=0;$(&#x27;status&#x27;).textContent=&#x27;Starting backtest…&#x27;;try{const sessions=$(&#x27;sessions&#x27;).value,cost=$(&#x27;cost-points&#x27;).value||&#x27;2&#x27;,from=$(&#x27;history-start-date&#x27;).value,to=$(&#x27;history-end-date&#x27;).value;let url=base()+&#x27;/api/history/start?sessions=&#x27;+encodeURIComponent(sessions)+&#x27;&amp;cost_points=&#x27;+encodeURIComponent(cost);if(from)url+=&#x27;&amp;start_date=&#x27;+encodeURIComponent(from);if(to)url+=&#x27;&amp;end_date=&#x27;+encodeURIComponent(to);const start=await fetch(url,{method:&#x27;POST&#x27;});const job=await start.json();if(!start.ok)throw new Error(job.detail||&#x27;HTTP &#x27;+start.status);let state;while(true){await new Promise(r=&gt;setTimeout(r,1200));const sr=await fetch(base()+&#x27;/api/history/status/&#x27;+job.job_id);state=await sr.json();if(!sr.ok)throw new Error(state.detail||&#x27;Could not read progress&#x27;);prog.value=state.progress_pct||0;msg.textContent=(state.message||state.status)+&#x27; · &#x27;+(state.completed_chunks||0)+&#x27;/&#x27;+(state.total_chunks||0)+&#x27; chunks · &#x27;+(state.candles_received||0).toLocaleString()+&#x27; candles&#x27;;$(&#x27;status&#x27;).textContent=state.status+&#x27; · &#x27;+(state.progress_pct||0)+&#x27;%&#x27;;if(state.status===&#x27;failed&#x27;)throw new Error(state.error||state.message);if(state.status===&#x27;completed&#x27;)break;}const rr=await fetch(base()+&#x27;/api/history/result/&#x27;+job.job_id);const d=await rr.json();if(!rr.ok)throw new Error(d.detail||&#x27;HTTP &#x27;+rr.status);strategyTrades.smc_pac=[...(d.signals||[])];$(&#x27;trade-detail-panel&#x27;).style.display=&#x27;none&#x27;;allTrades=strategyTrades[$(&#x27;strategy-view&#x27;).value]||[];render();$(&#x27;status&#x27;).textContent=&#x27;Loaded &#x27;+(d.session_dates||[]).length+&#x27; sessions · &#x27;+allTrades.length+&#x27; trades&#x27;;msg.innerHTML=&#x27;Completed · &#x27;+(d.summary?.one_minute_candles||0).toLocaleString()+&#x27; candles · cache chunks &#x27;+(d.summary?.cache_chunks_used||0)+&#x27;&lt;br&gt;&lt;b&gt;SMC FVG / OB / IDM / BOS / MSS:&lt;/b&gt; &#x27;+(d.summary?.trades??0)+&#x27; trades · win &#x27;+(d.summary?.win_rate_pct??&#x27;—&#x27;)+&#x27;% · PF &#x27;+(d.summary?.profit_factor??&#x27;—&#x27;)+&#x27; · net &#x27;+(d.summary?.net_points??&#x27;—&#x27;)+&#x27; pts&lt;br&gt;&lt;b&gt;Diagnostics:&lt;/b&gt; BOS &#x27;+(d.summary?.diagnostics?.bos??0)+&#x27; · MSS &#x27;+(d.summary?.diagnostics?.mss??0)+&#x27; · FVG &#x27;+(d.summary?.diagnostics?.fvg_detected??0)+&#x27; · OB &#x27;+(d.summary?.diagnostics?.ob_detected??0)+&#x27; · IDM &#x27;+(d.summary?.diagnostics?.idm??0)+&#x27; · 1m triggers &#x27;+(d.summary?.diagnostics?.trigger??0)+&#x27;&lt;br&gt;&lt;span class=&quot;muted&quot;&gt;SMC-only morning window 09:30–11:50 IST. NIFTY spot points, not options-premium returns.&lt;/span&gt;&#x27;; $(&#x27;detail&#x27;).innerHTML=&#x27;&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;Trade details&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;Select a row in the table to inspect its levels and recorded explanation.&lt;/div&gt;&#x27;;$(&#x27;diagram&#x27;).innerHTML=&#x27;&lt;div class=&quot;empty&quot;&gt;Select a trade to show its levels.&lt;/div&gt;&#x27;;}catch(e){$(&#x27;status&#x27;).textContent=&#x27;Could not load: &#x27;+e.message;msg.textContent=&#x27;Backtest failed: &#x27;+e.message;$(&#x27;rows&#x27;).innerHTML=&#x27;&lt;tr&gt;&lt;td colspan=&quot;8&quot; class=&quot;empty&quot;&gt;&#x27;+e.message+&#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;;}finally{b.disabled=false;b.textContent=&#x27;Run corrected backtest&#x27;;}});
+$(&#x27;load&#x27;).addEventListener(&#x27;click&#x27;,async()=&gt;{const b=$(&#x27;load&#x27;),prog=$(&#x27;history-progress&#x27;),msg=$(&#x27;progress-message&#x27;);b.disabled=true;b.textContent=&#x27;Starting…&#x27;;prog.value=0;$(&#x27;status&#x27;).textContent=&#x27;Starting backtest…&#x27;;try{const sessions=$(&#x27;sessions&#x27;).value,cost=$(&#x27;cost-points&#x27;).value||&#x27;2&#x27;,from=$(&#x27;history-start-date&#x27;).value,to=$(&#x27;history-end-date&#x27;).value;let url=base()+&#x27;/api/history/start?sessions=&#x27;+encodeURIComponent(sessions)+&#x27;&amp;cost_points=&#x27;+encodeURIComponent(cost);if(from)url+=&#x27;&amp;start_date=&#x27;+encodeURIComponent(from);if(to)url+=&#x27;&amp;end_date=&#x27;+encodeURIComponent(to);const start=await fetch(url,{method:&#x27;POST&#x27;});const job=await start.json();if(!start.ok)throw new Error(job.detail||&#x27;HTTP &#x27;+start.status);let state;while(true){await new Promise(r=&gt;setTimeout(r,1200));const sr=await fetch(base()+&#x27;/api/history/status/&#x27;+job.job_id);state=await sr.json();if(!sr.ok)throw new Error(state.detail||&#x27;Could not read progress&#x27;);prog.value=state.progress_pct||0;msg.textContent=(state.message||state.status)+&#x27; · &#x27;+(state.completed_chunks||0)+&#x27;/&#x27;+(state.total_chunks||0)+&#x27; chunks · &#x27;+(state.candles_received||0).toLocaleString()+&#x27; candles&#x27;;$(&#x27;status&#x27;).textContent=state.status+&#x27; · &#x27;+(state.progress_pct||0)+&#x27;%&#x27;;if(state.status===&#x27;failed&#x27;)throw new Error(state.error||state.message);if(state.status===&#x27;completed&#x27;)break;}const rr=await fetch(base()+&#x27;/api/history/result/&#x27;+job.job_id);const d=await rr.json();if(!rr.ok)throw new Error(d.detail||&#x27;HTTP &#x27;+rr.status);strategyTrades.smc_pac=[...(d.signals||[])];$(&#x27;trade-detail-panel&#x27;).style.display=&#x27;none&#x27;;allTrades=strategyTrades[$(&#x27;strategy-view&#x27;).value]||[];render();$(&#x27;status&#x27;).textContent=&#x27;Loaded &#x27;+(d.session_dates||[]).length+&#x27; sessions · &#x27;+allTrades.length+&#x27; trades&#x27;;msg.innerHTML=&#x27;Completed · &#x27;+(d.summary?.one_minute_candles||0).toLocaleString()+&#x27; candles · cache chunks &#x27;+(d.summary?.cache_chunks_used||0)+&#x27;&lt;br&gt;&lt;b&gt;SMC FVG / OB / IDM / BOS / MSS:&lt;/b&gt; &#x27;+(d.summary?.trades??0)+&#x27; trades · win &#x27;+(d.summary?.win_rate_pct??&#x27;—&#x27;)+&#x27;% · PF &#x27;+(d.summary?.profit_factor??&#x27;—&#x27;)+&#x27; · net &#x27;+(d.summary?.net_points??&#x27;—&#x27;)+&#x27; pts&lt;br&gt;&lt;b&gt;Diagnostics:&lt;/b&gt; BOS &#x27;+(d.summary?.diagnostics?.bos??0)+&#x27; · MSS &#x27;+(d.summary?.diagnostics?.mss??0)+&#x27; · FVG &#x27;+(d.summary?.diagnostics?.fvg_detected??0)+&#x27; · OB &#x27;+(d.summary?.diagnostics?.ob_detected??0)+&#x27; · IDM &#x27;+(d.summary?.diagnostics?.idm??0)+&#x27; · 1m triggers &#x27;+(d.summary?.diagnostics?.trigger??0)+&#x27;&lt;br&gt;&lt;span class=&quot;muted&quot;&gt;SMC-only morning window 09:30–11:50 IST. NIFTY spot points, not options-premium returns.&lt;/span&gt;&#x27;; $(&#x27;detail&#x27;).innerHTML=&#x27;&lt;h3 style=&quot;font-size:15px;margin:0 0 8px&quot;&gt;Trade details&lt;/h3&gt;&lt;div class=&quot;muted&quot;&gt;Select a row in the table to inspect its levels and recorded explanation.&lt;/div&gt;&#x27;;$(&#x27;diagram&#x27;).innerHTML=&#x27;&lt;div class=&quot;empty&quot;&gt;Select a trade to show its levels.&lt;/div&gt;&#x27;;}catch(e){$(&#x27;status&#x27;).textContent=&#x27;Could not load: &#x27;+e.message;msg.textContent=&#x27;Backtest failed: &#x27;+e.message;$(&#x27;rows&#x27;).innerHTML=&#x27;&lt;tr&gt;&lt;td colspan=&quot;10&quot; class=&quot;empty&quot;&gt;&#x27;+e.message+&#x27;&lt;/td&gt;&lt;/tr&gt;&#x27;;}finally{b.disabled=false;b.textContent=&#x27;Run corrected backtest&#x27;;}});
 [&#x27;direction&#x27;,&#x27;result&#x27;,&#x27;strategy-view&#x27;,&#x27;search&#x27;].forEach(id=&gt;$(id).addEventListener(id===&#x27;search&#x27;?&#x27;input&#x27;:&#x27;change&#x27;,render));
 window.addEventListener(&#x27;load&#x27;,()=&gt;{const sendHeight=()=&gt;window.parent.postMessage({type:&#x27;smc-report-height&#x27;,height:Math.ceil(document.documentElement.scrollHeight)},&#x27;*&#x27;);sendHeight();if(window.ResizeObserver){new ResizeObserver(sendHeight).observe(document.body);}setTimeout(sendHeight,250);setTimeout(sendHeight,900);});
-&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="width:100%;height:420px;min-height:0;border:0;border-radius:10px;background:transparent;display:block;overflow:hidden" title="Historical trade report"></iframe></section><section class="card bottom research-engine-section" style="margin-bottom:16px"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>7. SMC · ICT · Price Action Research Engine v3.0</h3><span class="collapse-chevron">−</span></div><p class="note" data-collapse-content="true" style="margin-top:0">New rule sequence: 5m BOS / MSS → 2m FVG / OB / IDM retest → 1m entry confirmation · signals 09:30–11:50 IST close-confirmed trigger. Maximum one trade per session; no setup means no trade.</p><div class="concepts" data-collapse-content="true"><div class="concept"><b>SMC reference</b><span>BOS / CHoCH, swing structure, liquidity pools, order-block and FVG context.</span></div><div class="concept"><b>ICT reference</b><span>MSS, displacement, buy/sell-side liquidity sweeps and session timing.</span></div><div class="concept"><b>Price Action reference</b><span>Price structure, liquidity grabs, imbalance retests and multi-timeframe context.</span></div><div class="concept"><b>Validation gate</b><span>Win rate, profit factor, average net points, CE/PE split and out-of-sample checks.</span></div></div><p class="note" data-collapse-content="true">Independent implementation inspired by public descriptions; not LuxAlgo code or an endorsement. A 70% win rate is an unproven target, not a promise. Current replay is NIFTY spot points, not options-premium returns.</p><p class="note" data-collapse-content="true"><a href="https://www.luxalgo.com/library/indicator/smart-money-concepts-smc/" rel="noopener" target="_blank">LuxAlgo SMC</a> · <a href="https://www.luxalgo.com/library/indicator/ict-concepts/" rel="noopener" target="_blank">ICT Concepts</a> · <a href="https://www.luxalgo.com/library/indicator/luxalgo-price-action-concepts/" rel="noopener" target="_blank">Price Action Concepts</a> · <a href="https://github.com/harshatangirala/smc-ict-research" rel="noopener" target="_blank">Independent SMC/ICT study</a></p></section><section class="card bottom concept-coverage-section"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>8. SMC concept coverage</h3><span class="collapse-chevron">−</span></div><div class="concepts" data-collapse-content="true"><div class="concept"><b>Market structure</b><span>HH / HL · LH / LL · BOS · CHoCH · MSS</span></div><div class="concept"><b>Liquidity</b><span>BSL · SSL · EQH / EQL · sweeps · inducement</span></div><div class="concept"><b>Imbalances</b><span>FVG · IFVG · volume imbalance · displacement</span></div><div class="concept"><b>Institutional zones</b><span>Order blocks · breaker · mitigation · rejection</span></div><div class="concept"><b>Dealing range</b><span>Premium · discount · equilibrium · OTE</span></div><div class="concept"><b>Time &amp; session</b><span>Previous day levels · session highs/lows · kill zones</span></div></div><p class="note" data-collapse-content="true">Detection rules will be specified and tested individually. SMC labels are analytical interpretations, not proof of institutional orders.</p></section><section class="card bottom connection-setup-section"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>9. Connection setup</h3><span class="collapse-chevron">−</span></div><div class="controls" data-collapse-content="true"><select aria-label="Data source" class="select"><option>Angel One SmartAPI · connected through local API</option><option>CSV candle upload (prototype)</option></select><select aria-label="Expiry" class="select"><option>Weekly expiry</option></select><select aria-label="Risk" class="select"><option>Moderate risk</option></select><button class="primary" id="setup">View integration checklist</button></div><p class="note" data-collapse-content="true" id="setup-note">Next: resolve Angel One app registration / static-IP form requirement, verify the NIFTY instrument token, then test historical candles. Live WebSocket 2.0 feed builds 1m candles locally; 2m and 5m are aggregated locally. Historical preload is guarded and cached to avoid repeated broker requests.</p></section><section class="card bottom python-scanner-section"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>10. Connect to your local Python scanner</h3><span class="collapse-chevron">−</span></div><p class="note" data-collapse-content="true">Keep Uvicorn running on this Windows laptop. This page does not store SmartAPI credentials.</p><div class="controls" data-collapse-content="true"><input aria-label="Python API address" class="select" id="api-url" value="http://129.225.68.75:8000"/><button class="primary" id="connect-python">Test Python connection</button><button class="primary" id="connect-local-api" type="button">Retry API connection</button><button class="primary" id="run-scan">Run SMC scan</button><span class="pill" id="python-status">Not tested</span></div><p class="note" id="connect-api-status">Retry API connection sends POST /api/connect to the Python API URL above.</p><p class="note" data-collapse-content="true" id="python-detail">Test /api/status. Live chart and SMC scan use the local completed-candle engine; historical API is used only for one guarded warm-up. No orders are placed.</p><pre class="note" data-collapse-content="true" id="scan-results" style="white-space:pre-wrap;overflow-wrap:anywhere">No scan loaded yet.</pre></section><div class="footer">TEJANSH RESEARCH SMC SCANNER · Live market data · Paper/research only · No live orders placed</div></div></main>
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" style="width:100%;height:420px;min-height:0;border:0;border-radius:10px;background:transparent;display:block;overflow:hidden" title="Historical trade report"></iframe></section><section class="card bottom research-engine-section active-smc-engine-section" style="margin-bottom:16px">
+  <div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0">
+    <h3>7. SMC Engine – Active Rules &amp; Live Diagnostics</h3><span class="collapse-chevron">−</span>
+  </div>
+  <p class="note" data-collapse-content="true" style="margin-top:0">
+    This panel documents the rules that are actually implemented in <code>scanner.py</code>.
+    It does not imply that every concept from SMC / ICT theory is currently detected.
+  </p>
+  <div class="smc-rule-grid" data-collapse-content="true">
+    <div class="smc-rule-card">
+      <b>1. 5-minute market structure</b>
+      <span><strong>BOS:</strong> completed 5m close breaks the prior 10-bar high/low.</span>
+      <span><strong>MSS proxy:</strong> BOS occurs against the preceding 5-close slope.</span>
+      <span>When no fresh break exists, direction may fall back to a 20-bar range position and 5-vs-15 close averages.</span>
+    </div>
+    <div class="smc-rule-card">
+      <b>2. 2-minute Fair Value Gap</b>
+      <span>Three-candle gap checked over the latest 12 bars.</span>
+      <span>Uses the gap zone only while a later close has not invalidated it; current 2m candle must overlap the zone for a retest.</span>
+    </div>
+    <div class="smc-rule-card">
+      <b>3. 2-minute Order Block</b>
+      <span>Last opposite-colour candle before a directional displacement candle.</span>
+      <span>Displacement body must be at least 1.3× the average body of the preceding five candles; search lookback is 10 bars.</span>
+      <span>Later close through the far edge invalidates the zone; current candle overlap is the retest test.</span>
+    </div>
+    <div class="smc-rule-card">
+      <b>4. 2-minute IDM / liquidity proxy</b>
+      <span>Checks the prior 12-bar internal high/low, excluding the current candle.</span>
+      <span>Requires a wick sweep and a close back inside the range, in the expected direction.</span>
+    </div>
+    <div class="smc-rule-card">
+      <b>5. 1-minute entry confirmation</b>
+      <span>Bullish: green candle closes above the previous three 1m highs.</span>
+      <span>Bearish: red candle closes below the previous three 1m lows.</span>
+      <span>Only completed candles are used.</span>
+    </div>
+    <div class="smc-rule-card">
+      <b>6. Final signal gate</b>
+      <span>5m direction + (2m FVG retest OR OB retest) + (IDM sweep OR BOS/MSS) + 1m trigger + entry-time filter.</span>
+      <span>Code time filter: <strong>09:30–11:50 IST</strong>.</span>
+    </div>
+  </div>
+  <div class="smc-live-panel" data-collapse-content="true">
+    <div class="smc-live-heading">
+      <b>Live scan diagnostics</b>
+      <span class="muted" id="smc-live-updated">Waiting for API…</span>
+    </div>
+    <div class="smc-live-grid">
+      <div><small>5m direction</small><strong id="smc-live-direction">—</strong></div>
+      <div><small>5m BOS / MSS</small><strong id="smc-live-structure">—</strong></div>
+      <div><small>2m FVG retest</small><strong id="smc-live-fvg">—</strong></div>
+      <div><small>2m OB retest</small><strong id="smc-live-ob">—</strong></div>
+      <div><small>2m IDM sweep</small><strong id="smc-live-idm">—</strong></div>
+      <div><small>1m trigger</small><strong id="smc-live-trigger">—</strong></div>
+      <div><small>Entry time filter</small><strong id="smc-live-time">—</strong></div>
+      <div><small>Current decision</small><strong id="smc-live-signal">WAIT</strong></div>
+    </div>
+    <p class="note" id="smc-live-reason">Live diagnostics will populate from the completed-candle scan API.</p>
+  </div>
+  <p class="note" data-collapse-content="true">
+    <strong>Not currently implemented as independent detection rules:</strong>
+    CHoCH, EQH/EQL, IFVG, volume imbalance, breaker blocks, premium/discount arrays, OTE,
+    previous-day high/low and ICT kill-zone logic. These should not be treated as active filters.
+    SMC labels are rule-based price interpretations, not proof of institutional orders.
+  </p>
+</section>
+
+<section class="card bottom connection-setup-section trading-configuration-section">
+  <div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0">
+    <h3>8. Trading Configuration</h3><span class="collapse-chevron">−</span>
+  </div>
+  <div class="trading-config-grid" data-collapse-content="true">
+    <div class="trading-config-item">
+      <small>Market data provider</small>
+      <strong>Angel One SmartAPI</strong>
+      <span>Credentials are loaded by the Python API from its environment; they are not stored in this page.</span>
+    </div>
+    <div class="trading-config-item">
+      <small>API service</small>
+      <strong id="cfg-api-status">Checking…</strong>
+      <span id="cfg-api-detail">Python API health status.</span>
+    </div>
+    <div class="trading-config-item">
+      <small>Angel One / WebSocket</small>
+      <strong id="cfg-angel-status">Checking…</strong>
+      <span id="cfg-angel-detail">Broker login and live feed status.</span>
+    </div>
+    <div class="trading-config-item">
+      <small>Candle pipeline</small>
+      <strong>1m live → 2m / 5m local</strong>
+      <span>1-minute candles are built from WebSocket ticks; 2m and 5m are aggregated locally.</span>
+    </div>
+    <div class="trading-config-item">
+      <small>Option contract selection</small>
+      <strong>Automatic nearest expiry + nearest strike</strong>
+      <span>For a CE/PE signal, the API selects the nearest valid NIFTY OPTIDX expiry and closest available strike to spot.</span>
+    </div>
+    <div class="trading-config-item">
+      <small>Execution mode</small>
+      <strong>Research / paper only</strong>
+      <span>No live order placement is performed by this scanner.</span>
+    </div>
+  </div>
+  <div class="trading-config-footer" data-collapse-content="true">
+    <span class="note">There is no active Weekly/Monthly expiry selector or Moderate-risk setting in the current Python strategy. Those controls were removed because they were display-only and did not change backend behaviour.</span>
+    <button class="primary" id="refresh-trading-config" type="button">Refresh connection status</button>
+  </div>
+</section>
+<section class="card bottom python-scanner-section"><div aria-expanded="true" class="section-title collapsible-heading" role="button" tabindex="0"><h3>9. Connect to your local Python scanner</h3><span class="collapse-chevron">−</span></div><p class="note" data-collapse-content="true">Keep Uvicorn running on this Windows laptop. This page does not store SmartAPI credentials.</p><div class="controls" data-collapse-content="true"><input aria-label="Python API address" class="select" id="api-url" value="http://129.225.68.75:8000"/><button class="primary" id="connect-python">Test Python connection</button><button class="primary" id="connect-local-api" type="button">Retry API connection</button><button class="primary" id="run-scan">Run SMC scan</button><button class="primary" id="angel-disconnect" type="button">Disconnect Angel One</button><button class="primary" id="angel-connect" type="button">Connect Angel One</button><button class="primary" id="scanner-start" type="button">Start Scanner</button><button class="primary" id="scanner-stop" type="button">Stop Scanner</button><span class="pill" id="python-status">Not tested</span></div><p class="note" id="connect-api-status">Retry API connection sends POST /api/connect to the Python API URL above.</p><p class="note" data-collapse-content="true" id="python-detail">Test /api/status. Live chart and SMC scan use the local completed-candle engine; historical API is used only for one guarded warm-up. No orders are placed.</p><pre class="note" data-collapse-content="true" id="scan-results" style="white-space:pre-wrap;overflow-wrap:anywhere">No scan loaded yet.</pre></section><div class="footer">TEJANSH SMC SCANNER · Live market data · Paper/research only · No live orders placed</div></div></main>
 <script>
   // Timeframe buttons are wired to the real local candle API by the live chart module below.
   document.querySelectorAll('.tf').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tf').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}));
-  document.getElementById('setup').addEventListener('click',()=>{document.getElementById('setup-note').textContent='Checklist: 1) Obtain Angel One confirmation on data-only app registration. 2) Create the SmartAPI app using the approved details. 3) Verify instrument master token. 4) Test historical candles. 5) Implement live WebSocket and candle aggregation. 6) Validate SMC rules with paper trading.'});
+
+
+  async function refreshSmcDiagnostics(){
+    const set=(id,value,good=null)=>{
+      const el=document.getElementById(id); if(!el) return;
+      el.textContent=value;
+      el.classList.remove('good','bad');
+      if(good===true) el.classList.add('good');
+      if(good===false) el.classList.add('bad');
+    };
+    try{
+      const base=document.getElementById('api-url').value.trim().replace(/\/+$/,'');
+      const r=await fetch(base+'/api/scan',{cache:'no-store'});
+      const d=await r.json();
+      if(!r.ok) throw new Error(d.detail||('HTTP '+r.status));
+      const a=d.analysis||{}, c=a.checks||{};
+      set('smc-live-direction',a.direction||'Not established',!!a.direction);
+      set('smc-live-structure',(c['5m_BOS']?'BOS ':'')+(c['5m_MSS']?'MSS':'')||'No fresh break',!!(c['5m_BOS']||c['5m_MSS']));
+      set('smc-live-fvg',c['2m_FVG_retest']?'Retest confirmed':c['2m_FVG_detected']?'Zone found':'Not confirmed',!!c['2m_FVG_retest']);
+      set('smc-live-ob',c['2m_order_block_retest']?'Retest confirmed':c['2m_order_block_detected']?'Zone found':'Not confirmed',!!c['2m_order_block_retest']);
+      set('smc-live-idm',c['2m_IDM_sweep']?'Sweep / reclaim':'Not confirmed',!!c['2m_IDM_sweep']);
+      set('smc-live-trigger',c['1m_entry_confirmation']?'Confirmed':'Waiting',!!c['1m_entry_confirmation']);
+      set('smc-live-time',c['entry_window_0930_1140']?'Inside 09:30–11:50':'Outside window',!!c['entry_window_0930_1140']);
+      set('smc-live-signal',a.signal||'WAIT',a.signal==='CE'||a.signal==='PE');
+      const why=(a.reasons||[]).join(' · ');
+      document.getElementById('smc-live-reason').textContent=why||d.note||'No diagnostic detail returned.';
+      document.getElementById('smc-live-updated').textContent='Updated '+new Date().toLocaleTimeString();
+    }catch(e){
+      document.getElementById('smc-live-updated').textContent='API unavailable';
+      document.getElementById('smc-live-reason').textContent='Could not load live scan diagnostics: '+e.message;
+    }
+  }
+
+  async function refreshTradingConfiguration(){
+    const base=document.getElementById('api-url').value.trim().replace(/\/+$/,'');
+    const api=document.getElementById('cfg-api-status');
+    const apiDetail=document.getElementById('cfg-api-detail');
+    const angel=document.getElementById('cfg-angel-status');
+    const angelDetail=document.getElementById('cfg-angel-detail');
+    try{
+      const r=await fetch(base+'/api/status',{cache:'no-store'});
+      const d=await r.json();
+      if(!r.ok) throw new Error(d.detail||('HTTP '+r.status));
+      api.textContent='Online'; api.style.color='#35d39a';
+      apiDetail.textContent='Service: '+(d.service||'Python scanner API')+' · '+(d.historical_candle_count||0)+' cached candles';
+      angel.textContent=d.websocket_connected?'Angel One Live':'Disconnected · API Available';
+      angel.style.color=d.websocket_connected?'#35d39a':'#f4bd62';
+      angelDetail.textContent=d.websocket_connected
+        ? (d.last_tick_age_seconds==null?'WebSocket connected · waiting for first tick':'Live feed · last tick '+Math.round(d.last_tick_age_seconds)+' sec ago')
+        : (d.session_authenticated?'WebSocket closed · login session retained · API and saved data available':'WebSocket closed · connect Angel One to start live feed');
+    }catch(e){
+      api.textContent='Unavailable'; api.style.color='#ff707b';
+      apiDetail.textContent=e.message;
+      angel.textContent='Not verified'; angel.style.color='#f4bd62';
+      angelDetail.textContent='Connect to the Python API to check Angel One status.';
+    }
+  }
+  document.getElementById('refresh-trading-config')?.addEventListener('click',()=>{
+    refreshTradingConfiguration(); refreshSmcDiagnostics();
+  });
 
   const apiBase=()=>{let base=document.getElementById('api-url').value.trim();while(base.endsWith('/'))base=base.slice(0,-1);return base};
+  refreshTradingConfiguration(); refreshSmcDiagnostics();
+  setInterval(()=>{refreshTradingConfiguration();refreshSmcDiagnostics();},15000);
+
+  async function scannerAction(path, label){
+    const status=document.getElementById('connect-api-status');
+    status.textContent=label+'…';
+    try{
+      const r=await fetch(apiBase()+path,{method:'POST',cache:'no-store'});
+      const d=await r.json();
+      if(!r.ok) throw new Error(d.detail||('HTTP '+r.status));
+      status.textContent=d.message||label+' completed.';
+      await Promise.all([refreshScannerControls(),refreshTradingConfiguration()]);
+      if(path==='/api/disconnect'){
+        const pill=document.getElementById('python-status');
+        if(pill) {
+          pill.textContent='Angel One Disconnected · API Available';
+          pill.style.borderColor='#d59a32';
+          pill.style.color='#f4bd62';
+        }
+      }
+    }catch(e){status.textContent=label+' failed: '+e.message;}
+  }
+  async function refreshScannerControls(){
+    try{
+      const r=await fetch(apiBase()+'/api/scanner/status',{cache:'no-store'});
+      const d=await r.json(); if(!r.ok) throw new Error(d.detail||'Status unavailable');
+      const angel=document.getElementById('python-status');
+      if(angel) {
+        angel.textContent=(d.angel_one_connected?'Angel One Live':'Angel One Disconnected · API Available')+
+          ' · Scanner '+(d.scanner_running?'running':'stopped');
+        angel.style.borderColor=d.angel_one_connected?'#16a477':'#d59a32';
+        angel.style.color=d.angel_one_connected?'#35d39a':'#f4bd62';
+      }
+    }catch(e){}
+  }
+  document.getElementById('angel-disconnect').addEventListener('click',()=>scannerAction('/api/disconnect','Disconnect Angel One'));
+  document.getElementById('angel-connect').addEventListener('click',()=>scannerAction('/api/connect','Connect Angel One'));
+  document.getElementById('scanner-start').addEventListener('click',()=>scannerAction('/api/scanner/start','Start Scanner'));
+  document.getElementById('scanner-stop').addEventListener('click',()=>scannerAction('/api/scanner/stop','Stop Scanner'));
+  refreshScannerControls();
+
   const fmt=v=>v==null||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let lastHistoryTrades=[];
   document.getElementById('connect-python').addEventListener('click',async()=>{
    const status=document.getElementById('python-status'),detail=document.getElementById('python-detail');status.textContent='Checking…';
    try{const r=await fetch(apiBase()+'/api/status');const d=await r.json();if(!r.ok)throw new Error(d.detail||'HTTP '+r.status);
-   status.textContent=d.angel_one_connected?'Angel One connected':'Python API connected';detail.textContent='API reachable · Angel One '+(d.angel_one_connected?'authenticated':'not authenticated')+' · WebSocket '+(d.websocket_connected?'connected':'not connected');
+   status.textContent=d.websocket_connected?'Angel One Live':'API reachable · Angel One disconnected';detail.textContent='API reachable · WebSocket '+(d.websocket_connected?'connected':'disconnected')+' · Login session '+(d.session_authenticated?'available':'not authenticated');
    await refreshLivePanel();
    }catch(e){status.textContent='Not connected';detail.textContent='Cannot reach local API: '+e.message+' · Keep Uvicorn running.'}
   });
@@ -1312,7 +1661,7 @@ window.addEventListener(&#x27;load&#x27;,()=&gt;{const sendHeight=()=&gt;window.
     const riskDetail=document.getElementById('signal-risk-detail');if(riskDetail)riskDetail.textContent='Manual approval · paper only · '+(stale?'quote stale':'fresh quote');
     const monitorNote=document.getElementById('signal-monitor-note');if(monitorNote)monitorNote.textContent=openPaper?'OPEN PAPER '+openPaper.side+' · Entry '+fmt(openPaper.entry_price)+' · SL '+fmt(openPaper.stop_loss)+' · T1 '+fmt(openPaper.target_1)+' · T2 '+fmt(openPaper.target_2)+' · P/L '+fmt(openPaper.unrealised_points)+' points. Position status is independent of the latest scanner WAIT result.':planFresh?'Confirmed '+(plan.side||'signal')+' · Entry '+fmt(plan.entry_reference)+' · SL '+fmt(plan.stop_loss)+' · T1 '+fmt(plan.target_1)+' · T2 '+fmt(plan.target_2)+'. NIFTY spot references only.':(d.reasons||[]).slice(-3).join(' · ')||'No confirmed entry. Waiting for completed-candle confirmation. Levels remain blank until a valid signal exists.';
     const refreshed=document.getElementById('mtf-last-refresh');if(refreshed)refreshed.textContent='Updated '+new Date().toLocaleTimeString('en-IN')+' · auto every 2 sec';
-    document.getElementById('python-status').textContent=st.angel_one_connected?'Angel One connected':'API reachable';
+    document.getElementById('python-status').textContent=st.websocket_connected?'Angel One Live':'Angel One Disconnected · API Available';
     document.getElementById('python-detail').textContent='API reachable · Angel One '+(st.angel_one_connected?'connected':'not connected')+' · WebSocket '+(st.websocket_connected?'connected':'disconnected');
    }catch(e){if(health)health.textContent='API unavailable';const feedDetail=document.getElementById('live-feed-detail');if(feedDetail)feedDetail.textContent='Could not read live feed: '+e.message+' · Ensure Uvicorn is running and /api/live is available.'}
   }
@@ -1571,7 +1920,7 @@ window.addEventListener(&#x27;load&#x27;,()=&gt;{const sendHeight=()=&gt;window.
      const rows=(d.recent_confirmed_signals||d.confirmed_signals||[]).filter(x=>x&&x.status==='CONFIRMED'&&['CE','PE'].includes(String(x.signal||'').toUpperCase())).slice(0,10);
      const wrap=$('today-journal-table-wrap'),msg=$('today-journal-message'),body=$('today-journal-rows');
      if(rows.length){
-      body.innerHTML=rows.map(x=>{const outcome=x.outcome||'OPEN';const cls=outcome==='SL HIT'?'wait':outcome==='TARGET 1 HIT'||outcome==='TARGET 2 HIT'?'':'wait';const paper=x.paper_instrument?('<br><small>'+esc(x.paper_instrument)+' · '+esc(x.paper_trade_status||'')+'</small>'):'<small>Not taken · paper mode OFF or entry limit/window</small>';const pts=(x.points_gained_lost!==null&&x.points_gained_lost!==undefined)?x.points_gained_lost:null;const points=pts===null?'—':(Number(pts)>0?'+':'')+fmt(pts);const premiumEntry=x.paper_entry_premium;const premiumExit=x.paper_exit_premium!==null&&x.paper_exit_premium!==undefined?x.paper_exit_premium:x.paper_last_premium;const premiumExitIsLtp=(x.paper_exit_premium===null||x.paper_exit_premium===undefined)&&premiumExit!==null&&premiumExit!==undefined;const premiumPts=(x.paper_points_gained_lost!==null&&x.paper_points_gained_lost!==undefined)?Number(x.paper_points_gained_lost):(premiumEntry!==null&&premiumEntry!==undefined&&premiumExit!==null&&premiumExit!==undefined?Number(premiumExit)-Number(premiumEntry):null);const premiumPoints=premiumPts===null||!Number.isFinite(premiumPts)?'—':(premiumPts>0?'+':'')+fmt(premiumPts);const premiumRupees=(x.option_pnl_rupees!==null&&x.option_pnl_rupees!==undefined)?Number(x.option_pnl_rupees):null;const premiumPnl=premiumRupees===null||!Number.isFinite(premiumRupees)?'—':(premiumRupees>0?'+':'')+'₹'+fmt(premiumRupees);const premiumClass=premiumPts===null?'':premiumPts>0?'pnl-positive':premiumPts<0?'pnl-negative':'pnl-flat';const rupeeClass=premiumRupees===null?'':premiumRupees>0?'pnl-positive':premiumRupees<0?'pnl-negative':'pnl-flat';const stamp=x.timestamp?new Date(x.timestamp):null;const signalDate=stamp&&!Number.isNaN(stamp.getTime())?stamp.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Kolkata'}):'';const signalTime=x.time|| (stamp&&!Number.isNaN(stamp.getTime())?stamp.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Asia/Kolkata'}):'—');return '<tr><td>'+esc(signalDate?signalDate+' · '+signalTime:signalTime)+'</td><td><b>'+esc(x.signal||'—')+'</b></td><td>'+fmt(x.entry)+'</td><td>'+fmt(x.stop_loss)+'</td><td>'+fmt(x.target_1)+'</td><td>'+fmt(x.target_2)+'</td><td><span class="tag '+cls+'">'+esc(outcome)+'</span></td><td>'+fmt(x.exit_price)+'</td><td>'+points+(x.points_basis?'<br><small>'+esc(x.points_basis)+'</small>':'')+'</td><td>'+fmt(premiumEntry)+'</td><td>'+fmt(premiumExit)+(premiumExitIsLtp?'<br><small>LTP · open</small>':'')+'</td><td class="'+premiumClass+'">'+premiumPoints+'</td><td class="'+rupeeClass+'">'+premiumPnl+'</td><td>'+paper+'</td></tr>'}).join('');
+      body.innerHTML=rows.map(x=>{const outcome=x.outcome||'OPEN';const outcomeText=String(outcome).toUpperCase();const outcomePnl=(x.points_gained_lost!==null&&x.points_gained_lost!==undefined)?Number(x.points_gained_lost):null;const outcomeClass=outcomeText.includes('TARGET')?'target':(outcomeText.includes('SL')||outcomeText.includes('STOP'))?'stop':outcomePnl===null?'open':outcomePnl>0?'target':outcomePnl<0?'stop':'pnl-flat';const paper=x.paper_instrument?('<br><small>'+esc(x.paper_instrument)+' · '+esc(x.paper_trade_status||'')+'</small>'):(x.sim_option_symbol?('<br><small>SIMULATED · '+esc(x.sim_option_symbol)+' · '+esc(x.sim_premium_status||'tracking')+'</small>'):'<small>Option quote unavailable</small>');const realisedPts=(x.points_gained_lost!==null&&x.points_gained_lost!==undefined)?Number(x.points_gained_lost):null;const signalDay=String(x.timestamp||'').slice(0,10);const liveQuote=Number(d.live_spot_price);const liveQuoteStamp=d.live_spot_timestamp?new Date(d.live_spot_timestamp):null;const liveQuoteFresh=Number.isFinite(liveQuote)&&liveQuote>0&&liveQuoteStamp&&!Number.isNaN(liveQuoteStamp.getTime())&&(Date.now()-liveQuoteStamp.getTime())<=30000&&(Date.now()-liveQuoteStamp.getTime())>=-5000;const isUnresolved=['OPEN','TARGET 1 HIT'].includes(outcomeText);const isCurrentDay=signalDay===(d.date||'');const sideSign=String(x.signal||'').toUpperCase()==='CE'?1:-1;const livePts=(isUnresolved&&isCurrentDay&&liveQuoteFresh&&Number.isFinite(Number(x.entry)))?(liveQuote-Number(x.entry))*sideSign:null;const pts=realisedPts!==null?realisedPts:livePts;const points=pts===null?'—':(pts>0?'+':'')+fmt(pts);const spotClass=pts===null?'':pts>0?'pnl-positive':pts<0?'pnl-negative':'pnl-flat';const liveSpotNote=livePts!==null?'<br><small>Live spot '+fmt(liveQuote)+'</small>':'';const premiumEntry=x.paper_entry_premium??x.sim_premium_entry;const premiumExit=x.paper_exit_premium??x.sim_premium_exit??x.paper_last_premium??x.sim_premium_last;const premiumExitIsLtp=(x.paper_exit_premium==null&&x.sim_premium_exit==null)&&premiumExit!=null;const premiumPts=(x.paper_points_gained_lost??x.sim_premium_points)!=null?Number(x.paper_points_gained_lost??x.sim_premium_points):(premiumEntry!=null&&premiumExit!=null?Number(premiumExit)-Number(premiumEntry):null);const premiumPoints=premiumPts===null||!Number.isFinite(premiumPts)?'—':(premiumPts>0?'+':'')+fmt(premiumPts);const premiumRupees=(x.option_pnl_rupees??x.paper_pnl_rupees??x.sim_premium_rupees)!=null?Number(x.option_pnl_rupees??x.paper_pnl_rupees??x.sim_premium_rupees):null;const premiumPnl=premiumRupees===null||!Number.isFinite(premiumRupees)?'—':(premiumRupees>0?'+':'')+'₹'+fmt(premiumRupees);const premiumClass=premiumPts===null?'':premiumPts>0?'pnl-positive':premiumPts<0?'pnl-negative':'pnl-flat';const rupeeClass=premiumRupees===null?'':premiumRupees>0?'pnl-positive':premiumRupees<0?'pnl-negative':'pnl-flat';const stamp=x.timestamp?new Date(x.timestamp):null;const signalDate=stamp&&!Number.isNaN(stamp.getTime())?stamp.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',timeZone:'Asia/Kolkata'}):'';const signalTime=x.time|| (stamp&&!Number.isNaN(stamp.getTime())?stamp.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Asia/Kolkata'}):'—');return '<tr><td>'+esc(signalDate?signalDate+' · '+signalTime:signalTime)+'</td><td><b>'+esc(x.signal||'—')+'</b></td><td>'+fmt(x.entry)+'</td><td>'+fmt(x.stop_loss)+'</td><td>'+fmt(x.target_1)+'</td><td>'+fmt(x.target_2)+'</td><td><span class="'+outcomeClass+'">'+esc(outcome)+'</span></td><td>'+fmt(x.exit_price)+'</td><td class="'+spotClass+'">'+points+(liveSpotNote|| (x.points_basis?'<br><small>'+esc(x.points_basis)+'</small>':''))+'</td><td>'+fmt(premiumEntry)+'</td><td>'+fmt(premiumExit)+(premiumExitIsLtp?'<br><small>LTP · open</small>':'')+'</td><td class="'+premiumClass+'">'+premiumPoints+'</td><td class="'+rupeeClass+'">'+premiumPnl+'</td><td>'+paper+'</td></tr>'}).join('');
       wrap.style.display='block';msg.style.display='none';
      }else{
       wrap.style.display='none';msg.style.display='block';
