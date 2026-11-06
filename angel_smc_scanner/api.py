@@ -28,7 +28,7 @@ ENTRY_END = dtime(11, 50)
 SIGNAL_LOG_START = dtime(9, 30)
 SIGNAL_LOG_END = dtime(15, 0)
 MAX_PAPER_TRADES_PER_DAY = 3
-FORCE_EXIT_TIME = dtime(15, 20)  # 10 minutes before NSE regular close
+FORCE_EXIT_TIME = dtime(15, 10)  # Force-close all remaining trades at 3:10 PM IST
 BASE_DIR = Path(__file__).resolve().parent
 ENV_FILE = BASE_DIR / ".env"
 app = FastAPI(title="NIFTY SMC Research Lab API", version="3.18.0")
@@ -1011,6 +1011,121 @@ def _run_storage_retention():
     _prune_backtest_result_cache()
 
 
+def _enrich_replay_with_option_premium(result, angel):
+    """Attach real Angel One NFO option-candle entry/exit premiums to replay trades.
+
+    This is best-effort: if an exact historical contract/candle is unavailable,
+    premium fields remain None. NIFTY spot points are never used as a substitute.
+    """
+    trades = result.get("signals") or result.get("trades") or result.get("trade_history") or []
+    if not trades:
+        return result
+    try:
+        master = _load_option_master()
+    except Exception as exc:
+        logger.warning("Option premium replay skipped: could not load instrument master: %s", exc)
+        for trade in trades:
+            trade.update({"option_symbol": None, "premium_entry": None,
+                          "premium_exit": None, "premium_points": None})
+        return result
+
+    # Resolve each historical signal to the nearest expiry that was still valid
+    # on that trade date, then to the nearest listed strike.
+    groups = {}
+    for trade in trades:
+        try:
+            entry_dt = pd.Timestamp(trade.get("time") or trade.get("signal_bar_time"))
+            if entry_dt.tzinfo is not None:
+                entry_dt = entry_dt.tz_convert(IST).tz_localize(None)
+            exit_dt = pd.Timestamp(trade.get("exit_time")) if trade.get("exit_time") else None
+            if exit_dt is not None and exit_dt.tzinfo is not None:
+                exit_dt = exit_dt.tz_convert(IST).tz_localize(None)
+            if exit_dt is None or pd.isna(exit_dt) or pd.isna(entry_dt):
+                raise ValueError("missing entry/exit timestamp")
+            side = "CE" if "CE" in str(trade.get("signal", "")).upper() else "PE"
+            spot = float(trade.get("entry"))
+            candidates = []
+            for item in master:
+                if (str(item.get("name", "")).upper() != "NIFTY"
+                    or str(item.get("exch_seg", "")).upper() != "NFO"
+                    or str(item.get("instrumenttype", "")).upper() != "OPTIDX"
+                    or not str(item.get("symbol", "")).upper().endswith(side)):
+                    continue
+                expiry = _expiry_date(item.get("expiry"))
+                if not expiry or expiry < entry_dt.date() or expiry > entry_dt.date() + timedelta(days=14):
+                    continue
+                strike_raw = float(item.get("strike"))
+                strike = strike_raw / 100.0 if strike_raw > 100000 else strike_raw
+                token = str(item.get("token", "")).strip()
+                symbol = str(item.get("symbol", "")).strip()
+                if token and symbol and strike > 0:
+                    candidates.append((expiry, abs(strike - spot), strike, token, symbol))
+            if not candidates:
+                raise ValueError("matching historical-date contract not present in instrument master")
+            nearest_expiry = min(x[0] for x in candidates)
+            chosen = min((x for x in candidates if x[0] == nearest_expiry), key=lambda x: (x[1], x[2]))
+            key = chosen[3]
+            trade["option_symbol"] = chosen[4]
+            trade["option_token"] = key
+            trade["option_expiry"] = chosen[0].isoformat()
+            trade["option_strike"] = chosen[2]
+            trade["premium_entry"] = None
+            trade["premium_exit"] = None
+            trade["premium_points"] = None
+            groups.setdefault(key, {"symbol": chosen[4], "trades": []})["trades"].append((trade, entry_dt, exit_dt))
+        except Exception as exc:
+            trade.update({"option_symbol": None, "premium_entry": None,
+                          "premium_exit": None, "premium_points": None,
+                          "premium_note": str(exc)[:140]})
+
+    premium_cache = CACHE_DIR / "option_premium_cache"
+    premium_cache.mkdir(parents=True, exist_ok=True)
+    for token, group in groups.items():
+        items = group["trades"]
+        start_dt = min(x[1] for x in items).replace(second=0, microsecond=0) - timedelta(minutes=2)
+        end_dt = max(x[2] for x in items).replace(second=0, microsecond=0) + timedelta(minutes=2)
+        cache_file = premium_cache / f"{token}_{start_dt:%Y%m%d}_{end_dt:%Y%m%d}.csv"
+        try:
+            if cache_file.exists():
+                candles = pd.read_csv(cache_file, parse_dates=["datetime"])
+            else:
+                candles = angel.historical("NFO", token, "ONE_MINUTE", start_dt, end_dt)
+                if candles is not None and not candles.empty:
+                    candles = candles.copy()
+                    dt = pd.to_datetime(candles["datetime"])
+                    if getattr(dt.dt, "tz", None) is not None:
+                        dt = dt.dt.tz_convert("Asia/Kolkata").dt.tz_localize(None)
+                    candles["datetime"] = dt
+                    candles.to_csv(cache_file, index=False)
+            if candles is None or candles.empty:
+                raise ValueError("Angel One returned no option candles")
+            candles["datetime"] = pd.to_datetime(candles["datetime"])
+            if getattr(candles["datetime"].dt, "tz", None) is not None:
+                candles["datetime"] = candles["datetime"].dt.tz_convert("Asia/Kolkata").dt.tz_localize(None)
+            candles = candles.sort_values("datetime").drop_duplicates("datetime")
+            for trade, entry_dt, exit_dt in items:
+                # First option candle at/after signal timestamp for entry; last
+                # candle at/before the spot-replay exit timestamp for exit.
+                entry_rows = candles[candles["datetime"] >= entry_dt]
+                exit_rows = candles[candles["datetime"] <= exit_dt]
+                if entry_rows.empty or exit_rows.empty:
+                    trade["premium_note"] = "Option candles do not cover entry/exit timestamp"
+                    continue
+                entry_premium = float(entry_rows.iloc[0]["close"])
+                exit_premium = float(exit_rows.iloc[-1]["close"])
+                trade["premium_entry"] = round(entry_premium, 2)
+                trade["premium_exit"] = round(exit_premium, 2)
+                trade["premium_points"] = round(exit_premium - entry_premium, 2)
+        except Exception as exc:
+            logger.warning("Could not fetch historical option candles for %s (%s): %s", group["symbol"], token, str(exc)[:180])
+            for trade, _, _ in items:
+                trade["premium_note"] = str(exc)[:160]
+
+    result["premium_pnl_basis"] = "Actual Angel One NFO one-minute option candle close; missing data remains blank."
+    result["premium_contract_note"] = "ATM contract resolved from the available Angel One instrument master; expired contracts absent from the master cannot be reconstructed."
+    return result
+
+
 def _run_history_job(job_id, sessions, cost_points, start_date=None, end_date=None):
     def update(**kwargs):
         with _history_jobs_lock:
@@ -1068,7 +1183,7 @@ def _run_history_job(job_id, sessions, cost_points, start_date=None, end_date=No
         update(status="replaying", progress_pct=0, message="Preparing completed four-timeframe candles for shared replay",
                sessions_found=len(selected_dates), candle_count=len(selected))
         fingerprint = hashlib.sha256(pd.util.hash_pandas_object(selected, index=False).values.tobytes()).hexdigest()
-        result_cache_file = RESULT_CACHE_DIR / f"{fingerprint}_cost_{float(cost_points):.2f}_smc_unified_v3.json"
+        result_cache_file = RESULT_CACHE_DIR / f"{fingerprint}_cost_{float(cost_points):.2f}_smc_unified_v4_option_premium.json"
         if result_cache_file.exists():
             try:
                 cached_result = json.loads(result_cache_file.read_text(encoding="utf-8"))
@@ -1094,6 +1209,8 @@ def _run_history_job(job_id, sessions, cost_points, start_date=None, end_date=No
         all_results = historical_replay_all(frames_by_tf, max_trades=5000,
                                             cost_points=cost_points, progress_callback=replay_progress)
         result = all_results["smc_pac"]
+        update(status="replaying", progress_pct=96, message="Fetching actual NIFTY option candles for historical premium P&L")
+        result = _enrich_replay_with_option_premium(result, c)
         result["comparison"] = {"smc_pac": result["summary"],
             "note": "SMC-only morning-session replay."}
         result["session_dates"] = [str(x) for x in selected_dates]
@@ -1560,7 +1677,7 @@ def _on_option_tick(message):
 
 
 def _force_close_paper_positions(reason="EOD EXIT"):
-    """Hard-close every paper position at 15:20 IST, even without fresh market ticks."""
+    """Hard-close every open paper position at 15:10 IST, even without fresh market ticks."""
     now = _now_ist()
     if now.time() < FORCE_EXIT_TIME:
         return
