@@ -168,6 +168,7 @@ class AngelClient:
             return False  # queued; on_open will subscribe them after the next connection
         self.ws.subscribe(correlation_id="nifty-option", mode=int(mode),
                           token_list=[{"exchangeType": int(exchange_type), "tokens": clean}])
+        logger.info("Subscribed to option market-data token(s): %s (exchangeType=%s)", ",".join(clean), exchange_type)
         return True
 
     def unsubscribe_market_tokens(self, tokens, exchange_type=2, mode=1):

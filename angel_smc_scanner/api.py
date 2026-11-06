@@ -10,10 +10,12 @@ import uuid
 import math
 import json
 import time
+import tempfile
 import hashlib
 import requests
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from angel_client import AngelClient, Credentials
 from scanner import build_timeframes, analyze_smc_stack, historical_replay_all, build_trade_plan, evaluate_trade_plan
@@ -33,6 +35,15 @@ app = FastAPI(title="NIFTY SMC Research Lab API", version="3.18.0")
 app.add_middleware(CORSMiddleware, allow_origins=["null", "http://127.0.0.1", "http://localhost",
     "http://127.0.0.1:5500", "http://localhost:5500", "https://javaravish.github.io"], allow_credentials=False,
     allow_methods=["GET", "POST"], allow_headers=["*"])
+@app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
+def serve_dashboard():
+    dashboard_file = BASE_DIR.parent / "index.html"
+    if not dashboard_file.is_file():
+        raise HTTPException(status_code=404, detail="Dashboard HTML not found")
+    return FileResponse(dashboard_file, media_type="text/html")
+
+
 _angel_client = None
 _live_lock = threading.RLock()
 _live = {
@@ -54,6 +65,7 @@ _history_jobs_lock = threading.RLock()
 
 # Paper-only auto strategy state. This never submits Angel One orders.
 _paper_lock = threading.RLock()
+_paper_save_lock = threading.Lock()
 _paper_state = {
     "enabled": False, "quantity_lots": 1, "open_positions": [],
     "closed_positions": [], "last_signal_time": None, "last_trade_date": None,
@@ -88,14 +100,32 @@ def _load_paper_state():
         logger.exception("Could not restore paper state")
 
 def _save_paper_state():
+    """Serialize state snapshots and atomically replace the file using a unique temp file."""
+    tmp_name = None
     try:
-        with _paper_lock:
-            snapshot = json.loads(json.dumps(_paper_state))
-        tmp = PAPER_STATE_FILE.with_suffix(".tmp")
-        tmp.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
-        tmp.replace(PAPER_STATE_FILE)
+        with _paper_save_lock:
+            with _paper_lock:
+                snapshot = json.loads(json.dumps(_paper_state))
+            PAPER_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            fd, tmp_name = tempfile.mkstemp(
+                prefix=PAPER_STATE_FILE.name + ".", suffix=".tmp", dir=str(PAPER_STATE_FILE.parent)
+            )
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                json.dump(snapshot, handle, ensure_ascii=False, indent=2)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(tmp_name, PAPER_STATE_FILE)
+            tmp_name = None
     except Exception:
         logger.exception("Could not persist paper state")
+    finally:
+        if tmp_name:
+            try:
+                os.unlink(tmp_name)
+            except FileNotFoundError:
+                pass
+            except Exception:
+                logger.warning("Could not remove temporary paper-state file %s", tmp_name)
 
 # Persistent intraday signal journal. Records one completed 1m scan per candle.
 SIGNAL_LOG_DIR = Path.home() / ".nifty_smc_research_lab" / "live_signal_history"
@@ -1653,6 +1683,29 @@ def live():
         raise HTTPException(status_code=400, detail=str(e)[:300])
 
 
+def _ensure_open_paper_option_subscription():
+    """Restore the active paper option token subscription after API/WebSocket restarts."""
+    with _paper_lock:
+        positions = list(_paper_state.get("open_positions") or [])
+        token = str(positions[0].get("option_token") or "").strip() if positions else ""
+    c = _angel_client
+    if not token or c is None or not c.jwt:
+        return
+    registered = token in c._extra_subscriptions.get(2, set())
+    if registered:
+        return
+    try:
+        queued_or_subscribed = c.subscribe_market_tokens([token], exchange_type=2)
+        logger.info(
+            "Restored active paper option subscription token=%s (websocket_subscribed=%s)",
+            token, bool(queued_or_subscribed)
+        )
+    except Exception:
+        # Allow the next background iteration to retry after a transient subscription error.
+        c._extra_subscriptions.setdefault(2, set()).discard(token)
+        logger.exception("Could not restore active paper option subscription token=%s", token)
+
+
 _engine_stop = threading.Event()
 _engine_thread = None
 
@@ -1663,6 +1716,7 @@ def _background_engine():
             _force_close_paper_positions()
             # live() owns broker connection, candle processing, journal and paper updates.
             live()
+            _ensure_open_paper_option_subscription()
             retry = 10
             _engine_stop.wait(2)
         except Exception as exc:
