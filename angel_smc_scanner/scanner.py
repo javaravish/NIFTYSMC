@@ -154,7 +154,7 @@ def analyze_smc_stack(frames, entry_time=None):
     trigger=bool(trigger_long or trigger_short)
     stamp=pd.Timestamp(last1.datetime)
     clock=stamp.strftime("%H:%M")
-    time_ok="09:30"<=clock<="11:40"
+    time_ok="09:30"<=clock<="11:50"
     structure_ok=bool(bos_long or bos_short or mss_long or mss_short or direction)
     zone_ok=bool(fvg_retest or ob_retest)
     # Main entry rule: 5m structure context + (FVG or OB retest) + IDM or structure break + 1m trigger + time window.
@@ -176,7 +176,7 @@ def analyze_smc_stack(frames, entry_time=None):
           f"2m order block: {'retest' if ob_retest else 'detected' if ob else 'not found'}",
           f"2m IDM: {'sweep/reclaim confirmed' if idm else 'not confirmed'}",
           f"1m trigger: {'confirmed' if trigger else 'waiting'}",
-          f"Entry time {clock}: {'inside' if time_ok else 'outside'} 09:30–11:40"],
+          f"Entry time {clock}: {'inside' if time_ok else 'outside'} 09:30–11:50"],
        "diagnostics":{"bos":int(bool(bos_long or bos_short)),"mss":int(bool(mss_long or mss_short)),
           "fvg_detected":int(bool(fvg)),"fvg_retest":int(fvg_retest),"ob_detected":int(bool(ob)),
           "ob_retest":int(ob_retest),"idm":int(idm),"trigger":int(trigger),"time_window":int(time_ok)}})
@@ -305,7 +305,7 @@ def historical_replay_all(frames, max_trades=5000, cost_points=2.0, progress_cal
     for i in range(total):
         stamp = pd.Timestamp(one.datetime.iloc[i])
         clock = stamp.strftime("%H:%M")
-        if not ("09:30" <= clock <= "11:40"):
+        if not ("09:30" <= clock <= "11:50"):
             continue
         diagnostics["bars_in_window"] += 1
         if len(signals) >= max_trades:
@@ -349,7 +349,7 @@ def historical_replay_all(frames, max_trades=5000, cost_points=2.0, progress_cal
         progress_callback(100, total, total)
     result = _summarise_replay(signals, cost_points, "smc_pac")
     result["summary"]["diagnostics"] = diagnostics
-    result["summary"]["signal_window"] = "09:30–11:40 IST"
+    result["summary"]["signal_window"] = "09:30–11:50 IST"
     result["summary"]["timeframes"] = "5m structure → 2m FVG/OB/IDM → 1m entry"
     result["summary"]["trade_plan"] = "Live-matched: signal candle close, OB/10-bar SL, Target 1 = 1R, Target 2 = 2R"
     result["summary"]["overlapping_signals"] = "Each confirmed signal is evaluated independently, matching the live journal; not a broker fill simulation."

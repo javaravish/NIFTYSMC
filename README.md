@@ -1,6 +1,6 @@
 # NIFTY SMC Research Lab v3.16
 
-Current strategy: SMC-only morning setup, using 5m structure (BOS/MSS) → 2m FVG / order-block / IDM context → 1m entry confirmation. Entry signals are restricted to 09:30–11:40 IST. Gainz-inspired and Combined modes have been removed. No 15m calculation is used by the current strategy.
+Current strategy: SMC-only morning setup, using 5m structure (BOS/MSS) → 2m FVG / order-block / IDM context → 1m entry confirmation. Entry signals are restricted to 09:30–11:50 IST. Gainz-inspired and Combined modes have been removed. No 15m calculation is used by the current strategy.
 
 This release updates the live data architecture: historical candles are reused from the persistent cache; WebSocket LTP ticks build completed 1m OHLC candles locally; 2m and 5m bars are aggregated locally; live chart and scan endpoints do not call Angel One historical data. A guarded warm-up request is attempted only when local cache is insufficient. The archive excludes `.env`, logs, Git history and Python bytecode. Copy `.env.example` to `.env` locally; never share credentials.
 
@@ -10,7 +10,7 @@ This release updates the live data architecture: historical candles are reused f
 - Removed Gainz-inspired and combined strategy outputs from the dashboard and API.
 - Removed 15-minute candle aggregation and all 15m strategy dependencies.
 - Strategy sequence: 5m structure (BOS/MSS) → 2m FVG / order-block / IDM context and retest → 1m entry confirmation.
-- Signal generation is restricted to 09:30–11:40 exchange-local time (IST for NSE).
+- Signal generation is restricted to 09:30–11:50 exchange-local time (IST for NSE).
 - One trade maximum per session remains enabled.
 - Report diagnostics count bars in the window and detected BOS, MSS, FVG, FVG retest, order blocks, OB retest, IDM, 1m trigger and qualified entries.
 - Historical OHLCV cache is retained. Report-cache key changed to `smc_morning_v2` so old Gainz/combined reports are not reused.

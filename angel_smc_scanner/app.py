@@ -83,12 +83,12 @@ if "frames" in st.session_state:
         st.write(f"- {key}: {'PASS' if value else 'WAIT'}")
     for reason in analysis.get("reasons", []):
         st.write(f"- {reason}")
-    st.warning("Signal window: 09:30–11:40 IST. Research prototype only; no order placement or guaranteed performance.")
+    st.warning("Signal window: 09:30–11:50 IST. Research prototype only; no order placement or guaranteed performance.")
 else:
     st.markdown("""
     ### Selected configuration
     - Multi-timeframe: **5m structure → 2m setup → 1m entry**
     - SMC concepts: **FVG, order blocks, IDM, BOS and MSS**
-    - Signal window: **09:30–11:40 IST**
+    - Signal window: **09:30–11:50 IST**
     - Historical analysis: cached NIFTY one-minute candles, resampled locally to 2m and 5m
     """)

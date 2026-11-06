@@ -7,7 +7,7 @@ Paper/research application inspired by public SMC, ICT and price-action concepts
 - 2m: FVG / order-block / IDM context and retest.
 - 1m: close-confirmed entry trigger.
 - No 15m calculation, Gainz-inspired strategy or Combined agreement mode is used in the current SMC-only application.
-- Entry window: 09:30–11:40 IST; one trade maximum per session in historical replay.
+- Entry window: 09:30–11:50 IST; one trade maximum per session in historical replay.
 - Higher-timeframe bars become available only after their close.
 - Historical replay uses completed candles, next-bar entry, stop-first same-bar handling, and end-of-day exits.
 - Paper/research only. The dashboard auto mode is paper-only; no broker order-placement route is implemented.
@@ -84,7 +84,7 @@ The Gainz-inspired variant is experimental. Do not infer profitability from indi
 
 ## v3.5 SMC morning-session strategy
 
-Gainz-inspired and combined strategy modes have been removed. 15-minute candle generation is removed. The strategy now uses 5m BOS/MSS context, 2m FVG and order-block zones, IDM sweep/reclaim, and 1m entry confirmation. New entry signals are accepted only from 09:30 through 11:40 IST. The report includes per-condition diagnostics. Existing historical candle cache remains in `%USERPROFILE%\.nifty_smc_research_lab\historical_cache`; report cache uses a new strategy version key.
+Gainz-inspired and combined strategy modes have been removed. 15-minute candle generation is removed. The strategy now uses 5m BOS/MSS context, 2m FVG and order-block zones, IDM sweep/reclaim, and 1m entry confirmation. New entry signals are accepted only from 09:30 through 11:50 IST. The report includes per-condition diagnostics. Existing historical candle cache remains in `%USERPROFILE%\.nifty_smc_research_lab\historical_cache`; report cache uses a new strategy version key.
 
 
 ### Live candle engine (v3.13)

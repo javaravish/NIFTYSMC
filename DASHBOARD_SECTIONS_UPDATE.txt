@@ -2,7 +2,7 @@ Dashboard Sections 7 and 9 update
 
 Section 7
 - Sections 7 and 8 have been combined into one practical SMC Engine panel.
-- Descriptions are limited to rules present in angel_smc_scanner/scanner.py: 5m BOS/MSS proxy and structure fallback, 2m FVG, 2m order-block displacement/retest, 2m IDM sweep/reclaim proxy, 1m trigger, and 09:30-11:40 IST time filter.
+- Descriptions are limited to rules present in angel_smc_scanner/scanner.py: 5m BOS/MSS proxy and structure fallback, 2m FVG, 2m order-block displacement/retest, 2m IDM sweep/reclaim proxy, 1m trigger, and 09:30-11:50 IST time filter.
 - Live diagnostic values are fetched from GET /api/scan. The panel refreshes every 15 seconds and can be refreshed manually.
 - Concepts not independently implemented in the current code are explicitly listed as not active: CHoCH, EQH/EQL, IFVG, volume imbalance, breaker blocks, premium/discount arrays, OTE, previous-day levels, and kill-zone logic.
 

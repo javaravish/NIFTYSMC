@@ -21,7 +21,7 @@ class ReplayTests(unittest.TestCase):
         assert "net_points" in result["summary"]
         assert "ce" in result["summary"] and "pe" in result["summary"]
         assert result["summary"]["cost_points_per_trade"]==2.0
-        assert result["summary"]["signal_window"]=="09:30–11:40 IST"
+        assert result["summary"]["signal_window"]=="09:30–11:50 IST"
         assert "diagnostics" in result["summary"]
 
     def test_only_smc_strategy_is_returned(self):

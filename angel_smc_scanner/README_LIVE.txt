@@ -46,7 +46,7 @@ Reports trade count, win rate, profit factor, average net points, net points, CE
 - Independent SMC/ICT research (S&P 500 daily data; not NIFTY intraday evidence): https://github.com/harshatangirala/smc-ict-research
 
 ## ATM option paper mode (v3.18)
-- When Paper Trading is ON and a new confirmed CE/PE signal arrives during 09:30–11:40 IST, the API resolves the nearest listed NIFTY OPTIDX expiry and the closest listed strike to the NIFTY spot price from Angel One's public scrip master.
+- When Paper Trading is ON and a new confirmed CE/PE signal arrives during 09:30–11:50 IST, the API resolves the nearest listed NIFTY OPTIDX expiry and the closest listed strike to the NIFTY spot price from Angel One's public scrip master.
 - CE signals simulate a BUY CE; PE signals simulate a BUY PE. The selected contract is subscribed on SmartAPI WebSocket exchange type NFO (2).
 - The simulated entry premium is the first received live option LTP after the signal. The system does not submit orders.
 - The strategy's SL, Target 1 and Target 2 remain NIFTY spot reference levels. They trigger the paper option exit. Option premium movement is separately used for option points and estimated rupee P&L (premium points × lot size × lots).
