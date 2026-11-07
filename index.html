@@ -1349,7 +1349,27 @@ function pointPnL(t){
  if(!Number.isFinite(exit))return null;
  return (t.signal===&#x27;BUY PE&#x27;?-1:1)*(exit-entry);
 }
-function filtered(){const d=$(&#x27;direction&#x27;).value,r=$(&#x27;result&#x27;).value,q=$(&#x27;search&#x27;).value.toLowerCase();allTrades=strategyTrades[$(&#x27;strategy-view&#x27;).value]||[];return allTrades.filter(t=&gt;(d===&#x27;ALL&#x27;||t.signal===d)&amp;&amp;(r===&#x27;ALL&#x27;||(r===&#x27;OPEN&#x27;?(String(t.outcome||&#x27;&#x27;).startsWith(&#x27;OPEN&#x27;)||t.outcome===&#x27;TARGET 1 HIT&#x27;||!t.outcome):r===&#x27;STOP&#x27;?String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;):t.outcome===r))&amp;&amp;(!q||(String(t.time)+&#x27; &#x27;+t.signal).toLowerCase().includes(q)))}
+function canonicalTradeOutcome(t){
+ const raw=String(t.outcome||'').trim().toUpperCase().replace(/[ _-]+/g,' ');
+ if(/TARGET\s*2|\bT2\b/.test(raw))return 'TARGET 2 HIT';
+ if(/TARGET\s*1|\bT1\b/.test(raw))return 'TARGET 1 HIT';
+ if(/^(SL|STOP)(\b|\s)/.test(raw)||raw.includes('STOP LOSS'))return 'STOP';
+ if(raw.includes('EOD')||raw.includes('END OF DAY'))return 'EOD_EXIT';
+ if(!raw||raw.startsWith('OPEN')||raw.includes('UNRESOLVED')||raw.includes('DATA END'))return 'OPEN';
+ return raw;
+}
+function filtered(){
+ const d=$('direction').value,r=$('result').value,q=$('search').value.toLowerCase();
+ allTrades=strategyTrades[$('strategy-view').value]||[];
+ return allTrades.filter(t=&gt;{
+  const outcome=canonicalTradeOutcome(t);
+  return (d==='ALL'||t.signal===d)&amp;&amp;(r==='ALL'||outcome===r)&amp;&amp;
+   (!q||(String(t.time)+' '+t.signal).toLowerCase().includes(q));
+ }).sort((a,b)=&gt;{
+  const ta=Date.parse(a.time)||0,tb=Date.parse(b.time)||0;
+  return tb-ta;
+ });
+}
 
 function csvCell(v){if(v===null||v===undefined)return &#x27;&#x27;;let s=typeof v===&#x27;object&#x27;?JSON.stringify(v):String(v);return &#x27;&quot;&#x27;+s.replace(/&quot;/g,&#x27;&quot;&quot;&#x27;)+&#x27;&quot;&#x27;;}
 $(&#x27;export-csv&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{
@@ -1364,7 +1384,7 @@ $(&#x27;export-csv&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{
 });
 function render(){
  const list=filtered(),wins=list.filter(t=&gt;pointPnL(t)!=null &amp;&amp; pointPnL(t)&gt;0).length,stops=list.filter(t=&gt;pointPnL(t)!=null &amp;&amp; pointPnL(t)&lt;=0).length;
- $(&#x27;m-total&#x27;).textContent=list.length;$(&#x27;m-ce&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY CE&#x27;).length;$(&#x27;m-pe&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY PE&#x27;).length;$(&#x27;m-outcomes&#x27;).textContent=&#x27;T1 &#x27;+list.filter(t=&gt;t.target_1_hit).length+&#x27; / T2 &#x27;+list.filter(t=&gt;t.outcome===&#x27;TARGET 2 HIT&#x27;).length+&#x27; / SL &#x27;+list.filter(t=&gt;String(t.outcome||&#x27;&#x27;).startsWith(&#x27;STOP&#x27;)).length+&#x27; / EOD &#x27;+list.filter(t=&gt;t.outcome===&#x27;EOD_EXIT&#x27;).length;$(&#x27;m-win&#x27;).textContent=wins+stops?(100*wins/(wins+stops)).toFixed(1)+&#x27;%&#x27;:&#x27;N/A&#x27;;
+ $(&#x27;m-total&#x27;).textContent=list.length;$(&#x27;m-ce&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY CE&#x27;).length;$(&#x27;m-pe&#x27;).textContent=list.filter(t=&gt;t.signal===&#x27;BUY PE&#x27;).length;$(&#x27;m-outcomes&#x27;).textContent=&#x27;T1 &#x27;+list.filter(t=&gt;!!t.target_1_hit||canonicalTradeOutcome(t)===&#x27;TARGET 1 HIT&#x27;||canonicalTradeOutcome(t)===&#x27;TARGET 2 HIT&#x27;).length+&#x27; / T2 &#x27;+list.filter(t=&gt;canonicalTradeOutcome(t)===&#x27;TARGET 2 HIT&#x27;).length+&#x27; / SL &#x27;+list.filter(t=&gt;canonicalTradeOutcome(t)===&#x27;STOP&#x27;).length+&#x27; / EOD &#x27;+list.filter(t=&gt;canonicalTradeOutcome(t)===&#x27;EOD_EXIT&#x27;).length;$(&#x27;m-win&#x27;).textContent=wins+stops?(100*wins/(wins+stops)).toFixed(1)+&#x27;%&#x27;:&#x27;N/A&#x27;;
  const points=list.map(pointPnL).filter(v=&gt;v!==null),net=points.reduce((a,b)=&gt;a+b,0);
  $(&#x27;m-net-points&#x27;).textContent=points.length?(net&gt;0?&#x27;+&#x27;:&#x27;&#x27;)+net.toFixed(2)+&#x27; pts&#x27;:&#x27;—&#x27;;
  $(&#x27;m-net-points&#x27;).className=net&gt;0?&#x27;pnl-positive&#x27;:net&lt;0?&#x27;pnl-negative&#x27;:&#x27;&#x27;;
